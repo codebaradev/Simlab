@@ -65,6 +65,12 @@ entity "Matakuliah" as matakuliah {
     * sks: int
 } 
 
+entity "Ruangan" as ruangan {
+    * id: int <PK>
+    ---
+    * name: string
+}
+
 user ||--|{ role
 
 user |o--o| kepala_lab: "Inherit"
