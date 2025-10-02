@@ -1,0 +1,78 @@
+@startuml "Erd"
+
+
+' --- Actor ---
+
+entity "User" as user { 
+    * id: int <PK>
+    * role_id: int <FK>
+    ---
+    * name: string
+    * username: string
+    * password: string
+    * status: int
+}
+
+entity "Role" as role {
+    * id: int <PK>
+    ---
+    * name: string
+}
+
+entity "KepalaLab" as kepala_lab {
+    * id: int <PK>
+    ---
+    
+}
+
+entity "PengelolaLab" as pengelola_lab {
+    * id: int <PK>
+    ---
+    
+}
+
+entity "AsistenLab" as aslab {
+    * id: int <PK>
+    ---
+    
+}
+
+entity "Dosen" as dosen {
+    * id: int <PK>
+    ---
+    * nip: string
+}
+
+entity "Mahasiswa" as mahasiswa {
+    * id: int <PK>
+    ---
+    * nim: string
+}
+
+entity "Admin" as admin {
+    * id: int <PK>
+    ---
+}
+
+entity "Jurusan" as jurusan {
+    
+} 
+
+entity "Matakuliah" as matakuliah {
+    * id: int <PK>
+    ---
+    * name: string
+    * sks: int
+} 
+
+user ||--|{ role
+
+user |o--o| kepala_lab: "Inherit"
+user |o--o| pengelola_lab: "Inherit"
+user |o--o| dosen: "Inherit"
+user |o--o| aslab: "Inherit"
+user |o--o| mahasiswa: "Inherit"
+
+
+
+@enduml
