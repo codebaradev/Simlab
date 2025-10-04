@@ -8,7 +8,7 @@ entity "User" as user {
     * role_id: int <FK>
     ---
     * name: string
-    * username: string
+    * username: string <U>
     * password: string
     * status: int
 }
@@ -17,36 +17,42 @@ entity "Role" as role {
     * id: int <PK>
     ---
     * name: string
+    * code: string <U>
 }
 
-entity "KepalaLab" as kepala_lab {
+entity "LabHead" as lab_head {
     * id: int <PK>
     ---
-    
 }
 
-entity "PengelolaLab" as pengelola_lab {
+entity "LabManager" as lab_manager {
     * id: int <PK>
     ---
-    
 }
 
-entity "AsistenLab" as aslab {
+entity "LabAssistant" as lab_assistant {
     * id: int <PK>
     ---
-    
 }
 
-entity "Dosen" as dosen {
+entity "Lecturer" as lecturer {
     * id: int <PK>
+    * study_program_pk: int <PK>
     ---
     * nip: string
 }
 
-entity "Mahasiswa" as mahasiswa {
+entity "Student" as student {
     * id: int <PK>
+    * study_program_id: int <FK>
     ---
     * nim: string
+    
+}
+
+entity "ClassLeader" as class_leader {
+    * id: int <PK>
+    ---
 }
 
 entity "Admin" as admin {
@@ -54,30 +60,104 @@ entity "Admin" as admin {
     ---
 }
 
-entity "Jurusan" as jurusan {
-    
-} 
+' Main
 
-entity "Matakuliah" as matakuliah {
+entity "Department" as department {
+    * id: int <PK>
+    ---
+    * name: string
+    * code: string <U>
+}
+
+entity "StudyProgram" as study_program {
+    * id: int <PK>
+    * department_id: int <FK>
+    ---
+    * name: string
+    * code: string <U>
+}
+
+entity "Course" as course {
     * id: int <PK>
     ---
     * name: string
     * sks: int
 } 
 
-entity "Ruangan" as ruangan {
+entity "Attendance" as attendance {
+    * id: int <PK>
+    ---
+    * status: int 
+}
+
+entity "Schedule" as schedule {
+    * id: int <PK>
+    * room_id: int <FK>
+    course_id: int <FK>
+    ---
+    * datetime: datetime
+    * is_approved: bool
+}
+
+entity "Class" as class {
+    * id: int <PK>
+    cl_id: int <FK>
+    ---
+    * name: string
+    * code: string <U>
+}
+
+entity "Room" as room {
     * id: int <PK>
     ---
     * name: string
+    * code: string <U>
 }
+
+' StudyProgram and Department
+
+department ||--|{ study_program
+lecturer ||--|| study_program
+student ||--|| study_program
+
+' Roles
 
 user ||--|{ role
 
-user |o--o| kepala_lab: "Inherit"
-user |o--o| pengelola_lab: "Inherit"
-user |o--o| dosen: "Inherit"
-user |o--o| aslab: "Inherit"
-user |o--o| mahasiswa: "Inherit"
+user |o--o| admin: "Inherit"
+user |o--o| lab_head: "Inherit"
+user |o--o| lab_manager: "Inherit"
+user |o--o| lecturer: "Inherit"
+user |o--o| lab_assistant: "Inherit"
+user |o--o| student: "Inherit"
+user |o--o| class_leader: "Inherit"
+
+
+
+' class
+
+student }|--|{ class: ""
+lecturer }|--|{ class: ""
+class_leader ||--|{ class: ""
+
+' Schedule
+
+lecturer }|--|{ schedule: ""
+student }|--|{ schedule: ""
+room ||--||schedule: ""
+class ||--|{ schedule:""
+course ||--|{ schedule:""
+
+' Attendance
+
+user }|--|| attendance: ""
+schedule }|--|| attendance: ""
+
+' Course
+
+lecturer }|--|{ course: ""
+student }|--|{ course: ""
+
 
 
 
