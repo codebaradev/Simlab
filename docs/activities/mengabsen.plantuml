@@ -1,0 +1,53 @@
+@startuml Mengabsen
+
+|Dosen|
+start
+:Tempel sidik jari di alat absensi;
+
+|Sistem|
+:Ambil ID dari sidik jari;
+:Validasi identitas di server;
+
+if (Validasi dosen berhasil?) then (Ya)
+  :Periksa jadwal kuliah saat ini;
+  if (Jadwal sesuai waktu & ruang?) then (Ya)
+    if (Sesi absensi terbuka?) then (Ya)
+      :Catat kehadiran dosen;
+    else (Belum)
+      :Buka sesi absensi otomatis;
+      :Catat kehadiran dosen;
+    endif
+  else (Tidak)
+    :Tampilkan pesan "Bukan jadwal atau ruang Anda";
+  endif
+else (Tidak)
+  :Tampilkan pesan "Sidik jari tidak dikenali";
+endif
+
+|Mahasiswa|
+while (Masih ada mahasiswa?)
+  :Tempel sidik jari di alat absensi;
+
+  |Sistem|
+  :Ambil ID dari sidik jari;
+  :Validasi identitas di server;
+
+  if (Validasi mahasiswa berhasil?) then (Ya)
+    if (Sesi absensi terbuka?) then (Ya)
+      :Catat kehadiran mahasiswa;
+    else (Belum)
+      :Tampilkan pesan "Absensi belum dibuka";
+    endif
+  else (Tidak)
+    :Tampilkan pesan "Sidik jari tidak dikenali";
+  endif
+endwhile
+
+|Sistem|
+:Periksa batas waktu absensi (15–30 menit);
+if (Waktu berakhir?) then (Ya)
+  :Tutup sesi absensi otomatis;
+endif
+
+stop
+@enduml

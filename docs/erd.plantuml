@@ -11,6 +11,13 @@ entity "User" as user {
     * username: string <U>
     * password: string
     * status: int
+    email: string <U>
+    phone_number: string <13>
+    birth_place: string
+    birth_date: date
+    gender: int
+    religion: int
+    address: string
 }
 
 entity "Role" as role {
@@ -40,6 +47,7 @@ entity "Lecturer" as lecturer {
     * study_program_pk: int <PK>
     ---
     * nip: string
+    * code: string <U>
 }
 
 entity "Student" as student {
@@ -47,7 +55,7 @@ entity "Student" as student {
     * study_program_id: int <FK>
     ---
     * nim: string
-    
+    * generation: year  
 }
 
 entity "ClassLeader" as class_leader {
@@ -86,8 +94,12 @@ entity "Course" as course {
 
 entity "Attendance" as attendance {
     * id: int <PK>
+    * user_id: <FK>
+    * class_id: <FK>
+    schedule_id: <FK>
     ---
-    * status: int 
+    * status: int
+    * appointment: int
 }
 
 entity "Schedule" as schedule {
@@ -95,7 +107,7 @@ entity "Schedule" as schedule {
     * room_id: int <FK>
     course_id: int <FK>
     ---
-    * datetime: datetime
+    * date: date
     * is_approved: bool
 }
 
@@ -112,6 +124,7 @@ entity "Room" as room {
     ---
     * name: string
     * code: string <U>
+    * computer_count: int
 }
 
 ' StudyProgram and Department
@@ -130,7 +143,7 @@ user |o--o| lab_manager: "Inherit"
 user |o--o| lecturer: "Inherit"
 user |o--o| lab_assistant: "Inherit"
 user |o--o| student: "Inherit"
-user |o--o| class_leader: "Inherit"
+student |o--o| class_leader: "Inherit"
 
 
 
@@ -148,10 +161,11 @@ room ||--||schedule: ""
 class ||--|{ schedule:""
 course ||--|{ schedule:""
 
-' Attendance
+' Attendanceu
 
-user }|--|| attendance: ""
-schedule }|--|| attendance: ""
+user ||--|{ attendance: ""
+class ||--|{ attendance: ""
+schedule ||--|{ attendance: ""
 
 ' Course
 

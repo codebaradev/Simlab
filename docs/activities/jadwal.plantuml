@@ -1,0 +1,31 @@
+@startuml Jadwal
+
+|Dosen/Ketua Tingkat|
+start
+:Meminta atau mengganti jadwal mata kuliah;
+
+|Sistem|
+if (Jenis permintaan?) then (Baru)
+  :Membuat jadwal baru;
+  :Set is_approved = false;
+else (Ganti)
+  :Mengubah jadwal yang ada;
+  :Set is_approved = false;
+endif
+
+|Kepala Lab|
+:Meninjau permintaan jadwal;
+if (Disetujui?) then (Ya)
+  |Sistem|
+  :Set is_approved = true;
+  |Dosen/Ketua Tingkat|
+  :Menggunakan kelas sesuai jadwal baru;
+else (Tidak)
+  |Sistem|
+  :Tetap is_approved = false;
+  |Dosen/Ketua Tingkat|
+  :Permintaan jadwal ditolak;
+endif
+
+stop
+@enduml
