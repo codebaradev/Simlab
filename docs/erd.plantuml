@@ -16,7 +16,6 @@ entity "User" as user {
     birth_place: string
     birth_date: date
     gender: int
-    religion: int
     address: string
 }
 
@@ -27,20 +26,7 @@ entity "Role" as role {
     * code: string <U>
 }
 
-entity "LabHead" as lab_head {
-    * id: int <PK>
-    ---
-}
 
-entity "LabManager" as lab_manager {
-    * id: int <PK>
-    ---
-}
-
-entity "LabAssistant" as lab_assistant {
-    * id: int <PK>
-    ---
-}
 
 entity "Lecturer" as lecturer {
     * id: int <PK>
@@ -63,10 +49,7 @@ entity "ClassLeader" as class_leader {
     ---
 }
 
-entity "Admin" as admin {
-    * id: int <PK>
-    ---
-}
+
 
 ' Main
 
@@ -99,7 +82,26 @@ entity "Attendance" as attendance {
     schedule_id: <FK>
     ---
     * status: int
-    * appointment: int
+}
+
+entity "FacilityRequest" as facility_request {
+    * id: int <PK>
+    ---
+    * date: date 
+}
+
+entity "Facility" as facility {
+    * id: int <PK>
+    * request_id: int <FK>
+    ---
+    * name: string
+    * code: string <U>
+}
+
+entity ScheduleRequest {
+    * id: int <PK>
+    ---
+    * status: int    
 }
 
 entity "Schedule" as schedule {
@@ -107,8 +109,17 @@ entity "Schedule" as schedule {
     * room_id: int <FK>
     course_id: int <FK>
     ---
-    * date: date
-    * is_approved: bool
+    * start_datetime: datetime
+    * end_datetime: datetime  
+    information: string
+}
+
+entity AttendanceMonitoring {
+    * id: int <PK>
+    * schedule_id: int <FK>
+    ---
+    topic: string
+    sub_topic: string
 }
 
 entity "Class" as class {
@@ -124,7 +135,31 @@ entity "Room" as room {
     ---
     * name: string
     * code: string <U>
+}
+
+entity Computer {
+    * id : int
+    ---
     * computer_count: int
+    * name : string
+    * processor : string
+    * gpu : string
+    * ram_capacity : int
+    * ram_type : int
+    * storage_type : int
+    * storage_capacity : int
+    * display_size : float
+    * display_resolution : int
+    * display_refresh_rate : int
+    * os : string
+    * release_year : int
+    * category : int
+}
+
+entity Application {
+    * id: int <PK>
+    ---
+    * name: string
 }
 
 ' StudyProgram and Department
@@ -137,11 +172,7 @@ student ||--|| study_program
 
 user ||--|{ role
 
-user |o--o| admin: "Inherit"
-user |o--o| lab_head: "Inherit"
-user |o--o| lab_manager: "Inherit"
 user |o--o| lecturer: "Inherit"
-user |o--o| lab_assistant: "Inherit"
 user |o--o| student: "Inherit"
 student |o--o| class_leader: "Inherit"
 
@@ -155,16 +186,17 @@ class_leader ||--|{ class: ""
 
 ' Schedule
 
+ScheduleRequest ||--|{ schedule
 lecturer }|--|{ schedule: ""
 student }|--|{ schedule: ""
 room ||--||schedule: ""
 class ||--|{ schedule:""
 course ||--|{ schedule:""
+schedule ||--|| AttendanceMonitoring
 
 ' Attendanceu
 
 user ||--|{ attendance: ""
-class ||--|{ attendance: ""
 schedule ||--|{ attendance: ""
 
 ' Course
@@ -172,7 +204,14 @@ schedule ||--|{ attendance: ""
 lecturer }|--|{ course: ""
 student }|--|{ course: ""
 
+' Room
 
+room ||--|{ Computer
+room ||--|{ Application
+
+' Facility
+user ||--|{ facility_request
+facility_request ||--|{ facility
 
 
 @enduml
