@@ -2,30 +2,36 @@
 
 |Dosen/Ketua Tingkat|
 start
-:Meminta atau mengganti jadwal mata kuliah;
+:Input mata kuliah, kelas,\ndan jumlah pertemuan yang diinginkan;
 
 |Sistem|
-if (Jenis permintaan?) then (Baru)
-  :Membuat jadwal baru;
-  :Set is_approved = false;
-else (Ganti)
-  :Mengubah jadwal yang ada;
-  :Set is_approved = false;
-endif
+:Menampilkan rekomendasi ruangan lab\nberdasarkan input dosen/ketua tingkat;
+
+|Dosen/Ketua Tingkat|
+:Memilih hari dan salah satu atau lebih ruangan lab;
+
+|Sistem|
+:Menampilkan daftar jadwal yang sesuai\ndengan jumlah pertemuan dan ruangan terpilih;
+:Set is_approved = false;
+:Kirim permintaan jadwal ke Kepala Lab;
+:Kirim notifikasi ke Kepala Lab\nbahwa ada permintaan jadwal baru;
 
 |Kepala Lab|
 :Meninjau permintaan jadwal;
+
 if (Disetujui?) then (Ya)
   |Sistem|
   :Set is_approved = true;
+  :Simpan jadwal ke sistem;
   |Dosen/Ketua Tingkat|
-  :Menggunakan kelas sesuai jadwal baru;
+  :Mendapatkan konfirmasi bahwa jadwal disetujui;
 else (Tidak)
   |Sistem|
-  :Tetap is_approved = false;
+  :Set is_approved = false;
   |Dosen/Ketua Tingkat|
-  :Permintaan jadwal ditolak;
+  :Mendapatkan notifikasi bahwa\npermintaan jadwal ditolak;
 endif
 
 stop
+
 @enduml

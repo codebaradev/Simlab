@@ -44,12 +44,18 @@ entity "Student" as student {
     * generation: year  
 }
 
+entity
+
 entity "ClassLeader" as class_leader {
     * id: int <PK>
     ---
 }
 
-
+entity LabAssistant {
+    * id: int <PK>
+    --- 
+    * tns: string
+}
 
 ' Main
 
@@ -201,6 +207,7 @@ schedule ||--|{ attendance: ""
 
 ' Course
 
+LabAssistant }|--|| course
 lecturer }|--|{ course: ""
 student }|--|{ course: ""
 
