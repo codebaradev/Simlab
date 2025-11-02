@@ -44,8 +44,6 @@ entity "Student" as student {
     * generation: year  
 }
 
-entity
-
 entity "ClassLeader" as class_leader {
     * id: int <PK>
     ---
@@ -180,7 +178,8 @@ user ||--|{ role
 
 user |o--o| lecturer: "Inherit"
 user |o--o| student: "Inherit"
-student |o--o| class_leader: "Inherit"
+student |o--o{ class_leader: "Inherit"
+student |o--o{ LabAssistant: "Inherit"
 
 
 
@@ -188,7 +187,7 @@ student |o--o| class_leader: "Inherit"
 
 student }|--|{ class: ""
 lecturer }|--|{ class: ""
-class_leader ||--|{ class: ""
+class_leader ||--|| class: ""
 
 ' Schedule
 
@@ -210,6 +209,7 @@ schedule ||--|{ attendance: ""
 LabAssistant }|--|| course
 lecturer }|--|{ course: ""
 student }|--|{ course: ""
+course ||--|| class
 
 ' Room
 
