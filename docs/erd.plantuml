@@ -11,6 +11,7 @@ entity "User" as user {
     * username: string <U>
     * password: string
     * status: int
+    fp_id: int
     email: string <U>
     phone_number: string <13>
     birth_place: string
@@ -24,6 +25,13 @@ entity "Role" as role {
     ---
     * name: string
     * code: string <U>
+}
+
+entity FingerPrint { 
+    * id: int <PK>
+    ---
+    * code: int <U>
+    * status: int
 }
 
 entity "Lecturer" as lecturer {
@@ -222,6 +230,7 @@ course ||--|| class
 
 room ||--|{ Computer
 room ||--|{ Application
+room ||--|| FingerPrint
 
 ' Facility
 user ||--|{ facility_request
