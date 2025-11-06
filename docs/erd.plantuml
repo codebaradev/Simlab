@@ -26,8 +26,6 @@ entity "Role" as role {
     * code: string <U>
 }
 
-
-
 entity "Lecturer" as lecturer {
     * id: int <PK>
     * study_program_pk: int <PK>
@@ -54,6 +52,8 @@ entity LabAssistant {
     --- 
     * tns: string
 }
+
+
 
 ' Main
 
@@ -100,6 +100,7 @@ entity "Facility" as facility {
     ---
     * name: string
     * code: string <U>
+    * status: int
 }
 
 entity ScheduleRequest {
@@ -118,6 +119,7 @@ entity "Schedule" as schedule {
     * start_datetime: datetime
     * end_datetime: datetime
     * status: int
+    * campus: int
     information: string
 }
 
@@ -140,6 +142,7 @@ entity "Class" as class {
 entity "Room" as room {
     * id: int <PK>
     ---
+    * status: int
     * name: string
     * code: string <U>
 }
