@@ -104,6 +104,7 @@ entity "Facility" as facility {
 
 entity ScheduleRequest {
     * id: int <PK>
+    * user_id: int <FK>
     ---
     * status: int    
 }
@@ -111,6 +112,7 @@ entity ScheduleRequest {
 entity "Schedule" as schedule {
     * id: int <PK>
     * room_id: int <FK>
+    sr_id: int <FK>
     course_id: int <FK>
     ---
     * start_datetime: datetime
@@ -192,6 +194,7 @@ class_leader ||--|| class: ""
 
 ' Schedule
 
+user ||--|{ ScheduleRequest
 ScheduleRequest ||--|{ schedule
 lecturer }|--|{ schedule: ""
 student }|--|{ schedule: ""
