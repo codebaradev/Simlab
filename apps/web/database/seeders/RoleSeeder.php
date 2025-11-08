@@ -17,7 +17,7 @@ class RoleSeeder extends Seeder
         foreach (UserRoleEnum::cases() as $roleEnum) {
             Role::updateOrCreate(
                 ['code' => $roleEnum->value],
-                ['label' => $roleEnum->label()]
+                ['name' => $roleEnum->label()]
             );
         }
     }

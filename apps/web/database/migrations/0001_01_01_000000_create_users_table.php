@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,11 +24,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('username')->unique();
-            $table->integer('status');
+            $table->integer('status')->default(UserStatusEnum::ACTIVE);
             $table->string('email')->unique()->nullable();
-            $table->string('phone_number', 13);
-            $table->integer('gender');
-            $table->string('address');
+            $table->string('phone_number', 13)->nullable();
+            $table->string('address')->nullable();
+            $table->integer('gender')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -56,6 +57,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('roles');
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
