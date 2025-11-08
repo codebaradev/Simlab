@@ -5,7 +5,6 @@
 
 entity "User" as user { 
     * id: int <PK>
-    * role_id: int <FK>
     ---
     * name: string
     * username: string <U>
@@ -29,9 +28,17 @@ entity "Role" as role {
 
 entity FingerPrint { 
     * id: int <PK>
+    * room_id: int <FK>
     ---
     * code: int <U>
     * status: int
+}
+
+entity RFID {
+    * id: int <PK>
+    * user_id: int <FK>
+    ---
+    * code: string
 }
 
 entity "Lecturer" as lecturer {
@@ -85,6 +92,8 @@ entity "Course" as course {
     ---
     * name: string
     * sks: int
+    * academic_year: YEAR
+    * semester_type: int
 } 
 
 entity "Attendance" as attendance {
@@ -145,6 +154,8 @@ entity "Class" as class {
     ---
     * name: string
     * code: string <U>
+    * academic_year: YEAR
+    * semester_type: int
 }
 
 entity "Room" as room {
@@ -156,7 +167,8 @@ entity "Room" as room {
 }
 
 entity Computer {
-    * id : int
+    * id : int <PK>
+    * room_id: int <FK>
     ---
     * computer_count: int
     * name : string
@@ -176,6 +188,7 @@ entity Computer {
 
 entity Application {
     * id: int <PK>
+    * room_id: int <PK>
     ---
     * name: string
 }
@@ -188,14 +201,14 @@ student ||--|| study_program
 
 ' Roles
 
-user ||--|{ role
+user }|--|{ role
 
 user |o--o| lecturer: "Inherit"
 user |o--o| student: "Inherit"
 student |o--o{ class_leader: "Inherit"
 student |o--o{ LabAssistant: "Inherit"
 
-
+user |o--|| RFID
 
 ' class
 
