@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Dashboard;
+namespace App\Livewire\Feature\Dashboard;
 
 use App\Traits\WithUser;
 use Illuminate\Support\Facades\Auth;
@@ -18,8 +18,8 @@ class Index extends Component
     public function render()
     {
         if ($this->user->roles->contains('code', 'lbr')) {
-            return view('livewire.dashboard.lbr-dashboard');
+            return view('livewire.feature.dashboard.lbr-dashboard');
         }
-        return view('livewire.dashboard.index');
+        return view('livewire.feature.dashboard.index');
     }
 }
