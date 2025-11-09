@@ -8,7 +8,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-slate-100 min-h-screen">
+    <body class="bg-slate-100 min-h-screen" x-data="sidebar()">
         <div>
             {{-- Sidebar --}}
             <x-partials.sidebar />
