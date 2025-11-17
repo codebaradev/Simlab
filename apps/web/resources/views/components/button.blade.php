@@ -4,47 +4,73 @@
     'variant' => 'primary',
     // Nama target Livewire (method / property) yang ingin dipantau oleh wire:loading.
     // Jika null, wire:loading akan bereaksi ke semua target (global).
-    'livewireTarget' => null,
+    'target' => null,
+    'leftIcon' => null,
+    'rightIcon' => null,
 ])
 
 @php
-    $base = 'btn inline-flex items-center rounded-lg gap-2';
+    $base = 'btn inline-flex items-center gap-2';
     $variants = [
-    'primary' => 'btn-primary',
-    'secondary' => 'btn-secondary',
-    'ghost' => 'btn-ghost',
-    'outline' => 'btn-outline',
+        'primary' => 'btn-primary',
+        'secondary' => 'btn-secondary',
+        'ghost' => 'btn-ghost',
+        'outline' => 'btn-outline',
+        'cancel' => 'btn-outline btn-secondary',
     ];
     $variantClass = $variants[$variant] ?? $variants['primary'];
 
     // helper untuk menambahkan atribut wire:target jika ada
-    $targetAttr = $livewireTarget ? ' wire:target="'.$livewireTarget.'"' : '';
+    $targetAttr = $target ? ' wire:target="'.$target.'"' : '';
 @endphp
 
 <button
     type="{{ $type }}"
     {{ $attributes->merge(['class' => trim("$base $variantClass")]) }}
-    {{-- disable saat loading --}}
-    wire:loading.attr="disabled" {!! $targetAttr !!}
-    {{-- aria busy saat loading --}}
-    wire:loading.class.remove="not-loading" wire:loading.class="is-loading" {!! $targetAttr !!}
+
+
+    @if ($target)
+        {{-- disable saat loading --}}
+        wire:loading.attr="disabled" {!! $targetAttr !!}
+        {{-- aria busy saat loading --}}
+        wire:loading.class.remove="not-loading" wire:loading.class="is-loading" {!! $targetAttr !!}
+    @endif
+
     aria-live="polite"
 >
 
-    {{-- LOADING SPINNER (only visible during Livewire loading of target) --}}
-    <span class="flex-none" role="status" aria-hidden="true"
-          style="display: none;"
-          wire:loading{!! $targetAttr !!} wire:loading.class.remove="hidden" >
 
 
-        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
-    </span>
 
     {{-- TEXT: show when NOT loading; hidden when loading --}}
-    <span class="flex-1" wire:loading.remove{!! $targetAttr !!}>
+    <span class="flex items-center gap-1" >
+        {{-- LOADING SPINNER (only visible during Livewire loading of target) --}}
+        @if ($target)
+        <span
+            class="loading loading-spinner size-4"
+            wire:loading{!! $targetAttr !!} wire:loading.class.remove="hidden"
+        ></span>
+        @endif
+
+        @if ($leftIcon)
+        <div
+            class=""
+            @if ($target)
+                wire:loading.class="hidden"
+            @endif
+        >
+            @include('components.icon.' . $leftIcon)
+        </div>
+        @endif
+
         {{ $slot }}
+
+        @if ($rightIcon)
+        <div>
+            @include('components.icon.' . $rightIcon)
+        </div>
+        @endif
     </span>
+
+
 </button>

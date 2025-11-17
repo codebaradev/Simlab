@@ -16,9 +16,12 @@
             {{-- Header --}}
 
             {{-- Main --}}
-            <main>
+            <main class="content-transition flex-1 overflow-auto" :class="isCollapsed ? 'ml-20' : 'ml-64'">
                 {{ $slot }}
             </main>
+
+            <!-- Global Alert Modal -->
+            <livewire:shared.modals.alert-modal />
         </div>
     </body>
     <script>

@@ -1,3 +1,7 @@
+@php
+    $user = auth()->user();
+@endphp
+
 <div
     class="fixed sidebar-transition z-10 bg-white shadow-lg h-full flex flex-col"
     :class="isCollapsed ? 'w-20' : 'w-64'"
@@ -22,6 +26,7 @@
     <nav class="flex-1 p-4 overflow-y-auto">
         <ul class="space-y-2">
             <x-partials.sidebar-menu name="Dashboard" url="/dashboard" selected="dashboard" />
+            <x-partials.sidebar-menu name="Jadwal" url="/jadwal" selected="jadwal" icon="users"/>
             <x-partials.sidebar-menu name="Mahasiswa" url="/mahasiswa" selected="mahasiswa" icon="users"/>
             <x-partials.sidebar-menu name="Dosen" url="/dosen" selected="dosen" icon="user"/>
             <x-partials.sidebar-menu name="Jurusan" url="/jurusan" selected="jurusan" icon="office"/>
@@ -32,24 +37,48 @@
 
     <!-- User Profile Section -->
     <div class="p-4 border-t border-gray-200">
-        <div class="flex items-center space-x-3" x-show="!isCollapsed">
-            <div class="avatar">
-                <div class="w-10 rounded-full">
-                    <img src="https://i.pravatar.cc/150?img=32" alt="User Avatar">
+        <!-- Expanded View -->
+        <div class="dropdown dropdown-right dropdown-end w-full" x-show="!isCollapsed">
+            <label tabindex="0" class="btn btn-ghost hover:bg-gray-100 rounded-lg p-3 w-full flex items-center space-x-3 cursor-pointer transition-colors justify-between">
+                <div class="flex items-center space-x-3 flex-1 min-w-0">
+                    <div class="avatar">
+                        <div class="w-10 rounded-full bg-base-200 flex justify-center items-center  ">
+                            <x-icon.user />
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 text-left">
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ $user->username }}</p>
+                        {{-- <p class="text-xs text-gray-500 truncate">admin@example.com</p> --}}
+                    </div>
                 </div>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">Admin Sistem</p>
-                <p class="text-xs text-gray-500 truncate">admin@example.com</p>
-            </div>
+                <x-icon.chevron-right class="size-4"/>
+            </label>
+
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
+                <li>
+                    <livewire:shared.buttons.logout-button/>
+                </li>
+            </ul>
         </div>
 
-        <div class="flex justify-center mt-4" x-show="isCollapsed">
-            <div class="avatar">
-                <div class="w-10 rounded-full">
-                    <img src="https://i.pravatar.cc/150?img=32" alt="User Avatar">
+        <!-- Collapsed View -->
+        <div class="dropdown dropdown-right dropdown-end w-full" x-show="isCollapsed">
+            <label tabindex="0" class="btn btn-ghost hover:bg-gray-100 rounded-lg p-2 w-full flex justify-center cursor-pointer transition-colors">
+                <div class="avatar">
+                    <div class="w-10 rounded-full bg-base-200 flex justify-center items-center  ">
+                        <x-icon.user />
+                    </div>
                 </div>
-            </div>
+            </label>
+
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
+                <li class="menu-title">
+                    <span>{{ $user->username }}</span>
+                </li>
+                <li>
+                    <livewire:shared.buttons.logout-button/>
+                </li>
+            </ul>
         </div>
     </div>
 </div>

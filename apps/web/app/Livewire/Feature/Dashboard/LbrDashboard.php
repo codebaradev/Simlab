@@ -8,6 +8,8 @@ class LbrDashboard extends Component
 {
     public function render()
     {
-        return view('livewire.feature.dashboard.lbr-dashboard');
+        return view('livewire.feature.dashboard.lbr-dashboard', [
+            'title' => 'Dashboard'
+        ]);
     }
 }

@@ -21,7 +21,7 @@
             <div class="flex flex-col gap-4 mb-8">
                 <x-form.input name="username" label="Username"/>
 
-                <x-form.input name="password" label="Password"/>
+                <x-form.input name="password" type="password" label="Password"/>
             </div>
 
             <div class="card-actions ">
