@@ -1,12 +1,41 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <title>{{ $title ?? 'Simlab' }}</title>
+
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body>
-        {{ $slot }}
+    <body class="bg-slate-100 min-h-screen" x-data="sidebar()">
+        <div>
+            {{-- Sidebar --}}
+            <x-partials.sidebar />
+
+            {{-- Header --}}
+
+            {{-- Main --}}
+            <main class="content-transition flex-1 overflow-auto" :class="isCollapsed ? 'ml-20' : 'ml-64'">
+                {{ $slot }}
+            </main>
+
+            <!-- Global Alert Modal -->
+            <livewire:shared.modals.alert-modal />
+        </div>
     </body>
+    <script>
+        function sidebar() {
+            return {
+                isCollapsed: false,
+                activeMenu: 'dashboard',
+                toggleSidebar() {
+                    this.isCollapsed = !this.isCollapsed;
+                },
+                setActiveMenu(menu) {
+                    this.activeMenu = menu;
+                }
+            }
+        }
+    </script>
 </html>
