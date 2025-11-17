@@ -45,6 +45,7 @@ entity "Lecturer" as lecturer {
     * id: int <PK>
     * study_program_pk: int <PK>
     ---
+    * nidn: string
     * nip: string
     * code: string <U>
 }
@@ -68,12 +69,11 @@ entity LabAssistant {
     * tns: string
 }
 
-
-
 ' Main
 
 entity "Department" as department {
     * id: int <PK>
+    * head_id: int <FK>
     ---
     * name: string
     * code: string <U>
@@ -81,6 +81,7 @@ entity "Department" as department {
 
 entity "StudyProgram" as study_program {
     * id: int <PK>
+    * head_id: int <FK> 
     * department_id: int <FK>
     ---
     * name: string
@@ -113,7 +114,7 @@ entity "FacilityRequest" as facility_request {
 
 entity "Facility" as facility {
     * id: int <PK>
-    * request_id: int <FK>
+    * request_id: int <FK>p
     ---
     * name: string
     * code: string <U>
@@ -166,6 +167,9 @@ entity "Room" as room {
     * code: string <U>
 }
 
+' TODO: NIDN kode nama prodi dosen
+' TODO: nim nama kelas status (asleb, dibanned)
+
 entity Computer {
     * id : int <PK>
     * room_id: int <FK>
@@ -207,6 +211,9 @@ user |o--o| lecturer: "Inherit"
 user |o--o| student: "Inherit"
 student |o--o{ class_leader: "Inherit"
 student |o--o{ LabAssistant: "Inherit"
+lecturer ||--|| department: "Department Leader"
+lecturer ||--|| study_program: "Study Program Leader"
+
 
 user |o--|| RFID
 
