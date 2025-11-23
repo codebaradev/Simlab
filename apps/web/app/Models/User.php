@@ -50,6 +50,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'role_users', 'user_id', 'role_id');
     }
 
+    public function rfid(): HasOne
+    {
+        return $this->hasOne(Rfid::class, 'user_id', 'id' );
+    }
+
     public function lecturer(): HasOne
     {
         return $this->hasOne(Lecturer::class, 'user_id', 'id');

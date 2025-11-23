@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Student;
+use App\Models\Rfid;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class StudentService
+class RfidService
 {
     private $perPage;
     private $maxPerPage;
@@ -17,11 +17,11 @@ class StudentService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $filters = [], string $sortField = 'generation', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $filters = [], string $sortField = 'code', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
-        $query = Student::query();
+        $query = Rfid::query();
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -37,7 +37,7 @@ class StudentService
             }
         }
 
-        $sortField = in_array($sortField, ['nim', 'generation', 'created_at']) ? $sortField : 'generation';
+        $sortField = in_array($sortField, ['nidn', 'nip', 'code', 'created_at']) ? $sortField : 'code';
         $sortDirection = $sortDirection === 'desc' ? 'desc' : 'asc';
         $query->orderBy($sortField, $sortDirection);
 
@@ -50,44 +50,42 @@ class StudentService
 
     public function findById($id, $with = [], $withTrashed = false)
     {
-        $query = $withTrashed ? Student::withTrashed() : Student::query();
+        $query = $withTrashed ? Rfid::withTrashed() : Rfid::query();
         if (!empty($with)) {
             $query->with($with);
         }
         return $query->findOrFail($id);
     }
 
-    public function create(int $user_id, int $sp_id, array $data): Student
+    public function create(int $user_id, array $data): Rfid
     {
-        return DB::transaction(function () use ($user_id, $sp_id, $data) {
-            $Student = Student::make($data);
+        return DB::transaction(function () use ($user_id, $data) {
+            $Rfid = Rfid::make($data);
 
-            $Student->sp_id = $sp_id;
-            $Student->user_id = $user_id;
+            $Rfid->user_id = $user_id;
 
-            $Student->save();
-            return $Student;
+            $Rfid->save();
+            return $Rfid;
         });
     }
 
-    public function update(Student $Student, int $user_id, int $sp_id, array $data): Student
+    public function update(Rfid $Rfid, int $user_id, array $data): Rfid
     {
-        return DB::transaction(function () use ($Student, $user_id, $sp_id, $data) {
-            $Student->fill($data);
+        return DB::transaction(function () use ($Rfid, $user_id, $data) {
+            $Rfid->fill($data);
 
-            $Student->sp_id = $sp_id;
-            $Student->user_id = $user_id;
+            $Rfid->user_id = $user_id;
 
-            $Student->update($data);
-            return $Student;
+            $Rfid->update($data);
+            return $Rfid;
         });
     }
 
-    public function delete(Student $Student): bool
+    public function delete(Rfid $Rfid): bool
     {
-        return DB::transaction(function () use ($Student) {
-            // Soft delete the Student
-            $Student->delete();
+        return DB::transaction(function () use ($Rfid) {
+            // Soft delete the Rfid
+            $Rfid->delete();
 
             return true;
         });
@@ -96,8 +94,8 @@ class StudentService
     public function restore($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $Student = Student::withTrashed()->findOrFail($id);
-            $Student->restore();
+            $Rfid = Rfid::withTrashed()->findOrFail($id);
+            $Rfid->restore();
 
             return true;
         });
@@ -106,8 +104,8 @@ class StudentService
     public function forceDelete($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $Student = Student::withTrashed()->findOrFail($id);
-            $Student->forceDelete();
+            $Rfid = Rfid::withTrashed()->findOrFail($id);
+            $Rfid->forceDelete();
 
             return true;
         });
@@ -116,7 +114,7 @@ class StudentService
     public function bulkDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = Student::whereIn('id', $ids)->delete();
+            $count = Rfid::whereIn('id', $ids)->delete();
 
             return $count;
         });
@@ -125,7 +123,7 @@ class StudentService
     public function bulkForceDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = Student::whereIn('id', $ids)->forceDelete();
+            $count = Rfid::whereIn('id', $ids)->forceDelete();
 
             return $count;
         });
@@ -134,7 +132,7 @@ class StudentService
     public function bulkRestore(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = Student::withTrashed()
+            $count = Rfid::withTrashed()
                 ->whereIn('id', $ids)
                 ->restore();
 
