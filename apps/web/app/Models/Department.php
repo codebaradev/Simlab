@@ -16,6 +16,7 @@ class Department extends Model
     public $table = "departments";
 
     protected $fillable = [
+        // 'head_id',
         'code',
         'name',
     ];

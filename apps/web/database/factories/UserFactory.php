@@ -49,6 +49,17 @@ class UserFactory extends Factory
         });
     }
 
+    public function student(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $role = Role::where('code', UserRoleEnum::MAHASISWA->value)->first();
+
+            if ($role) {
+                $user->roles()->attach($role->id);
+            }
+        });
+    }
+
     public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
