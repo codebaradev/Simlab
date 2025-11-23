@@ -3,6 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\UserRoleEnum;
+use App\Enums\UserStatusEnum;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -25,13 +28,25 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'username' => fake()->userName(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'username' => $this->faker->unique()->numerify('##########'),
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => Hash::make('password'),
+            'status' => UserStatusEnum::ACTIVE->value,
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function lecturer(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $role = Role::where('code', UserRoleEnum::DOSEN->value)->first();
+
+            if ($role) {
+                $user->roles()->attach($role->id);
+            }
+        });
     }
 
     public function admin(): static
@@ -44,7 +59,6 @@ class UserFactory extends Factory
             'password' => Hash::make('admin123'), // default password
         ]);
     }
-
     /**
      * Indicate that the model's email address should be unverified.
      */

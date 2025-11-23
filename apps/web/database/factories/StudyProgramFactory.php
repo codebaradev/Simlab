@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,6 +18,7 @@ class StudyProgramFactory extends Factory
     public function definition(): array
     {
         return [
+            'department_id' => Department::factory(),
             'code' => $this->faker->unique()->regexify('[A-Z0-9]{3}'),
             'name' => $this->faker->words(2, true) . 'Study Program',
         ];

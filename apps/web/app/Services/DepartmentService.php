@@ -11,14 +11,16 @@ use Illuminate\Support\Facades\Log;
 class DepartmentService
 {
     private $perPage;
+    private $maxPerPage;
 
     public function __construct() {
         $this->perPage = config('pagination.default');
+        $this->maxPerPage = config('pagination.max_limit');
     }
 
     public function getAll(array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
-        $perPage = $perPage ?? $this->perPage;
+        $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = Department::query();
 
@@ -54,17 +56,30 @@ class DepartmentService
         return $query->findOrFail($id);
     }
 
-    public function create(array $data): Department
+    public function create(array $data, ?int $head_id = null, ): Department
     {
-        return DB::transaction(function () use ($data) {
-            return Department::create($data);
+        return DB::transaction(function () use ($head_id, $data) {
+            $department = Department::make($data);
+
+            if ($head_id) {
+                $department->head_id = $head_id;
+            }
+
+            $department->save();
+            return $department;
         });
     }
 
-    public function update(Department $department, array $data): Department
+    public function update(Department $department, array $data, ?int $head_id = null): Department
     {
-        return DB::transaction(function () use ($department, $data) {
-            $department->update($data);
+        return DB::transaction(function () use ($department, $head_id, $data) {
+            $department->fill($data);
+
+            if ($head_id) {
+                $department->head_id = $head_id;
+            }
+
+            $department->save();
             return $department;
         });
     }

@@ -5,20 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudyProgram extends Model
+class Lecturer extends Model
 {
+    /** @use HasFactory<\Database\Factories\LecturerFactory> */
     use HasFactory, SoftDeletes;
 
-    public $table = "study_programs";
+    public $table = "lecturers";
 
     protected $fillable = [
-        // 'head_id',
-        // 'department_id',
-        'code',
-        'name',
+        // 'user_id',
+        // 'sp_id',
+        'nidn',
+        'nip',
+        'code'
     ];
 
     protected $casts = [
@@ -26,26 +28,27 @@ class StudyProgram extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function department(): BelongsTo
+    public function study_program(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'department_id','id');
+        return $this->belongsTo(StudyProgram::class, 'sp_id', 'id');
     }
 
-    public function head(): BelongsTo
+    public function head_of_department(): HasOne
     {
-        return $this->belongsTo(Lecturer::class, 'head_id', 'id');
+        return $this->hasOne(Department::class, 'head_id', 'id');
     }
 
-    public function lecturers(): HasMany
+    public function head_of_sp(): HasOne
     {
-        return $this->hasMany(Lecturer::class, 'sp_id', 'id');
+        return $this->hasOne(StudyProgram::class, 'head_id', 'id');
     }
 
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
             $q->where('code', 'like', '%' . $search . '%')
-                ->orWhere('name', 'like', '%' . $search . '%');
+                ->orWhere('nidn', 'like', '%' . $search . '%')
+                ->orWhere('nip', 'like', '%' . $search . '%');
         });
     }
 

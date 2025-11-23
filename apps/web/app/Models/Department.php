@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use function PHPUnit\Framework\returnArgument;
 
 class Department extends Model
 {
@@ -22,6 +24,11 @@ class Department extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function head(): BelongsTo
+    {
+        return $this->belongsTo(Lecturer::class, 'head_id', 'id');
+    }
 
     public function study_program(): HasOne
     {

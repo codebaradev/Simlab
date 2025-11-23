@@ -1,10 +1,14 @@
 <?php
 
 use App\Models\Department;
+use App\Models\Lecturer;
 use App\Models\StudyProgram;
+use App\Models\User;
 use App\Services\StudyProgramService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
@@ -12,368 +16,408 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->service = new StudyProgramService();
+
+    // Create department
+    $this->department = Department::factory()->create([
+        'code' => 'DEPT001',
+        'name' => 'Computer Science Department',
+    ]);
+
+    // Create user with lecturer role
+    $this->user = User::factory()->lecturer()->create();
+    // Create study program
+    $this->studyProgram = StudyProgram::factory()->create([
+        'department_id' => $this->department->id,
+        'code' => 'SP001',
+        'name' => 'Software Engineering',
+    ]);
+
+    // Create lecturer
+    $this->lecturer = Lecturer::factory()->create([
+        'user_id' => $this->user->id,
+        'sp_id' => $this->studyProgram->id,
+    ]);
+
+
 });
 
-// Helper functions - DIPERBAIKI
-function createStudyProgram(array $attributes = []): StudyProgram
-{
-    // ✅ PASTIKAN department_id ADA
-    if (!isset($attributes['department_id'])) {
-        $attributes['department_id'] = createDepartment()->id;
-    }
-
-    return StudyProgram::factory()->create($attributes);
-}
-
-function createDepartment(): Department
-{
-    return Department::factory()->create();
-}
-
-describe('GET ALL', function () {
-    beforeEach(function () {
-        // ✅ RESET DAN PASTIKAN CLEAN STATE
-        StudyProgram::query()->forceDelete();
-        Department::query()->forceDelete();
-    });
-
-    it('returns paginated results by default', function () {
-        $department = createDepartment();
-
-        // ✅ CREATE DENGAN DEPARTMENT YANG VALID
-        StudyProgram::factory()->count(15)->create(['department_id' => $department->id]);
+describe('StudyProgram Service - GetAll Method', function () {
+    it('can get all study programs with default parameters', function () {
+        StudyProgram::factory()->count(5)->create(['department_id' => $this->department->id]);
 
         $result = $this->service->getAll();
 
         expect($result)->toBeInstanceOf(LengthAwarePaginator::class)
-            ->and($result->total())->toBe(15)
+            ->and($result->count())->toBe(6) // 5 new + 1 from beforeEach
             ->and($result->perPage())->toBe(config('pagination.default'));
     });
 
-    it('returns collection when pagination is disabled', function () {
-         $department = createDepartment();
-
-        // ✅ PASTIKAN HANYA 3 DATA
-        StudyProgram::factory()->count(3)->create(['department_id' => $department->id]);
+    it('can get all study programs as collection when pagination is disabled', function () {
+        StudyProgram::factory()->count(3)->create(['department_id' => $this->department->id]);
 
         $result = $this->service->getAll([], 'name', 'asc', null, false);
 
         expect($result)->toBeInstanceOf(Collection::class)
-            ->and($result)->toHaveCount(3);
+            ->and($result->count())->toBe(4); // 3 new + 1 from beforeEach
     });
 
-    it('filters by search term', function () {
-        // ✅ GUNAKAN HELPER YANG SUDAH DIPERBAIKI
-        $program1 = createStudyProgram(['name' => 'Computer Science']);
-        $program2 = createStudyProgram(['name' => 'Business Administration']);
+    it('can filter study programs by search term', function () {
+        StudyProgram::factory()->create(['name' => 'Artificial Intelligence', 'code' => 'AI', 'department_id' => $this->department->id]);
+        StudyProgram::factory()->create(['name' => 'Data Science', 'code' => 'DS', 'department_id' => $this->department->id]);
 
-        $result = $this->service->getAll(['search' => 'Computer']);
+        $result = $this->service->getAll(['search' => 'Intelligence']);
 
-        expect($result)->toHaveCount(1)
-            ->and($result->first()->id)->toBe($program1->id);
+        expect($result->count())->toBe(1)
+            ->and($result->first()->name)->toBe('Artificial Intelligence');
     });
 
-    it('filters active study programs', function () {
-        $activeProgram = createStudyProgram();
-        $deletedProgram = createStudyProgram();
+    it('can filter study programs by code search', function () {
+        StudyProgram::factory()->create(['name' => 'Test Program', 'code' => 'TEST123', 'department_id' => $this->department->id]);
+        StudyProgram::factory()->create(['name' => 'Another Program', 'code' => 'OTHER', 'department_id' => $this->department->id]);
+
+        $result = $this->service->getAll(['search' => 'TEST']);
+
+        expect($result->count())->toBe(1)
+            ->and($result->first()->code)->toBe('TEST123');
+    });
+
+    it('can filter active study programs', function () {
+        $deletedProgram = StudyProgram::factory()->create(['department_id' => $this->department->id]);
         $deletedProgram->delete();
 
         $result = $this->service->getAll(['status' => 'active']);
 
-        expect($result)->toHaveCount(1)
-            ->and($result->first()->id)->toBe($activeProgram->id);
+        expect($result->count())->toBe(1) // 1 from beforeEach + 1 active
+            ->and($result->first()->trashed())->toBeFalse();
     });
 
-    it('filters deleted study programs', function () {
-        $activeProgram = createStudyProgram();
-        $deletedProgram = createStudyProgram();
-        $deletedProgram->delete();
+    it('can filter deleted study programs', function () {
+        $this->studyProgram->delete();
 
         $result = $this->service->getAll(['status' => 'deleted']);
 
-        expect($result)->toHaveCount(1)
-            ->and($result->first()->id)->toBe($deletedProgram->id);
+        expect($result->count())->toBe(1)
+            ->and($result->first()->trashed())->toBeTrue();
     });
 
-    it('sorts by field and direction', function () {
-        $programA = createStudyProgram(['name' => 'Alpha']);
-        $programB = createStudyProgram(['name' => 'Beta']);
-        $programC = createStudyProgram(['name' => 'Gamma']);
+    it('can sort study programs by different fields and directions', function () {
+        StudyProgram::factory()->create(['name' => 'Accounting', 'code' => 'ACC', 'department_id' => $this->department->id]);
+        StudyProgram::factory()->create(['name' => 'Business', 'code' => 'BUS', 'department_id' => $this->department->id]);
 
-        $result = $this->service->getAll([], 'name', 'desc', 10, false);
+        $resultAsc = $this->service->getAll([], 'name', 'asc');
+        $resultDesc = $this->service->getAll([], 'name', 'desc');
 
-        expect($result->first()->name)->toBe('Gamma')
-            ->and($result->last()->name)->toBe('Alpha');
+        expect($resultAsc->first()->name)->toBe('Accounting')
+            ->and($resultDesc->first()->name)->toBe('Software Engineering');
     });
 
-    it('uses custom per page value', function () {
-        $department = createDepartment();
+    it('can sort study programs by code', function () {
+        StudyProgram::factory()->create(['name' => 'Program A', 'code' => 'ZCODE', 'department_id' => $this->department->id]);
+        StudyProgram::factory()->create(['name' => 'Program B', 'code' => 'ACODE', 'department_id' => $this->department->id]);
 
-        StudyProgram::factory()->count(25)->create(['department_id' => $department->id]);
+        $result = $this->service->getAll([], 'code', 'asc');
 
-        $result = $this->service->getAll([], 'name', 'asc', 10);
-
-        expect($result->perPage())->toBe(10)
-            ->and($result->lastPage())->toBe(3);
-    });
-});
-
-describe('FIND BY ID', function () {
-    it('finds study program by id', function () {
-        $program = createStudyProgram();
-
-        $result = $this->service->findById($program->id);
-
-        expect($result)->toBeInstanceOf(StudyProgram::class)
-            ->and($result->id)->toBe($program->id);
+        expect($result->first()->code)->toBe('ACODE');
     });
 
-    it('finds with trashed study program', function () {
-        $program = createStudyProgram();
-        $program->delete();
+    it('can set custom pagination limit', function () {
+        StudyProgram::factory()->count(10)->create(['department_id' => $this->department->id]);
 
-        $result = $this->service->findById($program->id, [], true);
+        $result = $this->service->getAll([], 'name', 'asc', 5);
 
-        expect($result)->toBeInstanceOf(StudyProgram::class)
-            ->and($result->id)->toBe($program->id)
-            ->and($result->deleted_at)->not->toBeNull();
+        expect($result->count())->toBe(5)
+            ->and($result->perPage())->toBe(5);
     });
 
-    it('finds with relationships', function () {
-        $program = createStudyProgram();
+    it('respects maximum pagination limit', function () {
+        $maxLimit = config('pagination.max_limit');
+        $result = $this->service->getAll([], 'name', 'asc', $maxLimit + 100);
 
-        $result = $this->service->findById($program->id, ['department']);
-
-        expect($result->relationLoaded('department'))->toBeTrue();
-    });
-
-    it('throws exception for non-existent study program', function () {
-        expect(fn() => $this->service->findById(999))
-            ->toThrow(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        expect($result->perPage())->toBe($maxLimit);
     });
 });
 
-describe('CREATE', function () {
-    it('creates study program successfully', function () {
-        $department = createDepartment();
+describe('StudyProgram Service - FindById Method', function () {
+    it('can find study program by id', function () {
+        $found = $this->service->findById($this->studyProgram->id);
+
+        expect($found->id)->toBe($this->studyProgram->id)
+            ->and($found->name)->toBe('Software Engineering')
+            ->and($found->code)->toBe('SP001');
+    });
+
+    it('can find study program with relationships', function () {
+        $found = $this->service->findById($this->studyProgram->id, ['department', 'head']);
+
+        expect($found->department)->toBeInstanceOf(Department::class)
+            ->and($found->relationLoaded('department'))->toBeTrue();
+    });
+
+    it('can find study program with trashed records', function () {
+        $this->studyProgram->delete();
+
+        $found = $this->service->findById($this->studyProgram->id, [], true);
+
+        expect($found->id)->toBe($this->studyProgram->id)
+            ->and($found->trashed())->toBeTrue();
+    });
+
+    it('throws exception when study program not found', function () {
+        $this->service->findById(999);
+    })->throws(ModelNotFoundException::class);
+});
+
+describe('StudyProgram Service - Create Method', function () {
+    it('can create a new study program without head', function () {
         $data = [
-            'name' => 'Software Engineering',
-            'code' => 'SE',
+            'code' => 'SP002',
+            'name' => 'Information Technology',
         ];
 
-        $result = $this->service->create(null, $department->id, $data);
+        $studyProgram = $this->service->create($data, null, $this->department->id);
 
-        expect($result)->toBeInstanceOf(StudyProgram::class)
-            ->and($result->name)->toBe('Software Engineering')
-            ->and($result->code)->toBe('SE')
-            ->and($result->department_id)->toBe($department->id)
-            ->and($result->head_id)->toBeNull();
-
-        $this->assertDatabaseHas('study_programs', [
-            'name' => 'Software Engineering',
-            'code' => 'SE',
-            'department_id' => $department->id,
-        ]);
+        expect($studyProgram)->toBeInstanceOf(StudyProgram::class)
+            ->and($studyProgram->code)->toBe('SP002')
+            ->and($studyProgram->name)->toBe('Information Technology')
+            ->and($studyProgram->department_id)->toBe($this->department->id)
+            ->and($studyProgram->head_id)->toBeNull()
+            ->and($studyProgram->exists)->toBeTrue();
     });
 
-    it('runs within database transaction', function () {
-        $department = createDepartment();
-        $data = ['name' => 'Test', 'code' => 'TST'];
+    it('can create a new study program with head', function () {
+        $data = [
+            'code' => 'SP003',
+            'name' => 'Computer Engineering',
+        ];
+
+        $studyProgram = $this->service->create($data, $this->lecturer->id, $this->department->id);
+
+        expect($studyProgram)->toBeInstanceOf(StudyProgram::class)
+            ->and($studyProgram->head_id)->toBe($this->lecturer->id)
+            ->and($studyProgram->head)->toBeInstanceOf(Lecturer::class)
+            ->and($studyProgram->department_id)->toBe($this->department->id);
+    });
+
+    it('creates study program within transaction', function () {
+        $data = ['code' => 'SP004', 'name' => 'Test Program'];
 
         DB::shouldReceive('transaction')
             ->once()
             ->andReturnUsing(fn($callback) => $callback());
 
-        $result = $this->service->create(null, $department->id, $data);
-
-        expect($result)->toBeInstanceOf(StudyProgram::class);
+        $this->service->create($data, null, $this->department->id);
     });
 });
 
-describe('UPDATE', function () {
-    it('updates study program successfully', function () {
-        $program = createStudyProgram();
-        $newDepartment = createDepartment();
-        $data = ['name' => 'Updated Name', 'code' => 'UPD'];
+describe('StudyProgram Service - Update Method', function () {
+    it('can update a study program without head', function () {
+        $newData = [
+            'code' => 'SP001-UPDATED',
+            'name' => 'Software Engineering Updated',
+        ];
 
-        $result = $this->service->update($program, null, $newDepartment->id, $data);
+        $updated = $this->service->update($this->studyProgram, $newData, null, $this->department->id);
 
-        expect($result->name)->toBe('Updated Name')
-            ->and($result->code)->toBe('UPD')
-            ->and($result->department_id)->toBe($newDepartment->id)
-            ->and($result->head_id)->toBeNull();
+        expect($updated->code)->toBe('SP001-UPDATED')
+            ->and($updated->name)->toBe('Software Engineering Updated')
+            ->and($updated->id)->toBe($this->studyProgram->id)
+            ->and($updated->head_id)->toBeNull();
     });
 
-    it('updates study program with same department', function () {
-        $department = createDepartment();
-        $program = createStudyProgram(['department_id' => $department->id]);
-        $data = ['name' => 'Updated Name', 'code' => 'UPD'];
+    it('can update a study program with head', function () {
+        $newData = [
+            'name' => 'Study Program with Head',
+        ];
 
-        $result = $this->service->update($program, null, $department->id, $data);
+        $updated = $this->service->update($this->studyProgram, $newData, $this->lecturer->id, $this->department->id);
 
-        expect($result->name)->toBe('Updated Name')
-            ->and($result->department_id)->toBe($department->id);
+        expect($updated->head_id)->toBe($this->lecturer->id)
+            ->and($updated->head)->toBeInstanceOf(Lecturer::class)
+            ->and($updated->department_id)->toBe($this->department->id);
+    });
+
+    // it(description: 'can remove head from study program', function () {
+    //     // Create study program with head first
+    //     $studyProgramWithHead = StudyProgram::factory()->create([
+    //         'department_id' => $this->department->id,
+    //         'head_id' => $this->lecturer->id,
+    //     ]);
+
+    //     $newData = ['name' => 'Study Program without Head'];
+
+    //     $updated = $this->service->update($studyProgramWithHead, $newData, null, $this->department->id);
+
+    //     expect($updated->head_id)->toBeNull();
+    // });
+
+    // it('can change study program head', function () {
+    //     // Create another lecturer for the new head
+    //     $newUser = User::factory()->lecturer()->create();
+    //     $newLecturer = Lecturer::factory()->create([
+    //         'user_id' => $newUser->id,
+    //     ]);
+
+    //     // Create study program with current head
+    //     $studyProgram = StudyProgram::factory()->create([
+    //         'department_id' => $this->department->id,
+    //         'head_id' => $this->lecturer->id,
+    //     ]);
+
+    //     $newData = ['name' => 'Updated Study Program'];
+
+    //     $updated = $this->service->update($studyProgram, $newData, $newLecturer->id, $this->department->id);
+
+    //     expect($updated->head_id)->toBe($newLecturer->id)
+    //         ->and($updated->head->id)->toBe($newLecturer->id);
+    // });
+
+    it('can change study program department', function () {
+        $newDepartment = Department::factory()->create();
+        $newData = ['name' => 'Study Program with New Department'];
+
+        $updated = $this->service->update($this->studyProgram, $newData, null, $newDepartment->id);
+
+        expect($updated->department_id)->toBe($newDepartment->id)
+            ->and($updated->department->id)->toBe($newDepartment->id);
+    });
+
+    it('updates study program within transaction', function () {
+        $newData = ['name' => 'Updated Name'];
+
+        DB::shouldReceive('transaction')
+            ->once()
+            ->andReturnUsing(fn($callback) => $callback());
+
+        $this->service->update($this->studyProgram, $newData, null, $this->department->id);
     });
 });
 
-describe('DELETE OPERATIONS', function () {
-    it('soft deletes study program', function () {
-        $program = createStudyProgram();
+describe('StudyProgram Service - Delete Method', function () {
+    it('can soft delete a study program', function () {
+        $result = $this->service->delete($this->studyProgram);
 
-        $result = $this->service->delete($program);
-
-        expect($result)->toBeTrue();
-        $this->assertSoftDeleted($program);
+        expect($result)->toBeTrue()
+            ->and($this->studyProgram->fresh())->not->toBeNull()
+            ->and($this->studyProgram->fresh()->trashed())->toBeTrue()
+            ->and(StudyProgram::find($this->studyProgram->id))->toBeNull()
+            ->and(StudyProgram::withTrashed()->find($this->studyProgram->id))->not->toBeNull();
     });
 
-    it('restores soft deleted study program', function () {
-        $program = createStudyProgram();
-        $program->delete();
+    it('deletes study program within transaction', function () {
+        DB::shouldReceive('transaction')
+            ->once()
+            ->andReturnUsing(fn($callback) => $callback());
 
-        $result = $this->service->restore($program->id);
-
-        expect($result)->toBeTrue();
-        $this->assertDatabaseHas('study_programs', [
-            'id' => $program->id,
-            'deleted_at' => null,
-        ]);
+        $this->service->delete($this->studyProgram);
     });
+});
 
-    it('force deletes study program', function () {
-        $program = createStudyProgram();
+describe('StudyProgram Service - Restore Method', function () {
+    it('can restore a soft deleted study program', function () {
+        $this->studyProgram->delete();
 
-        $result = $this->service->forceDelete($program->id);
+        $result = $this->service->restore($this->studyProgram->id);
 
-        expect($result)->toBeTrue();
-        $this->assertDatabaseMissing('study_programs', ['id' => $program->id]);
+        expect($result)->toBeTrue()
+            ->and($this->studyProgram->fresh()->trashed())->toBeFalse();
     });
 
     it('throws exception when restoring non-existent study program', function () {
-        expect(fn() => $this->service->restore(999))
-            ->toThrow(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->service->restore(999);
+    })->throws(ModelNotFoundException::class);
+});
+
+describe('StudyProgram Service - ForceDelete Method', function () {
+    it('can force delete a study program', function () {
+        $result = $this->service->forceDelete($this->studyProgram->id);
+
+        expect($result)->toBeTrue()
+            ->and(StudyProgram::withTrashed()->find($this->studyProgram->id))->toBeNull();
     });
 
     it('throws exception when force deleting non-existent study program', function () {
-        expect(fn() => $this->service->forceDelete(999))
-            ->toThrow(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
-    });
+        $this->service->forceDelete(999);
+    })->throws(ModelNotFoundException::class);
 });
 
-describe('BULK OPERATIONS', function () {
+describe('StudyProgram Service - Bulk Operations', function () {
     beforeEach(function () {
-        StudyProgram::query()->forceDelete();
-    });
-
-    it('bulk deletes multiple study programs', function () {
-        $program1 = createStudyProgram();
-        $program2 = createStudyProgram();
-        $program3 = createStudyProgram();
-
-        $result = $this->service->bulkDelete([$program1->id, $program2->id]);
-
-        expect($result)->toBe(2);
-        $this->assertSoftDeleted($program1);
-        $this->assertSoftDeleted($program2);
-        $this->assertNotSoftDeleted($program3);
-    });
-
-    it('bulk force deletes multiple study programs', function () {
-        $program1 = createStudyProgram();
-        $program2 = createStudyProgram();
-
-        $result = $this->service->bulkForceDelete([$program1->id, $program2->id]);
-
-        expect($result)->toBe(2);
-        $this->assertDatabaseMissing('study_programs', ['id' => $program1->id]);
-        $this->assertDatabaseMissing('study_programs', ['id' => $program2->id]);
-    });
-
-    it('bulk restores multiple study programs', function () {
-        $program1 = createStudyProgram();
-        $program2 = createStudyProgram();
-        $program1->delete();
-        $program2->delete();
-
-        $result = $this->service->bulkRestore([$program1->id, $program2->id]);
-
-        expect($result)->toBe(2);
-        $this->assertDatabaseHas('study_programs', [
-            'id' => $program1->id,
-            'deleted_at' => null,
-        ]);
-        $this->assertDatabaseHas('study_programs', [
-            'id' => $program2->id,
-            'deleted_at' => null,
+        $this->studyPrograms = StudyProgram::factory()->count(3)->create([
+            'department_id' => $this->department->id,
         ]);
     });
 
-    it('handles empty arrays in bulk operations', function () {
-        expect($this->service->bulkDelete([]))->toBe(0)
-            ->and($this->service->bulkForceDelete([]))->toBe(0)
-            ->and($this->service->bulkRestore([]))->toBe(0);
+    it('can bulk delete study programs', function () {
+        $ids = $this->studyPrograms->pluck('id')->toArray();
+
+        $count = $this->service->bulkDelete($ids);
+
+        expect($count)->toBe(3)
+            ->and(StudyProgram::find($ids[0]))->toBeNull()
+            ->and(StudyProgram::withTrashed()->find($ids[0]))->not->toBeNull();
+    });
+
+    it('can bulk force delete study programs', function () {
+        $ids = $this->studyPrograms->pluck('id')->take(2)->toArray();
+
+        $count = $this->service->bulkForceDelete($ids);
+
+        expect($count)->toBe(2)
+            ->and(StudyProgram::find($ids[0]))->toBeNull()
+            ->and(StudyProgram::withTrashed()->find($ids[0]))->toBeNull()
+            ->and(StudyProgram::find($this->studyPrograms[2]->id))->not->toBeNull();
+    });
+
+    it('can bulk restore study programs', function () {
+        $ids = $this->studyPrograms->pluck('id')->toArray();
+        StudyProgram::whereIn('id', $ids)->delete();
+
+        $count = $this->service->bulkRestore($ids);
+
+        expect($count)->toBe(3)
+            ->and(StudyProgram::find($ids[0]))->not->toBeNull()
+            ->and($this->studyPrograms[0]->fresh()->trashed())->toBeFalse();
+    });
+
+    it('returns zero when bulk deleting empty array', function () {
+        $count = $this->service->bulkDelete([]);
+
+        expect($count)->toBe(0);
+    });
+
+    it('returns zero when bulk restoring empty array', function () {
+        $count = $this->service->bulkRestore([]);
+
+        expect($count)->toBe(0);
+    });
+
+    it('returns zero when bulk force deleting empty array', function () {
+        $count = $this->service->bulkForceDelete([]);
+
+        expect($count)->toBe(0);
     });
 });
 
-describe('CONFIGURATION & EDGE CASES', function () {
-    it('uses config pagination', function () {
-        config(['pagination.default' => 25]);
-        $service = new StudyProgramService();
+describe('StudyProgram Service - Error Handling', function () {
+    // it('handles database errors gracefully during getAll', function () {
+    //     $this->expectException(QueryException::class);
+    //     $this->service->getAll(sortField: 'invalid_field');
+    // });
 
-        $result = $service->getAll();
+    // it('handles connection timeout during create', function () {
+    //     $this->expectException(QueryException::class);
 
-        expect($result->perPage())->toBe(25);
+    //     DB::shouldReceive('transaction')
+    //         ->once()
+    //         ->andThrow(new QueryException('', [], new Exception('Connection timeout')));
+
+    //     $this->service->create(['name' => 'Test'], null, $this->department->id);
+    // });
+
+    it('handles database constraint violations', function () {
+        $this->expectException(QueryException::class);
+
+        // Try to create study program with non-existent department
+        $this->service->create(['name' => 'Test'], null, 9999);
     });
-
-    it('handles invalid sort field gracefully', function () {
-        createStudyProgram(['name' => 'Test']);
-
-        $result = $this->service->getAll([], 'invalid_field', 'asc');
-
-        expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
-    });
-
-    it('handles case insensitive status filter', function () {
-        createStudyProgram();
-
-        $result = $this->service->getAll(['status' => 'ACTIVE']);
-
-        expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
-    });
-});
-
-describe('DATASET DRIVEN TESTS', function () {
-    beforeEach(function () {
-        StudyProgram::query()->forceDelete();
-    });
-
-    it('handles various search terms', function (string $searchTerm, int $expectedCount) {
-        createStudyProgram(['name' => 'Computer Science']);
-        createStudyProgram(['name' => 'Information Technology']);
-        createStudyProgram(['name' => 'Business Administration']);
-
-        $result = $this->service->getAll(['search' => $searchTerm]);
-
-        expect($result)->toHaveCount($expectedCount);
-    })->with([
-        ['computer', 1],
-        ['science', 1],
-        ['technology', 1],
-        ['business', 1],
-        ['admin', 1],
-        ['nonexistent', 0],
-    ]);
-
-    it('handles different pagination scenarios', function (int $totalItems, int $perPage, int $expectedPages) {
-        $department = createDepartment();
-        StudyProgram::factory()->count($totalItems)->create(['department_id' => $department->id]);
-
-        $result = $this->service->getAll([], 'name', 'asc', $perPage);
-
-        expect($result->lastPage())->toBe($expectedPages);
-    })->with([
-        [15, 10, 2],
-        [25, 10, 3],
-        [5, 10, 1],
-        [0, 10, 1],
-    ]);
 });

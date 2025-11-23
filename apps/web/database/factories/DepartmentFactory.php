@@ -19,7 +19,7 @@ class DepartmentFactory extends Factory
     {
         return [
             'code' => $this->faker->unique()->regexify('DEPT[A-Z0-9]{3}'),
-            'name' => $this->faker->words(2, true) . ' Department',
+            'name' => $this->faker->unique()->words(2, true) . ' Department',
         ];
     }
 

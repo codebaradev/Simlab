@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\StudyProgram;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Models\Lecturer;
+use DB;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
-
-class StudyProgramService
+class LecturerService
 {
     private $perPage;
     private $maxPerPage;
@@ -22,7 +21,7 @@ class StudyProgramService
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
-        $query = StudyProgram::query();
+        $query = Lecturer::query();
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -38,7 +37,7 @@ class StudyProgramService
             }
         }
 
-        $sortField = in_array($sortField, ['name', 'code', 'created_at']) ? $sortField : 'name';
+        $sortField = in_array($sortField, ['nidn', 'nip', 'code', 'created_at']) ? $sortField : 'code';
         $sortDirection = $sortDirection === 'desc' ? 'desc' : 'asc';
         $query->orderBy($sortField, $sortDirection);
 
@@ -51,50 +50,44 @@ class StudyProgramService
 
     public function findById($id, $with = [], $withTrashed = false)
     {
-        $query = $withTrashed ? StudyProgram::withTrashed() : StudyProgram::query();
+        $query = $withTrashed ? Lecturer::withTrashed() : Lecturer::query();
         if (!empty($with)) {
             $query->with($with);
         }
         return $query->findOrFail($id);
     }
 
-    public function create(array $data, ?int $head_id = null, int $department_id): StudyProgram
+    public function create(int $user_id, int $sp_id, array $data): Lecturer
     {
-        return DB::transaction(function () use ($head_id, $department_id, $data) {
-            $studyProgram = StudyProgram::make($data);
+        return DB::transaction(function () use ($user_id, $sp_id, $data) {
+            $lecturer = Lecturer::make($data);
 
-            $studyProgram->department_id = $department_id;
+            $lecturer->sp_id = $sp_id;
+            $lecturer->user_id = $user_id;
 
-            if ($head_id) {
-                $studyProgram->head_id = $head_id;
-            }
-
-            $studyProgram->save();
-            return $studyProgram;
+            $lecturer->save();
+            return $lecturer;
         });
     }
 
-    public function update(StudyProgram $studyProgram,  array $data , ?int $head_id = null, int $department_id): StudyProgram
+    public function update(Lecturer $lecturer, int $user_id, int $sp_id, array $data): Lecturer
     {
-        return DB::transaction(function () use ($studyProgram, $head_id, $department_id, $data) {
-            $studyProgram->fill($data);
+        return DB::transaction(function () use ($lecturer, $user_id, $sp_id, $data) {
+            $lecturer->fill($data);
 
-            $studyProgram->department_id = $department_id;
+            $lecturer->sp_id = $sp_id;
+            $lecturer->user_id = $user_id;
 
-            if ($head_id) {
-                $studyProgram->head_id = $head_id;
-            }
-
-            $studyProgram->update($data);
-            return $studyProgram;
+            $lecturer->update($data);
+            return $lecturer;
         });
     }
 
-    public function delete(StudyProgram $studyProgram): bool
+    public function delete(Lecturer $lecturer): bool
     {
-        return DB::transaction(function () use ($studyProgram) {
-            // Soft delete the StudyProgram
-            $studyProgram->delete();
+        return DB::transaction(function () use ($lecturer) {
+            // Soft delete the Lecturer
+            $lecturer->delete();
 
             return true;
         });
@@ -103,8 +96,8 @@ class StudyProgramService
     public function restore($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $studyProgram = StudyProgram::withTrashed()->findOrFail($id);
-            $studyProgram->restore();
+            $lecturer = Lecturer::withTrashed()->findOrFail($id);
+            $lecturer->restore();
 
             return true;
         });
@@ -113,8 +106,8 @@ class StudyProgramService
     public function forceDelete($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $studyProgram = StudyProgram::withTrashed()->findOrFail($id);
-            $studyProgram->forceDelete();
+            $lecturer = Lecturer::withTrashed()->findOrFail($id);
+            $lecturer->forceDelete();
 
             return true;
         });
@@ -123,7 +116,7 @@ class StudyProgramService
     public function bulkDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = StudyProgram::whereIn('id', $ids)->delete();
+            $count = Lecturer::whereIn('id', $ids)->delete();
 
             return $count;
         });
@@ -132,7 +125,7 @@ class StudyProgramService
     public function bulkForceDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = StudyProgram::whereIn('id', $ids)->forceDelete();
+            $count = Lecturer::whereIn('id', $ids)->forceDelete();
 
             return $count;
         });
@@ -141,7 +134,7 @@ class StudyProgramService
     public function bulkRestore(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = StudyProgram::withTrashed()
+            $count = Lecturer::withTrashed()
                 ->whereIn('id', $ids)
                 ->restore();
 
