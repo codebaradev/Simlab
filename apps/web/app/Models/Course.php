@@ -26,6 +26,11 @@ class Course extends Model
         return $this->belongsToMany(Lecturer::class, 'course_lecturers', 'course_id', 'lecturer_id');
     }
 
+    public function academic_classes(): BelongsToMany
+    {
+        return $this->belongsToMany(AcademicClass::class, 'course_academic_class', 'course_id', 'academic_class_id');
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {

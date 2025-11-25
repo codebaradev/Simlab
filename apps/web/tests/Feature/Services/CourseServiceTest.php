@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AcademicClass;
 use App\Models\Course;
 use App\Models\Lecturer;
 use App\Models\User;
@@ -266,6 +267,142 @@ describe('CourseService', function () {
             expect($result)->toBe(3);
             expect(Course::count())->toBe(0);
             expect(Course::withTrashed()->count())->toBe(0);
+        });
+    });
+
+    describe('addAcademicClass method', function () {
+        it('can add academic classes to course', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $academicClass1 = AcademicClass::factory()->create();
+            $academicClass2 = AcademicClass::factory()->create();
+            $academicClassIds = [$academicClass1->id, $academicClass2->id];
+
+            // Act
+            $result = $this->service->addAcademicClass($course, $academicClassIds);
+
+            // Assert
+            expect($result)->toBeTrue()
+                ->and($course->academic_classes)->toHaveCount(2)
+                ->and($course->academic_classes->contains($academicClass1))->toBeTrue()
+                ->and($course->academic_classes->contains($academicClass2))->toBeTrue();
+        });
+
+        it('returns true when adding empty academic classes array', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $emptyAcademicClassIds = [];
+
+            // Act
+            $result = $this->service->addAcademicClass($course, $emptyAcademicClassIds);
+
+            // Assert
+            expect($result)->toBeTrue()
+                ->and($course->academic_classes)->toHaveCount(0);
+        });
+
+        it('runs in database transaction when adding academic classes', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $academicClass = AcademicClass::factory()->create();
+            $academicClassIds = [$academicClass->id];
+
+            DB::shouldReceive('transaction')
+                ->once()
+                ->andReturnUsing(fn($callback) => $callback());
+
+            // Act
+            $result = $this->service->addAcademicClass($course, $academicClassIds);
+
+            // Assert
+            expect($result)->toBeTrue();
+        });
+
+        it('throws exception when adding academic class with invalid foreign key', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $invalidAcademicClassIds = [999, 1000]; // IDs yang tidak ada
+
+            // Act & Assert
+            expect(fn() => $this->service->addAcademicClass($course, $invalidAcademicClassIds))
+                ->toThrow(\Illuminate\Database\QueryException::class)
+                ->and(fn() => $this->service->addAcademicClass($course, $invalidAcademicClassIds))
+                ->toThrow(\Exception::class, 'SQLSTATE[23000]');
+        });
+    });
+
+    describe('removeAcademicClass method', function () {
+        it('can remove academic classes from course', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $academicClass1 = AcademicClass::factory()->create();
+            $academicClass2 = AcademicClass::factory()->create();
+            $academicClass3 = AcademicClass::factory()->create();
+
+            // Attach classes first
+            $course->academic_classes()->attach([$academicClass1->id, $academicClass2->id, $academicClass3->id]);
+
+            $academicClassIdsToRemove = [$academicClass1->id, $academicClass2->id];
+
+            // Act
+            $result = $this->service->removeAcademicClass($course, $academicClassIdsToRemove);
+
+            // Assert
+            expect($result)->toBeTrue()
+                ->and($course->fresh()->academic_classes)->toHaveCount(1)
+                ->and($course->academic_classes->contains($academicClass1))->toBeFalse()
+                ->and($course->academic_classes->contains($academicClass2))->toBeFalse()
+                ->and($course->academic_classes->contains($academicClass3))->toBeTrue();
+        });
+
+        it('returns true when removing empty academic classes array', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $academicClass = AcademicClass::factory()->create();
+            $course->academic_classes()->attach($academicClass->id);
+
+            $emptyAcademicClassIds = [];
+
+            // Act
+            $result = $this->service->removeAcademicClass($course, $emptyAcademicClassIds);
+
+            // Assert
+            expect($result)->toBeTrue()
+                ->and($course->fresh()->academic_classes)->toHaveCount(1);
+        });
+
+        it('runs in database transaction when removing academic classes', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $academicClass = AcademicClass::factory()->create();
+            $course->academic_classes()->attach($academicClass->id);
+
+            $academicClassIds = [$academicClass->id];
+
+            DB::shouldReceive('transaction')
+                ->once()
+                ->andReturnUsing(fn($callback) => $callback());
+
+            // Act
+            $result = $this->service->removeAcademicClass($course, $academicClassIds);
+
+            // Assert
+            expect($result)->toBeTrue();
+        });
+
+        it('handles non-existent academic classes when removing', function () {
+            // Arrange
+            $course = Course::factory()->create();
+            $academicClass = AcademicClass::factory()->create();
+
+            $nonExistentIds = [999, 1000]; // IDs that don't exist
+
+            // Act
+            $result = $this->service->removeAcademicClass($course, $nonExistentIds);
+
+            // Assert
+            expect($result)->toBeTrue()
+                ->and($course->academic_classes)->toHaveCount(0);
         });
     });
 });

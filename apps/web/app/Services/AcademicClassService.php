@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Course;
+use App\Models\AcademicClass;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class CourseService
+class AcademicClassService
 {
     private $perPage;
     private $maxPerPage;
@@ -21,7 +21,7 @@ class CourseService
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
-        $query = Course::query();
+        $query = AcademicClass::query();
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -37,7 +37,7 @@ class CourseService
             }
         }
 
-        $sortField = in_array($sortField, ['name', 'year', 'sks', 'created_at']) ? $sortField : 'name';
+        $sortField = in_array($sortField, ['name', 'year', 'code', 'created_at']) ? $sortField : 'created_at';
         $sortDirection = $sortDirection === 'desc' ? 'desc' : 'asc';
         $query->orderBy($sortField, $sortDirection);
 
@@ -50,73 +50,64 @@ class CourseService
 
     public function findById($id, $with = [], $withTrashed = false)
     {
-        $query = $withTrashed ? Course::withTrashed() : Course::query();
+        $query = $withTrashed ? AcademicClass::withTrashed() : AcademicClass::query();
         if (!empty($with)) {
             $query->with($with);
         }
         return $query->findOrFail($id);
     }
 
-    public function create(array $data): Course
+    public function create(array $data, ?int $clId = null): AcademicClass
     {
-        return DB::transaction(function () use ($data) {
-            $course = Course::make($data);
-            $course->save();
-            return $course;
+        return DB::transaction(function () use ($data, $clId) {
+            $AcademicClass = AcademicClass::make($data);
+
+            if ($clId) {
+                $AcademicClass->cl_id = $clId;
+            }
+
+            $AcademicClass->save();
+            return $AcademicClass;
         });
     }
 
-    public function update(Course $course, array $data,  ): Course
+    public function update(AcademicClass $AcademicClass, array $data, ?int $clId = null): AcademicClass
     {
-        return DB::transaction(function () use ($course, $data) {
-            $course->fill($data);
+        return DB::transaction(function () use ($AcademicClass, $clId, $data) {
+            $AcademicClass->fill($data);
 
-            $course->save();
-            return $course;
+            if ($clId) {
+                $AcademicClass->cl_id = $clId;
+            }
+
+            $AcademicClass->save();
+            return $AcademicClass;
         });
     }
 
-    public function addLecturer(Course $course, int $lecturerId): bool
+    public function addStudent(AcademicClass $AcademicClass, array $studentIds): bool
     {
-        return DB::transaction(function () use ($course, $lecturerId) {
-            $course->lecturers()->attach($lecturerId);
+        return DB::transaction(function () use ($AcademicClass, $studentIds) {
+            $AcademicClass->students()->attach($studentIds);
 
             return true;
         });
     }
 
-    public function removeLecturer(Course $course, int $lecturerId): bool
+    public function removeStudent(AcademicClass $AcademicClass, int $studentIds): bool
     {
-        return DB::transaction(function () use ($course, $lecturerId) {
-            $course->lecturers()->detach($lecturerId);
+        return DB::transaction(function () use ($AcademicClass, $studentIds) {
+            $AcademicClass->students()->detach($studentIds);
 
             return true;
         });
     }
 
-    public function addAcademicClass(Course $course, array $academicClassIds): bool
+    public function delete(AcademicClass $AcademicClass): bool
     {
-        return DB::transaction(function () use ($course, $academicClassIds) {
-            $course->academic_classes()->attach($academicClassIds);
-
-            return true;
-        });
-    }
-
-    public function removeAcademicClass(Course $course, array $academicClassIds): bool
-    {
-        return DB::transaction(function () use ($course, $academicClassIds) {
-            $course->academic_classes()->detach($academicClassIds);
-
-            return true;
-        });
-    }
-
-    public function delete(Course $course): bool
-    {
-        return DB::transaction(function () use ($course) {
-            // Soft delete the Course
-            $course->delete();
+        return DB::transaction(function () use ($AcademicClass) {
+            // Soft delete the AcademicClass
+            $AcademicClass->delete();
 
             return true;
         });
@@ -125,8 +116,8 @@ class CourseService
     public function restore($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $course = Course::withTrashed()->findOrFail($id);
-            $course->restore();
+            $AcademicClass = AcademicClass::withTrashed()->findOrFail($id);
+            $AcademicClass->restore();
 
             return true;
         });
@@ -135,8 +126,8 @@ class CourseService
     public function forceDelete($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $course = Course::withTrashed()->findOrFail($id);
-            $course->forceDelete();
+            $AcademicClass = AcademicClass::withTrashed()->findOrFail($id);
+            $AcademicClass->forceDelete();
 
             return true;
         });
@@ -145,7 +136,7 @@ class CourseService
     public function bulkDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = Course::whereIn('id', $ids)->delete();
+            $count = AcademicClass::whereIn('id', $ids)->delete();
 
             return $count;
         });
@@ -154,7 +145,7 @@ class CourseService
     public function bulkForceDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = Course::whereIn('id', $ids)->forceDelete();
+            $count = AcademicClass::whereIn('id', $ids)->forceDelete();
 
             return $count;
         });
@@ -163,7 +154,7 @@ class CourseService
     public function bulkRestore(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = Course::withTrashed()
+            $count = AcademicClass::withTrashed()
                 ->whereIn('id', $ids)
                 ->restore();
 
