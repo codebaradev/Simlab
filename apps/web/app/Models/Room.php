@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Room extends Model
@@ -18,6 +19,11 @@ class Room extends Model
         'name',
         'code',
     ];
+
+    public function computers(): HasMany
+    {
+        return $this->hasMany(Computer::class, 'room_id', 'id');
+    }
 
     public function scopeSearch($query, $search)
     {
