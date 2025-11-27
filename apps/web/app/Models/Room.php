@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Room extends Model
@@ -28,6 +29,11 @@ class Room extends Model
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class, 'room_id', 'id');
+    }
+
+    public function finger_prints(): HasOne
+    {
+        return $this->hasOne(FingerPrint::class, 'room_id', 'id');
     }
 
     public function scopeSearch($query, $search)
