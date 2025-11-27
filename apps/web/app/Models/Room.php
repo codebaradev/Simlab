@@ -25,6 +25,11 @@ class Room extends Model
         return $this->hasMany(Computer::class, 'room_id', 'id');
     }
 
+    public function applications(): HasMany
+    {
+        return $this->hasMany(Application::class, 'room_id', 'id');
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
