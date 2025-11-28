@@ -49,6 +49,11 @@ class Lecturer extends Model
         return $this->belongsToMany(Course::class, 'course_lecturers', 'lecturer_id', 'course_id');
     }
 
+    public function schedule_requests(): HasOne
+    {
+        return $this->hasOne(ScheduleRequest::class, 'user_id', 'idforeignKey: ');
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
