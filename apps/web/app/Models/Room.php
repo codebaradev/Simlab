@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use function PHPUnit\Framework\returnArgument;
 
 class Room extends Model
 {
@@ -34,6 +35,11 @@ class Room extends Model
     public function finger_prints(): HasOne
     {
         return $this->hasOne(FingerPrint::class, 'room_id', 'id');
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'room_id', 'id');
     }
 
     public function scopeSearch($query, $search)

@@ -6,6 +6,8 @@ use App\Enums\Schedule\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Schedule extends Model
@@ -52,11 +54,10 @@ class Schedule extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-    // contoh relasi ke attendance (jika ada tabel attendances)
-    // public function attendances()
-    // {
-    //     return $this->hasMany(\App\Models\Attendance::class, 'schedule_id');
-    // }
+    public function attendance_monitoring(): HasOne
+    {
+        return $this->hasOne(AttendanceMonitoring::class, 'schedule_id', 'id');
+    }
 
     public function scopeActive($query)
     {
