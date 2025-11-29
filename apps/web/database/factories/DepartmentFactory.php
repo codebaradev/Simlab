@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,8 +18,17 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'code' => fake()->unique()->regexify('[A-Z]{4}'),
+            'code' => $this->faker->unique()->regexify('DEPT[A-Z0-9]{3}'),
+            'name' => $this->faker->unique()->words(2, true) . ' Department',
         ];
+    }
+
+    public function deleted(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        })->afterCreating(function (Department $department) {
+            $department->delete();
+        });
     }
 }

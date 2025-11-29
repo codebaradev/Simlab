@@ -5,9 +5,12 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Routing\ResolvesRouteDependencies;
 
 class User extends Authenticatable
 {
@@ -47,6 +50,31 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_users', 'user_id', 'role_id');
+    }
+
+    public function rfid(): HasOne
+    {
+        return $this->hasOne(Rfid::class, 'user_id', 'id' );
+    }
+
+    public function lecturer(): HasOne
+    {
+        return $this->hasOne(Lecturer::class, 'user_id', 'id');
+    }
+
+    public function student(): HasOne
+    {
+        return $this->hasOne(Student::class, 'user_id', 'id');
+    }
+
+    public function schedule_requests(): HasMany
+    {
+        return $this->hasMany(ScheduleRequest::class, 'user_id', 'id');
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class, 'user_id', 'id');
     }
 
     /**
