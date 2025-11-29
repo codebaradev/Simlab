@@ -43,25 +43,27 @@ entity RFID {
 
 entity "Lecturer" as lecturer {
     * id: int <PK>
-    * study_program_pk: int <PK>
+    * user_id: int <FK>
+    * sp_id: int <FK>
     ---
-    * nidn: string
-    * nip: string
+    * nidn: string <U>
+    * nip: string <U>
     * code: string <U>
 }
 
 entity "Student" as student {
     * id: int <PK>
-    * study_program_id: int <FK>
+    * user_id: int <FK>
+    * sp_id: int <FK>
     ---
     * nim: string
     * generation: year  
 }
 
-entity "ClassLeader" as class_leader {
-    * id: int <PK>
-    ---
-}
+' entity "ClassLeader" as class_leader {
+'     * id: int <PK>
+'     ---
+' }
 
 entity LabAssistant {
     * id: int <PK>
@@ -73,7 +75,7 @@ entity LabAssistant {
 
 entity "Department" as department {
     * id: int <PK>
-    * head_id: int <FK>
+    head_id: int <FK>
     ---
     * name: string
     * code: string <U>
@@ -81,7 +83,7 @@ entity "Department" as department {
 
 entity "StudyProgram" as study_program {
     * id: int <PK>
-    * head_id: int <FK> 
+    head_id: int <FK> 
     * department_id: int <FK>
     ---
     * name: string
@@ -93,21 +95,21 @@ entity "Course" as course {
     ---
     * name: string
     * sks: int
-    * academic_year: YEAR
-    * semester_type: int
+    * year: YEAR
+    * semester: int
 } 
 
 entity "Attendance" as attendance {
     * id: int <PK>
-    * user_id: <FK>
-    * class_id: <FK>
-    schedule_id: <FK>
+    * user_id: int <FK>
+    * schedule_id: int <FK>
     ---
-    * status: int
+    status: int
 }
 
 entity "FacilityRequest" as facility_request {
     * id: int <PK>
+    * user_id: int <FK>
     ---
     * date: date 
 }
@@ -124,8 +126,11 @@ entity "Facility" as facility {
 entity ScheduleRequest {
     * id: int <PK>
     * user_id: int <FK>
+    lecturer_id: int
     ---
     * status: int    
+    * category: int 
+    information: string
 }
 
 entity "Schedule" as schedule {
@@ -137,6 +142,7 @@ entity "Schedule" as schedule {
     * start_datetime: datetime
     * end_datetime: datetime
     * status: int
+    * is_open: bool
     * campus: int
     information: string
 }
@@ -149,14 +155,14 @@ entity AttendanceMonitoring {
     sub_topic: string
 }
 
-entity "Class" as class {
+entity " AcademicClass" as AcademicClass {
     * id: int <PK>
     cl_id: int <FK>
     ---
     * name: string
     * code: string <U>
-    * academic_year: YEAR
-    * semester_type: int
+    * year: int
+    * semester: int
 }
 
 entity "Room" as room {
@@ -167,17 +173,16 @@ entity "Room" as room {
     * code: string <U>
 }
 
-' TODO: NIDN kode nama prodi dosen
-' TODO: nim nama kelas status (asleb, dibanned)
 
+    
 entity Computer {
     * id : int <PK>
     * room_id: int <FK>
     ---
     * computer_count: int
     * name : string
-    * processor : string
-    * gpu : string
+    * processor : int
+    * gpu : int
     * ram_capacity : int
     * ram_type : int
     * storage_type : int
@@ -200,8 +205,8 @@ entity Application {
 ' StudyProgram and Department
 
 department ||--|{ study_program
-lecturer ||--|| study_program
-student ||--|| study_program
+lecturer }|--|| study_program
+student }|--|| study_program
 
 ' Roles
 
@@ -209,28 +214,26 @@ user }|--|{ role
 
 user |o--o| lecturer: "Inherit"
 user |o--o| student: "Inherit"
-student |o--o{ class_leader: "Inherit"
 student |o--o{ LabAssistant: "Inherit"
-lecturer ||--|| department: "Department Leader"
-lecturer ||--|| study_program: "Study Program Leader"
+lecturer ||--|| department: "Department Head"
+lecturer ||--|| study_program: "Study Program Head"
 
 
 user |o--|| RFID
 
-' class
+' AcademicClass
 
-student }|--|{ class: ""
-lecturer }|--|{ class: ""
-class_leader ||--|| class: ""
+student }|--|{ AcademicClass: ""
+student ||--|{ AcademicClass: "AcademicClass Leader"
 
 ' Schedule
 
 user ||--|{ ScheduleRequest
+lecturer ||--|| ScheduleRequest
 ScheduleRequest ||--|{ schedule
-lecturer }|--|{ schedule: ""
-student }|--|{ schedule: ""
-room ||--||schedule: ""
-class ||--|{ schedule:""
+' lecturer }|--|{ schedule: ""
+' student }|--|{ schedule: ""
+room ||--|{ schedule: ""
 course ||--|{ schedule:""
 schedule ||--|| AttendanceMonitoring
 
@@ -243,8 +246,7 @@ schedule ||--|{ attendance: ""
 
 LabAssistant }|--|| course
 lecturer }|--|{ course: ""
-student }|--|{ course: ""
-course ||--|| class
+course }|--|{ AcademicClass
 
 ' Room
 
