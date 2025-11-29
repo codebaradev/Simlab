@@ -59,6 +59,11 @@ class Schedule extends Model
         return $this->hasOne(AttendanceMonitoring::class, 'schedule_id', 'id');
     }
 
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class, 'schedule_id', 'id');
+    }
+
     public function scopeActive($query)
     {
         return $query->whereNull('deleted_at');

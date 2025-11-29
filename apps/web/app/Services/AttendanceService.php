@@ -5,9 +5,9 @@ namespace App\Services;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Models\AttendanceMonitoring;
+use App\Models\Attendance;
 
-class AttendanceMonitoringService
+class AttendanceService
 {
     private $perPage;
     private $maxPerPage;
@@ -21,9 +21,9 @@ class AttendanceMonitoringService
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
-        $query = AttendanceMonitoring::query();
+        $query = Attendance::query();
 
-        // // Search filter
+        // Search filter
         // if (!empty($filters['search'])) {
         //     $query->search($filters['search']);
         // }
@@ -50,38 +50,38 @@ class AttendanceMonitoringService
 
     public function findById($id, $with = [], $withTrashed = false)
     {
-        $query = $withTrashed ? AttendanceMonitoring::withTrashed() : AttendanceMonitoring::query();
+        $query = $withTrashed ? Attendance::withTrashed() : Attendance::query();
         if (!empty($with)) {
             $query->with($with);
         }
         return $query->findOrFail($id);
     }
 
-    public function create(array $data): AttendanceMonitoring
+    public function create(array $data): Attendance
     {
         return DB::transaction(function () use ($data) {
-            $AttendanceMonitoring = AttendanceMonitoring::make($data);
+            $Attendance = Attendance::make($data);
 
-            $AttendanceMonitoring->save();
-            return $AttendanceMonitoring;
+            $Attendance->save();
+            return $Attendance;
         });
     }
 
-    public function update(AttendanceMonitoring $AttendanceMonitoring, array $data): AttendanceMonitoring
+    public function update(Attendance $Attendance, array $data): Attendance
     {
-        return DB::transaction(function () use ($AttendanceMonitoring, $data) {
-            $AttendanceMonitoring->fill($data);
+        return DB::transaction(function () use ($Attendance, $data) {
+            $Attendance->fill($data);
 
-            $AttendanceMonitoring->update($data);
-            return $AttendanceMonitoring;
+            $Attendance->update($data);
+            return $Attendance;
         });
     }
 
-    public function delete(AttendanceMonitoring $AttendanceMonitoring): bool
+    public function delete(Attendance $Attendance): bool
     {
-        return DB::transaction(function () use ($AttendanceMonitoring) {
-            // Soft delete the AttendanceMonitoring
-            $AttendanceMonitoring->delete();
+        return DB::transaction(function () use ($Attendance) {
+            // Soft delete the Attendance
+            $Attendance->delete();
 
             return true;
         });
@@ -90,8 +90,8 @@ class AttendanceMonitoringService
     public function restore($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $AttendanceMonitoring = AttendanceMonitoring::withTrashed()->findOrFail($id);
-            $AttendanceMonitoring->restore();
+            $Attendance = Attendance::withTrashed()->findOrFail($id);
+            $Attendance->restore();
 
             return true;
         });
@@ -100,8 +100,8 @@ class AttendanceMonitoringService
     public function forceDelete($id): bool
     {
         return DB::transaction(function () use ($id) {
-            $AttendanceMonitoring = AttendanceMonitoring::withTrashed()->findOrFail($id);
-            $AttendanceMonitoring->forceDelete();
+            $Attendance = Attendance::withTrashed()->findOrFail($id);
+            $Attendance->forceDelete();
 
             return true;
         });
@@ -110,7 +110,7 @@ class AttendanceMonitoringService
     public function bulkDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = AttendanceMonitoring::whereIn('id', $ids)->delete();
+            $count = Attendance::whereIn('id', $ids)->delete();
 
             return $count;
         });
@@ -119,7 +119,7 @@ class AttendanceMonitoringService
     public function bulkForceDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = AttendanceMonitoring::whereIn('id', $ids)->forceDelete();
+            $count = Attendance::whereIn('id', $ids)->forceDelete();
 
             return $count;
         });
@@ -128,7 +128,7 @@ class AttendanceMonitoringService
     public function bulkRestore(array $ids): int
     {
         return DB::transaction(function () use ($ids) {
-            $count = AttendanceMonitoring::withTrashed()
+            $count = Attendance::withTrashed()
                 ->whereIn('id', $ids)
                 ->restore();
 
