@@ -1,15 +1,31 @@
-@if ($paginator->hasPages())
-    <div class="flex rounded-b-lg flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-white">
+{{-- @if ($paginator->hasPages()) --}}
+    <div class="flex sticky bottom-0 z-20 rounded-b-lg flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-white">
         {{-- Page Info --}}
-        <div class="text-sm text-gray-600">
-            Menampilkan
-            <span class="font-semibold text-primary">{{ $paginator->firstItem() ?: 0 }}</span>
-            -
-            <span class="font-semibold text-primary">{{ $paginator->lastItem() ?: 0 }}</span>
-            dari
-            <span class="font-semibold text-primary">{{ $paginator->total() }}</span>
-            data
+        <div class="flex items-center gap-4">
+            <div class="text-sm text-gray-600">
+                Menampilkan
+                <span class="font-semibold text-primary">{{ $paginator->firstItem() ?: 0 }}</span>
+                -
+                <span class="font-semibold text-primary">{{ $paginator->lastItem() ?: 0 }}</span>
+                dari
+                <span class="font-semibold text-primary">{{ $paginator->total() }}</span>
+                data
+            </div>
         </div>
+
+        {{-- Per Page Selector --}}
+        @if(property_exists($this, 'perPage'))
+            @php
+                $perPageOptions = method_exists($this, 'getPerPageOptions') ? $this->getPerPageOptions() : [10, 25, 50, 100];
+            @endphp
+            <div class="flex items-center gap-2">
+                <select wire:model.live="perPage" class="select select-bordered select-sm w-20">
+                    @foreach($perPageOptions as $option)
+                        <option value="{{ $option }}">{{ $option }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
 
         {{-- Pagination Controls --}}
         <div class="join">
@@ -69,4 +85,4 @@
             @endif
         </div>
     </div>
-@endif
+{{-- @endif --}}

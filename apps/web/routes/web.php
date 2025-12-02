@@ -13,5 +13,5 @@ Route::get('/', Login::class)->middleware([GuestOnlyMiddleware::class])->name('l
 
 Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/jurusan', DepartmentList::class)->name('department.create');
+    Route::get('/jurusan', DepartmentList::class)->name('department.index');
 });

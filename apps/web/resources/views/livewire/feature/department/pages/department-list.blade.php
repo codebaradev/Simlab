@@ -1,12 +1,10 @@
 <div class="p-8">
-    <x-page.breadcrumbs
-        :items="[
+    <x-page.header
+        class="mb-4"
+        title="Jurusan"
+        :breadcrumbs="[
             ['label' => 'Jurusan'],
         ]"
-    />
-
-    <x-page.title
-        title="Jurusan"
     />
 
     <!-- Content -->

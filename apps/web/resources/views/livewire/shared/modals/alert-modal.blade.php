@@ -68,8 +68,8 @@
         </div>
 
         <!-- Backdrop - Click outside to close -->
-        <form method="dialog" class="modal-backdrop">
+        {{-- <form method="dialog" class="modal-backdrop">
             <button wire:click="closeModal">close</button>
-        </form>
+        </form> --}}
     </div>
 </div>

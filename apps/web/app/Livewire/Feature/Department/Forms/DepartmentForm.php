@@ -7,6 +7,8 @@ use Livewire\Component;
 
 class DepartmentForm extends Component
 {
+    protected DepartmentService $dpService;
+
     public $code;
     public $name;
     public $editingId = null;
@@ -23,6 +25,11 @@ class DepartmentForm extends Component
         'name.max' => 'Nama jurusan maksimal 100 karakter.',
     ];
 
+    public function boot(DepartmentService $dpService)
+    {
+        $this->dpService = $dpService;
+    }
+
     public function mount($editingId = null, $formData = [])
     {
         $this->editingId = $editingId;
@@ -37,8 +44,6 @@ class DepartmentForm extends Component
     {
         $this->validate();
 
-        $departmentService = app(DepartmentService::class);
-
         try {
             $data = [
                 'code' => $this->code,
@@ -46,10 +51,10 @@ class DepartmentForm extends Component
             ];
 
             if ($this->editingId) {
-                $department = \App\Models\Department::find($this->editingId);
-                $departmentService->update($department, $data);
+                $department = $this->dpService->findById($this->editingId);
+                $this->dpService->update($department, $data);
             } else {
-                $departmentService->create($data);
+                $this->dpService->create($data);
             }
 
             $this->dispatch('departmentSaved');

@@ -40,7 +40,16 @@ class AlertModal extends Component
     public function closeModal()
     {
         $this->show = false;
-        $this->reset();
+        // Reset properties to defaults
+        // $this->title = 'Informasi';
+        // $this->message = '';
+        // $this->type = 'info';
+        // $this->actionText = 'Tutup';
+        // $this->actionUrl = null;
+        // $this->actionMethod = 'closeAlertModal';
+        // $this->showCancelButton = false;
+        // $this->cancelText = 'Batal';
+        // $this->size = 'md';
     }
 
     public function performAction()

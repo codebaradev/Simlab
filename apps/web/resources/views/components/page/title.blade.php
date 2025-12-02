@@ -1,11 +1,11 @@
 @props([
     'title',
-    'subTitle' => null
+    // 'subTitle' => null
 ])
 
-<div class="mb-6">
+<div {{  $attributes->merge(['class' => ''])  }}>
     <h1 class="text-3xl font-bold text-gray-800 capitalize">{{ $title }}</h1>
-    @if ($subTitle)
+    {{-- @if ($subTitle)
         <p class="text-gray-600 mt-2">{{ $subTitle }}</p>
-    @endif
+    @endif --}}
 </div>

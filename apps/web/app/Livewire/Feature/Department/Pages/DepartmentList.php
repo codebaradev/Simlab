@@ -3,11 +3,15 @@
 namespace App\Livewire\Feature\Department\Pages;
 
 use App\Services\DepartmentService;
+use App\Traits\Livewire\WithAlertModal;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DepartmentList extends Component
 {
+    use WithAlertModal;
+
+    protected DepartmentService $dpService;
     public $showFormModal = false;
     public $editingDepartment = null;
     public $formData = [];
@@ -18,6 +22,11 @@ class DepartmentList extends Component
         'showEditForm' => 'showEditForm',
         'showCreateForm' => 'showCreateForm'
     ];
+
+    public function boot(DepartmentService $dpService)
+    {
+        $this->dpService = $dpService;
+    }
 
     public function mount()
     {
@@ -34,8 +43,7 @@ class DepartmentList extends Component
     public function showEditForm($departmentId)
     {
         $this->editingDepartment = $departmentId;
-        $departmentService = app(DepartmentService::class);
-        $department = \App\Models\Department::find($departmentId);
+        $department = $this->dpService->findById($departmentId);
 
         $this->formData = [
             'code' => $department->code,
@@ -63,19 +71,13 @@ class DepartmentList extends Component
     {
         $this->closeFormModal();
         $this->dispatch('refresh-table');
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Data jurusan berhasil disimpan.'
-        ]);
+        $this->showSuccessAlert('Data jurusan berhasil disimpan.');
     }
 
     public function handleDepartmentDeleted()
     {
         $this->dispatch('refresh-table');
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Data jurusan berhasil dihapus.'
-        ]);
+        $this->showSuccessAlert('Data jurusan berhasil dihapus.');
     }
 
     public function render()
