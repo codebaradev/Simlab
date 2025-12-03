@@ -28,6 +28,7 @@ class DepartmentTable extends Component
 
     protected $listeners = [
         'refresh-table' => '$refresh',
+        'bulkDelete' => 'bulkDelete',
     ];
 
     public function boot(DepartmentService $dpService)
@@ -87,7 +88,6 @@ class DepartmentTable extends Component
         if (empty($this->selected)) {
             return;
         }
-        dd("testig");
 
         try {
             $this->dpService->bulkDelete($this->selected);
@@ -103,18 +103,11 @@ class DepartmentTable extends Component
 
     public function deleteSelected()
     {
-        $this->showConfirmAlert(
-            message: 'Apakah Anda yakin ingin menghapus data jurusan terpilih?',
-            title: 'Konfirmasi Hapus',
-            actionText: 'Ya, Hapus',
-            cancelText: 'Batal',
-            actionMethod: 'bulkDelete',
-        );
+        $this->bulkDelete();
     }
 
     public function getDepartmentsProperty()
     {
-
         return $this->dpService->getAll(
             $this->getFilters(),
             $this->sortField,

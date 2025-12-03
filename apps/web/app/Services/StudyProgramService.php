@@ -18,11 +18,17 @@ class StudyProgramService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = StudyProgram::query();
+
+        $query->whereHas('department');
+
+        if (!empty($with)) {
+            $query->with($with);
+        }
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -36,6 +42,11 @@ class StudyProgramService
             } elseif ($filters['status'] === 'deleted') {
                 $query->onlyTrashed();
             }
+        }
+
+        // Department filter
+        if (!empty($filters['department_id'])) {
+            $query->where('department_id', $filters['department_id']);
         }
 
         $sortField = in_array($sortField, ['name', 'code', 'created_at']) ? $sortField : 'name';

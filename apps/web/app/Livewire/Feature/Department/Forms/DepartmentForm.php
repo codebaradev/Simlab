@@ -13,13 +13,10 @@ class DepartmentForm extends Component
     public $name;
     public $editingId = null;
 
-    protected $rules = [
-        'code' => 'required|string|max:10',
-        'name' => 'required|string|max:100',
-    ];
 
     protected $messages = [
         'code.required' => 'Kode jurusan wajib diisi.',
+        'code.unique' => 'Nama jurusan sudah digunakan.',
         'code.max' => 'Kode jurusan maksimal 10 karakter.',
         'name.required' => 'Nama jurusan wajib diisi.',
         'name.max' => 'Nama jurusan maksimal 100 karakter.',
@@ -42,19 +39,18 @@ class DepartmentForm extends Component
 
     public function save()
     {
-        $this->validate();
+        $validated = $this->validate([
+            'code' => 'required|string|max:10|unique:departments,code' . ($this->editingId ? ',' . $this->editingId : ''),
+            'name' => 'required|string|max:100',
+        ]);
 
         try {
-            $data = [
-                'code' => $this->code,
-                'name' => $this->name,
-            ];
 
             if ($this->editingId) {
                 $department = $this->dpService->findById($this->editingId);
-                $this->dpService->update($department, $data);
+                $this->dpService->update($department, $validated);
             } else {
-                $this->dpService->create($data);
+                $this->dpService->create($validated);
             }
 
             $this->dispatch('departmentSaved');

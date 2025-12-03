@@ -21,6 +21,7 @@
             'flex items-center p-3 rounded-lg hover:bg-blue-50 transition-colors',
             'active-menu text-red-50' => $isCurrent
         ])
+        wire:navigate
     >
         @component("components.icon.$icon", ['class' => 'size-6'])@endcomponent
         <span class="ml-3" x-show="!isCollapsed">{{ $name }}</span>

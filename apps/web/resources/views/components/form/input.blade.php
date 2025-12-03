@@ -18,15 +18,16 @@
     </label>
     @endif
 
-    {{-- Input --}}
-    <label class="input w-full">
-        {{-- Specific icon component (e.g. resources/views/components/icons/search.blade.php) --}}
+    {{-- Input Container --}}
+    <label class="input w-full relative flex items-center">
+        {{-- Left Icon --}}
         @if ($leftIcon)
-        <div>
+        <div class="mr-2">
             @include('components.icon.' . $leftIcon, ['class' => "w-5 h-5 text-gray-400"])
         </div>
         @endif
 
+        {{-- Input Field --}}
         <input
             @if ($live)
             wire:model.live.debounce.300ms="{{ $name }}"
@@ -36,18 +37,34 @@
             name="{{ $name }}"
             type="{{ $type }}"
             placeholder="{{ $placeholder }}"
-            placeholder="Enter your username"
             class="grow"
         />
 
-        @if ($rightIcon)
-        <div>
-            @include('components.icon.' . $rightIcon, ['class' => "w-5 h-5 text-gray-400"])
+        {{-- Right Icon Container --}}
+        <div class="flex items-center text-gray-400">
+            {{-- Right Icon --}}
+            @if ($rightIcon)
+            <div
+                class="ml-2"
+                @if ($live)
+                    wire:loading.class="hidden"
+                    wire:target="{{ $name }}"
+                @endif
+                >
+                @include('components.icon.' . $rightIcon, ['class' => "w-5 h-5"])
+            </div>
+            @endif
+
+            {{-- Loading Spinner (only for live mode) --}}
+            @if ($live)
+            <span
+                class="loading loading-spinner size-4 ml-2 hidden"
+                wire:loading.class.remove="hidden"
+                wire:target="{{ $name }}"
+            ></span>
+            @endif
         </div>
-        @endif
     </label>
-
-
 
     {{-- Error Message --}}
     @error($name)
