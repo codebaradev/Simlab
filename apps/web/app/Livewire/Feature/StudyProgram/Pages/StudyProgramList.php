@@ -1,32 +1,32 @@
 <?php
 
-namespace App\Livewire\Feature\Department\Pages;
+namespace App\Livewire\Feature\StudyProgram\Pages;
 
-use App\Services\DepartmentService;
+use App\Services\StudyProgramService;
 use App\Traits\Livewire\WithAlertModal;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class DepartmentList extends Component
+class StudyProgramList extends Component
 {
     use WithAlertModal;
 
-    protected DepartmentService $dpService;
+    protected StudyProgramService $spService;
     public $showFormModal = false;
-    public $editingDepartment = null;
+    public $editingStudyProgram = null;
     public $formData = [];
 
     protected $listeners = [
-        'departmentSaved' => 'handleDepartmentSaved',
-        'departmentDeleted' => 'handleDepartmentDeleted',
+        'studyProgramSaved' => 'handleStudyProgramSaved',
+        'studyProgramDeleted' => 'handleStudyProgramDeleted',
         'showEditForm' => 'showEditForm',
         'showCreateForm' => 'showCreateForm',
         'closeFormModal' => 'closeFormModal'
     ];
 
-    public function boot(DepartmentService $dpService)
+    public function boot(StudyProgramService $spService)
     {
-        $this->dpService = $dpService;
+        $this->spService = $spService;
     }
 
     public function mount()
@@ -41,14 +41,15 @@ class DepartmentList extends Component
         $this->showFormModal = true;
     }
 
-    public function showEditForm($departmentId)
+    public function showEditForm($studyProgramId)
     {
-        $this->editingDepartment = $departmentId;
-        $department = $this->dpService->findById($departmentId);
+        $this->editingStudyProgram = $studyProgramId;
+        $studyProgram = $this->spService->findById($studyProgramId);
 
         $this->formData = [
-            'code' => $department->code,
-            'name' => $department->name,
+            'code' => $studyProgram->code,
+            'name' => $studyProgram->name,
+            'department_id' => $studyProgram->department_id,
         ];
         $this->showFormModal = true;
     }
@@ -56,7 +57,7 @@ class DepartmentList extends Component
     public function closeFormModal()
     {
         $this->showFormModal = false;
-        $this->editingDepartment = null;
+        $this->editingStudyProgram = null;
         $this->formData = $this->emptyForm();
     }
 
@@ -65,24 +66,26 @@ class DepartmentList extends Component
         return [
             'code' => '',
             'name' => '',
+            'department_id' => null,
         ];
     }
 
-    public function handleDepartmentSaved()
+    public function handleStudyProgramSaved()
     {
         $this->closeFormModal();
         $this->dispatch('refresh-table');
-        $this->showSuccessAlert('Data jurusan berhasil disimpan.');
+        $this->showSuccessAlert('Data program studi berhasil disimpan.');
     }
 
-    public function handleDepartmentDeleted()
+    public function handleStudyProgramDeleted()
     {
         $this->dispatch('refresh-table');
-        $this->showSuccessAlert('Data jurusan berhasil dihapus.');
+        $this->showSuccessAlert('Data program studi berhasil dihapus.');
     }
 
     public function render()
     {
-        return view('livewire.feature.department.pages.department-list');
+        return view('livewire.feature.study-program.pages.study-program-list');
     }
 }
+

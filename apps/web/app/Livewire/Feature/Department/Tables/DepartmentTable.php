@@ -3,24 +3,24 @@
 namespace App\Livewire\Feature\Department\Tables;
 
 use App\Services\DepartmentService;
+use App\Traits\Livewire\WithAlertModal;
+use App\Traits\Livewire\WithBulkActions;
+use App\Traits\Livewire\WithFilters;
+use App\Traits\Livewire\WithSorting;
+use App\Traits\Livewire\WithTableFeatures;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DepartmentTable extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFilters, WithBulkActions, WithSorting, WithAlertModal, WithTableFeatures;
 
-    public $search = '';
-    public $selectedStatus = '';
-    public $sortField = 'name';
-    public $sortDirection = 'asc';
-    public $perPage = 10;
-    public $selected = [];
-    public $selectAll = false;
+    protected DepartmentService $dpService;
+
+    // public $selectedStatus = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'selectedStatus' => ['except' => ''],
         'sortField' => ['except' => 'name'],
         'sortDirection' => ['except' => 'asc'],
         'perPage' => ['except' => 10],
@@ -28,40 +28,39 @@ class DepartmentTable extends Component
 
     protected $listeners = [
         'refresh-table' => '$refresh',
+        'bulkDelete' => 'bulkDelete',
     ];
 
-    public function updatedSelectAll($value)
+    public function boot(DepartmentService $dpService)
     {
-        if ($value) {
-            $this->selected = $this->departments->pluck('id')->toArray();
-        } else {
-            $this->selected = [];
-        }
+        $this->dpService = $dpService;
     }
 
-    public function updatedSelected()
+
+    /**
+     * Override default sort field
+     */
+    protected function getDefaultSortField(): string
     {
-        $this->selectAll = false;
+        return 'name';
     }
 
-    public function sortBy($field)
+    /**
+     * Override default sort direction
+     */
+    protected function getDefaultSortDirection(): string
     {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortDirection = 'asc';
-        }
-
-        $this->sortField = $field;
+        return 'asc';
     }
 
-    public function clearFilters()
+    public function updatedPerPage()
     {
-        $this->search = '';
-        $this->selectedStatus = '';
-        $this->selected = [];
-        $this->selectAll = false;
         $this->resetPage();
+    }
+
+    public function getItemsForBulkSelection()
+    {
+        return $this->departments;
     }
 
     public function editDepartment($departmentId)
@@ -71,60 +70,46 @@ class DepartmentTable extends Component
 
     public function deleteDepartment($departmentId)
     {
-        $departmentService = app(DepartmentService::class);
-
         try {
-            $department = \App\Models\Department::find($departmentId);
-            $departmentService->delete($department);
+            $department = $this->dpService->findById($departmentId);
+            $this->dpService->delete($department);
 
-            $this->dispatch('showAlertModal', [
-                'title' => 'Berhasil!',
-                'message' => 'Data jurusan berhasil dihapus.',
-                'type' => 'success',
-                'actionText' => 'Tutup'
-            ]);
+            $this->showSuccessAlert('Data jurusan berhasil dihapus.');
         } catch (\Exception $e) {
-            $this->dispatch('notify', [
-                'type' => 'error',
-                'message' => 'Gagal menghapus jurusan: ' . $e->getMessage()
-            ]);
+            $this->showErrorAlert('Gagal menghapus jurusan: ' . $e->getMessage());
         }
     }
 
-    public function deleteSelected()
+    /**
+     * Override bulkDelete from WithBulkActions trait
+     */
+    public function bulkDelete()
     {
         if (empty($this->selected)) {
             return;
         }
 
-        $departmentService = app(DepartmentService::class);
-
         try {
-            $departmentService->bulkDelete($this->selected);
+            $this->dpService->bulkDelete($this->selected);
 
-            $this->selected = [];
-            $this->selectAll = false;
+            $this->clearSelection();
 
+            $this->showSuccessAlert('Data jurusan terpilih berhasil dihapus.');
             $this->dispatch('departmentDeleted');
         } catch (\Exception $e) {
-            $this->dispatch('notify', [
-                'type' => 'error',
-                'message' => 'Gagal menghapus jurusan terpilih: ' . $e->getMessage()
-            ]);
+            $this->showErrorAlert('Gagal menghapus jurusan terpilih: ' . $e->getMessage());
         }
+    }
+
+    public function deleteSelected()
+    {
+        $this->bulkDelete();
     }
 
     public function getDepartmentsProperty()
     {
-        $departmentService = app(DepartmentService::class);
-
-        $filters = [
-            'search' => $this->search,
-            'status' => $this->selectedStatus,
-        ];
-
-        return $departmentService->getAll(
-            $filters,
+        return $this->dpService->getAll(
+            $this->getFilters(),
             $this->sortField,
             $this->sortDirection,
             $this->perPage

@@ -7,21 +7,25 @@ use Livewire\Component;
 
 class DepartmentForm extends Component
 {
+    protected DepartmentService $dpService;
+
     public $code;
     public $name;
     public $editingId = null;
 
-    protected $rules = [
-        'code' => 'required|string|max:10',
-        'name' => 'required|string|max:100',
-    ];
 
     protected $messages = [
         'code.required' => 'Kode jurusan wajib diisi.',
+        'code.unique' => 'Nama jurusan sudah digunakan.',
         'code.max' => 'Kode jurusan maksimal 10 karakter.',
         'name.required' => 'Nama jurusan wajib diisi.',
         'name.max' => 'Nama jurusan maksimal 100 karakter.',
     ];
+
+    public function boot(DepartmentService $dpService)
+    {
+        $this->dpService = $dpService;
+    }
 
     public function mount($editingId = null, $formData = [])
     {
@@ -35,21 +39,18 @@ class DepartmentForm extends Component
 
     public function save()
     {
-        $this->validate();
-
-        $departmentService = app(DepartmentService::class);
+        $validated = $this->validate([
+            'code' => 'required|string|max:10|unique:departments,code' . ($this->editingId ? ',' . $this->editingId : ''),
+            'name' => 'required|string|max:100',
+        ]);
 
         try {
-            $data = [
-                'code' => $this->code,
-                'name' => $this->name,
-            ];
 
             if ($this->editingId) {
-                $department = \App\Models\Department::find($this->editingId);
-                $departmentService->update($department, $data);
+                $department = $this->dpService->findById($this->editingId);
+                $this->dpService->update($department, $validated);
             } else {
-                $departmentService->create($data);
+                $this->dpService->create($validated);
             }
 
             $this->dispatch('departmentSaved');
