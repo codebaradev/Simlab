@@ -89,9 +89,9 @@
 
         <tbody>
             @forelse($lecturers as $lecturer)
-                <tr wire:key="student-{{ $lecturer->id }}"
+                <tr wire:key="lecturer-{{ $lecturer->id }}"
                     class="group cursor-pointer transition-all duration-200 hover:bg-blue-50 {{ $lecturer->status === 'nonaktif' ? 'bg-gray-50' : '' }}"
-                    wire:click="editStudent({{ $lecturer->id }})"
+                    wire:click="editLecturer({{ $lecturer->id }})"
                     @click.stop>
                     <x-table.checkbox-cell :value="$lecturer->id" />
                     <td class="font-mono font-bold">{{ $lecturer->nip }}</td>
@@ -126,13 +126,13 @@
                         :id="$lecturer->id"
                         :actions="[
                             [
-                                'action' => 'editStudent',
+                                'action' => 'editLecturer',
                                 'label' => 'Edit',
                                 'icon' => 'pencil-square',
                                 'class' => 'text-info'
                             ],
                             [
-                                'action' => 'deleteStudent',
+                                'action' => 'deleteLecturer',
                                 'label' => 'Hapus',
                                 'icon' => 'trash',
                                 'class' => 'text-error',

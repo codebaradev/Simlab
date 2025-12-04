@@ -50,16 +50,16 @@ class LecturerTable extends Component
         return $this->lecturers;
     }
 
-    public function editStudent($lecterurId)
+    public function editLecturer($lecterurId)
     {
-        $this->redirectRoute('student.edit', ['studentId' => $lecterurId], navigate: true);
+        $this->redirectRoute('lecturer.edit', ['lecturerId' => $lecterurId], navigate: true);
     }
 
-    public function deleteStudent($lecterurId)
+    public function deleteLecturer($lecterurId)
     {
         try {
-            $student = $this->leService->findById($lecterurId);
-            $this->leService->delete($student);
+            $lecturer = $this->leService->findById($lecterurId);
+            $this->leService->delete($lecturer);
 
             $this->showSuccessAlert('Data dosen berhasil dihapus.');
         } catch (\Exception $e) {
@@ -82,7 +82,7 @@ class LecturerTable extends Component
             $this->clearSelection();
 
             $this->showSuccessAlert('Data dosen terpilih berhasil dihapus.');
-            $this->dispatch('StudentDeleted');
+            $this->dispatch('lecturerDeleted');
         } catch (\Exception $e) {
             $this->showErrorAlert('Gagal menghapus dosen terpilih: ' . $e->getMessage());
         }

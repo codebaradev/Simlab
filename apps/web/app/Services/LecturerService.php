@@ -61,12 +61,11 @@ class LecturerService
         return $query->findOrFail($id);
     }
 
-    public function create(int $user_id, int $sp_id, array $data): Lecturer
+    public function create(int $user_id, array $data): Lecturer
     {
-        return DB::transaction(function () use ($user_id, $sp_id, $data) {
+        return DB::transaction(function () use ($user_id, $data) {
             $lecturer = Lecturer::make($data);
 
-            $lecturer->sp_id = $sp_id;
             $lecturer->user_id = $user_id;
 
             $lecturer->save();
@@ -74,12 +73,11 @@ class LecturerService
         });
     }
 
-    public function update(Lecturer $lecturer, int $user_id, int $sp_id, array $data): Lecturer
+    public function update(Lecturer $lecturer, int $user_id, array $data): Lecturer
     {
-        return DB::transaction(function () use ($lecturer, $user_id, $sp_id, $data) {
+        return DB::transaction(function () use ($lecturer, $user_id, $data) {
             $lecturer->fill($data);
 
-            $lecturer->sp_id = $sp_id;
             $lecturer->user_id = $user_id;
 
             $lecturer->update($data);
