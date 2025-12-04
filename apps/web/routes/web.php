@@ -6,6 +6,8 @@ use App\Http\Middleware\UserOnlyMiddleware;
 use App\Livewire\Feature\Auth\Login;
 use App\Livewire\Feature\Dashboard\Index as Dashboard;
 use App\Livewire\Feature\Department\Pages\DepartmentList;
+use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
+use App\Livewire\Feature\Lecturer\Pages\LecturerList;
 use App\Livewire\Feature\Student\Pages\StudentFormPage;
 use App\Livewire\Feature\Student\Pages\StudentList;
 use App\Livewire\Feature\StudyProgram\Pages\StudyProgramList;
@@ -21,4 +23,8 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/mahasiswa', StudentList::class)->name('student.index');
     Route::get('/mahasiswa/tambah', StudentFormPage::class)->name('student.add');
     Route::get('/mahasiswa/{studentId}', StudentFormPage::class)->where('studentId', '[0-9]+')->name('student.edit');
+
+    Route::get('/dosen', LecturerList::class)->name('lecturer.index');
+    Route::get('/dosen/tambah', LecturerFormPage::class)->name('lecturer.add');
+    Route::get('/dosen/{lecturerId}', LecturerFormPage::class)->where('lecturerId', '[0-9]+')->name('lecturer.edit');
 });

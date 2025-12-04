@@ -4,12 +4,12 @@
         <div class="p-4">
             <x-table.header-actions>
                 {{-- Search Bar --}}
-                <x-table.search-bar name="search" placeholder="Cari mahasiswa berdasarkan NIM atau nama..." />
+                <x-table.search-bar name="search" placeholder="Cari dosen berdasarkan NIM atau nama..." />
 
                 {{-- Actions --}}
-                <a href="/mahasiswa/tambah" wire:navigate>
+                <a href="/dosen/tambah" wire:navigate>
                     <div class="flex items-center gap-3">
-                        <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Mahasiswa</x-button>
+                        <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Dosen</x-button>
                     </div>
                 </a>
             </x-table.header-actions>
@@ -24,7 +24,7 @@
                             wire:model.live="selectedStudyProgram"
                             label="Program Studi"
                             :options="$studyPrograms"
-                            optionValue="id"
+                            optionValxue="id"
                             optionLabel="name"
                             placeholder="Semua Program Studi"
                             class="w-64"
@@ -54,9 +54,9 @@
         {{-- Bulk Actions --}}
         <x-table.bulk-actions
             :selected="$selected"
-            itemName="mahasiswa"
+            itemName="dosen"
             deleteAction="deleteSelected"
-            deleteConfirm="Apakah Anda yakin ingin menghapus mahasiswa terpilih?"
+            deleteConfirm="Apakah Anda yakin ingin menghapus dosen terpilih?"
         />
     </x-table.header>
 
@@ -66,14 +66,14 @@
             <tr>
                 <x-table.checkbox-header />
                 <x-table.sortable-header
-                    field="nim"
-                    label="NIM"
+                    field="nip"
+                    label="NIP"
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
                 <x-table.sortable-header
                     field="name"
-                    label="Nama Mahasiswa"
+                    label="Nama Dosen"
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
@@ -83,46 +83,29 @@
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
-                <x-table.sortable-header
-                    field="generation"
-                    label="Angkatan"
-                    :sortField="$sortField"
-                    :sortDirection="$sortDirection"
-                />
-                {{-- <x-table.sortable-header
-                    field="status"
-                    label="Status"
-                    :sortField="$sortField"
-                    :sortDirection="$sortDirection"
-                /> --}}
                 <th class="w-32"></th>
             </tr>
         </x-table.sticky-thead>
 
         <tbody>
-            @forelse($students as $student)
-                <tr wire:key="student-{{ $student->id }}"
-                    class="group cursor-pointer transition-all duration-200 hover:bg-blue-50 {{ $student->status === 'nonaktif' ? 'bg-gray-50' : '' }}"
-                    wire:click="editStudent({{ $student->id }})"
+            @forelse($lecturers as $lecturer)
+                <tr wire:key="student-{{ $lecturer->id }}"
+                    class="group cursor-pointer transition-all duration-200 hover:bg-blue-50 {{ $lecturer->status === 'nonaktif' ? 'bg-gray-50' : '' }}"
+                    wire:click="editStudent({{ $lecturer->id }})"
                     @click.stop>
-                    <x-table.checkbox-cell :value="$student->id" />
-                    <td class="font-mono font-bold">{{ $student->nim }}</td>
+                    <x-table.checkbox-cell :value="$lecturer->id" />
+                    <td class="font-mono font-bold">{{ $lecturer->nip }}</td>
                     <td>
                         <div class="flex flex-col">
-                            <span class="font-semibold">{{ $student->user->name ?? $student->name }}</span>
-                            <span class="text-xs text-gray-500">{{ $student->user->email ?? $student->email }}</span>
+                            <span class="font-semibold">{{ $lecturer->user->name ?? $lecturer->name }}</span>
+                            <span class="text-xs text-gray-500">{{ $lecturer->user->email ?? $lecturer->email }}</span>
                         </div>
                     </td>
                     <td>
                         <div class="flex flex-col">
-                            <span>{{ $student->study_program->name ?? '-' }}</span>
-                            <span class="text-xs text-gray-500">{{ $student->study_program->code ?? '' }}</span>
+                            <span>{{ $lecturer->study_program->name ?? '-' }}</span>
+                            <span class="text-xs text-gray-500">{{ $lecturer->study_program->code ?? '' }}</span>
                         </div>
-                    </td>
-                    <td>
-                        <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                            {{ $student->generation ?? '-' }}
-                        </span>
                     </td>
                     {{-- <td>
                         @php
@@ -133,14 +116,14 @@
                                 'lulus' => 'bg-blue-50 text-blue-700 ring-blue-600/20',
                                 'dropout' => 'bg-gray-50 text-gray-700 ring-gray-600/20',
                             ];
-                            $color = $statusColors[$student->status] ?? 'bg-gray-50 text-gray-700 ring-gray-600/20';
+                            $color = $statusColors[$lecturer->status] ?? 'bg-gray-50 text-gray-700 ring-gray-600/20';
                         @endphp
                         <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset {{ $color }}">
-                            {{ ucfirst($student->status) }}
+                            {{ ucfirst($lecturer->status) }}
                         </span>
                     </td> --}}
                     <x-table.action-menu
-                        :id="$student->id"
+                        :id="$lecturer->id"
                         :actions="[
                             [
                                 'action' => 'editStudent',
@@ -153,7 +136,7 @@
                                 'label' => 'Hapus',
                                 'icon' => 'trash',
                                 'class' => 'text-error',
-                                'confirm' => 'Apakah Anda yakin ingin menghapus mahasiswa ini?'
+                                'confirm' => 'Apakah Anda yakin ingin menghapus dosen ini?'
                             ]
                         ]"
                     />
@@ -161,8 +144,8 @@
             @empty
                 <x-table.empty-state
                     colspan="7"
-                    message="Tidak ada data mahasiswa"
-                    actionLabel="Tambah Mahasiswa Pertama"
+                    message="Tidak ada data dosen"
+                    actionLabel="Tambah dosen Pertama"
                     actionEvent="$dispatch('showCreateForm')"
                 />
             @endforelse
@@ -170,5 +153,5 @@
     </x-table.container>
 
     {{-- Pagination --}}
-    {{ $students->links() }}
+    {{ $lecturers->links() }}
 </x-table.wrapper>

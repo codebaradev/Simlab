@@ -10,7 +10,7 @@
 
     @if ($student)
         <div class="tabs tabs-lift">
-            <a href="/mahasiswa/{{ $student->id  }}" class="tab cursor-pointer tab-active">Data Diri</a>
+            <a href="/mahasiswa/{{ $student->id  }}" class="tab cursor-pointer tab-active" wire:navigate>Data Diri</a>
             <div class="tab-content bg-base-100 border-base-300 p-6">
                 <livewire:feature.student.forms.student-form
                 :student="$student"
