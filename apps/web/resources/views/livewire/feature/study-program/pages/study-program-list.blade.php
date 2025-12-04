@@ -20,11 +20,11 @@
             </form>
 
             <h3 class="font-bold text-lg mb-4">
-                {{ $editingStudyProgram ? 'Edit Program Studi' : 'Tambah Program Studi' }}
+                {{ $editingStudyProgramId ? 'Edit Program Studi' : 'Tambah Program Studi' }}
             </h3>
 
             <livewire:feature.study-program.forms.study-program-form
-                :editingId="$editingStudyProgram"
+                :editingId="$editingStudyProgramId"
                 :formData="$formData"
             />
         </div>

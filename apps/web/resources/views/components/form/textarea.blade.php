@@ -1,10 +1,8 @@
 @props([
     'name',
     'label' => null,
-    'options' => [],
-    'placeholder' => 'Pilih ' . ($label ?? $name),
-    'optionValue' => 'id',
-    'optionLabel' => 'name',
+    'placeholder' => 'Masukan ' . ($label ?? $name),
+    'rows' => 3,
     'live' => false,
     'required' => false
 ])
@@ -24,28 +22,19 @@
     </label>
     @endif
 
-    {{-- Select --}}
-    <select
+    {{-- Textarea --}}
+    <textarea
         @if ($live)
-        wire:model.live="{{ $name }}"
+        wire:model.live.debounce.300ms="{{ $name }}"
         @else
         wire:model="{{ $name }}"
         @endif
         name="{{ $name }}"
-        class="select select-bordered w-full"
+        placeholder="{{ $placeholder }}"
+        rows="{{ $rows }}"
+        class="textarea textarea-bordered w-full"
         @if ($required) required @endif
-    >
-        <option value="">{{ $placeholder }}</option>
-        @foreach($options as $option)
-            @php
-                $optionVal = is_array($option) ? $option[$optionValue] : $option->{$optionValue};
-                $optionLab = is_array($option) ? $option[$optionLabel] : $option->{$optionLabel};
-            @endphp
-            <option value="{{ $optionVal }}">
-                {{ $optionLab }}
-            </option>
-        @endforeach
-    </select>
+    ></textarea>
 
     {{-- Error Message --}}
     @error($name)

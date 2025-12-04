@@ -57,7 +57,7 @@
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
-                <x-table.sortable-header
+                <x-table.unsortable-header
                     label="Jurusan"
                 />
                 <th class="w-20"></th>
@@ -66,7 +66,10 @@
 
         <tbody>
             @forelse($studyPrograms as $studyProgram)
-                <tr wire:key="study-program-{{ $studyProgram->id }}">
+                <tr wire:key="study-program-{{ $studyProgram->id }}"
+                    class="group cursor-pointer transition-all duration-200 hover:bg-blue-50"
+                    wire:click="editStudyProgram({{ $studyProgram->id }})"
+                    @click.stop>
                     <x-table.checkbox-cell :value="$studyProgram->id" />
                     <td class="font-mono font-bold text-primary">{{ $studyProgram->code }}</td>
                     <td class="font-semibold">{{ $studyProgram->name }}</td>

@@ -5,16 +5,22 @@
     'placeholder' => 'Masukan ' . ($label ?? $name),
     'leftIcon' => null,
     'rightIcon' => null,
-    'live' => false
+    'live' => false,
+    'required' => false
 ])
 
 <div
     {{ $attributes->merge(['class' => "form-control w-full flex flex-col"]) }}
 >
-    {{-- Label --}}
+    {{-- Label dengan required indicator --}}
     @if ($label)
     <label class="label mb-1">
-        <span class="label-text">{{ $label }}</span>
+        <div class="flex items-center gap-1">
+            <span class="label-text">{{ $label }}</span>
+            @if ($required)
+                <span class="text-red-500 text-sm font-normal">*</span>
+            @endif
+        </div>
     </label>
     @endif
 
@@ -38,6 +44,7 @@
             type="{{ $type }}"
             placeholder="{{ $placeholder }}"
             class="grow"
+            @if ($required) required @endif
         />
 
         {{-- Right Icon Container --}}

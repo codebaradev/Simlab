@@ -5,7 +5,7 @@
     'class' => '',
 ])
 
-<td class="{{ $class }}">
+<td class="{{ $class }}" @click.stop>
     <div class="dropdown dropdown-{{ $dropdownPosition }} ">
         <label tabindex="0" class="btn btn-ghost btn-xs">
             <x-icon.ellipsis class="size-6"/>

@@ -17,7 +17,7 @@ class Student extends Model
 
     protected $fillable = [
         // 'user_id',
-        // 'sp_id',
+        'sp_id',
         'nim',
         'generation',
     ];
@@ -34,7 +34,8 @@ class Student extends Model
 
     public function study_program(): BelongsTo
     {
-        return $this->belongsTo(StudyProgram::class, 'sp_id', 'id');
+        return $this->belongsTo(StudyProgram::class, 'sp_id', 'id')
+            ->whereHas('department');
     }
 
     public function scopeSearch($query, $search)

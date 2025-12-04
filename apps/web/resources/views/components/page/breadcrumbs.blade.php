@@ -12,7 +12,7 @@
 
             <li>
                 @if($hasUrl && !$isLast)
-                    <a href="{{ $item['url'] }}" class="text-gray-600 hover:text-primary">
+                    <a href="{{ $item['url'] }}" class="text-gray-600 hover:text-primary" wire:navigate>
                         {{ $item['label'] }}
                     </a>
                 @else

@@ -18,10 +18,11 @@ class StudentFactory extends Factory
      */
     public function definition(): array
     {
+        $nim = $this->faker->unique()->numerify('#########');
         return [
-            'user_id' => User::factory()->student(),
+            'user_id' => User::factory()->student(['username' => $nim]),
             'sp_id' => StudyProgram::factory(),
-            'nim' => $this->faker->unique()->numerify('#########'),
+            'nim' => $nim,
             'generation' => $this->faker->year(),
         ];
     }

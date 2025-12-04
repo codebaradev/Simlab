@@ -3,6 +3,7 @@
 namespace App\Livewire\Feature\StudyProgram\Forms;
 
 use App\Services\StudyProgramService;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class StudyProgramForm extends Component
@@ -12,6 +13,8 @@ class StudyProgramForm extends Component
     public $code;
     public $name;
     public $department_id;
+
+    #[Reactive]
     public $editingId = null;
 
     protected $messages = [
