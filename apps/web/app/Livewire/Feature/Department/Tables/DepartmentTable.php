@@ -36,26 +36,9 @@ class DepartmentTable extends Component
         $this->dpService = $dpService;
     }
 
-
-    /**
-     * Override default sort field
-     */
     protected function getDefaultSortField(): string
     {
         return 'name';
-    }
-
-    /**
-     * Override default sort direction
-     */
-    protected function getDefaultSortDirection(): string
-    {
-        return 'asc';
-    }
-
-    public function updatedPerPage()
-    {
-        $this->resetPage();
     }
 
     public function getItemsForBulkSelection()

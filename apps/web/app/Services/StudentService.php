@@ -17,11 +17,17 @@ class StudentService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $filters = [], string $sortField = 'generation', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'generation', string $sortDirection = 'desc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = Student::query();
+
+        $query->whereHas('study_program');
+
+        if (!empty($with)) {
+            $query->with($with);
+        }
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -57,12 +63,11 @@ class StudentService
         return $query->findOrFail($id);
     }
 
-    public function create(int $user_id, int $sp_id, array $data): Student
+    public function create(int $user_id, array $data): Student
     {
-        return DB::transaction(function () use ($user_id, $sp_id, $data) {
+        return DB::transaction(function () use ($user_id, $data) {
             $Student = Student::make($data);
 
-            $Student->sp_id = $sp_id;
             $Student->user_id = $user_id;
 
             $Student->save();
@@ -70,12 +75,11 @@ class StudentService
         });
     }
 
-    public function update(Student $Student, int $user_id, int $sp_id, array $data): Student
+    public function update(Student $Student, int $user_id, array $data): Student
     {
-        return DB::transaction(function () use ($Student, $user_id, $sp_id, $data) {
+        return DB::transaction(function () use ($Student, $user_id, $data) {
             $Student->fill($data);
 
-            $Student->sp_id = $sp_id;
             $Student->user_id = $user_id;
 
             $Student->update($data);

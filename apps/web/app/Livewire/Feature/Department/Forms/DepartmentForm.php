@@ -12,8 +12,6 @@ class DepartmentForm extends Component
     public $code;
     public $name;
     public $editingId = null;
-
-
     protected $messages = [
         'code.required' => 'Kode jurusan wajib diisi.',
         'code.unique' => 'Nama jurusan sudah digunakan.',

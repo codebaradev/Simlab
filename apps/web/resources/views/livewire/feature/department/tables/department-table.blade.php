@@ -45,7 +45,10 @@
 
         <tbody>
             @forelse($departments as $department)
-                <tr wire:key="department-{{ $department->id }}">
+                <tr wire:key="department-{{ $department->id }}"
+                    class="group cursor-pointer transition-all duration-200 hover:bg-blue-50"
+                    wire:click="editDepartment({{ $department->id }})"
+                    @click.stop>
                     <x-table.checkbox-cell :value="$department->id" />
                     <td class="font-mono font-bold text-primary">{{ $department->code }}</td>
                     <td class="font-semibold">{{ $department->name }}</td>
