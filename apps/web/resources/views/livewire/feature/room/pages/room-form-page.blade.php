@@ -16,6 +16,9 @@
                     :room="$room"
                 />
             </div>
+
+            <a href="/ruangan/{{ $room->id  }}/komputer" class="tab cursor-pointer" wire:navigate>Komputer</a>
+            <a href="/ruangan/{{ $room->id  }}/aplikasi" class="tab cursor-pointer" wire:navigate>Aplikasi</a>
         </div>
     @else
         <div class="card bg-base-100 border-base-300 p-6">

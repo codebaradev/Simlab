@@ -4,6 +4,8 @@ use App\Http\Middleware\GuestOnlyMiddleware;
 use App\Http\Middleware\LbrOnlyMiddleware;
 use App\Http\Middleware\UserOnlyMiddleware;
 use App\Livewire\Feature\Auth\Login;
+use App\Livewire\Feature\Computer\Pages\ComputerFormPage;
+use App\Livewire\Feature\Computer\Pages\ComputerList;
 use App\Livewire\Feature\Dashboard\Index as Dashboard;
 use App\Livewire\Feature\Department\Pages\DepartmentList;
 use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
@@ -33,4 +35,7 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/ruangan', RoomList::class)->name('room.index');
     Route::get('/ruangan/tambah', RoomFormPage::class)->name('room.add');
     Route::get('/ruangan/{roomId}', RoomFormPage::class)->where('roomId', '[0-9]+')->name('room.edit');
+    Route::get('/ruangan/{roomId}/komputer', ComputerList::class)->where('roomId', '[0-9]+')->name('room.computer.index');
+    Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.index');
+    Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
 });

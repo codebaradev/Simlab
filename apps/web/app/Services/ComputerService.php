@@ -17,7 +17,7 @@ class ComputerService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(?int $room_id = null, array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(?int $room_id = null, array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
@@ -25,6 +25,10 @@ class ComputerService
 
         if ($room_id) {
             $query->where('room_id', $room_id);
+        }
+
+        if (!empty($with)) {
+            $query->with($with);
         }
 
         // Search filter
