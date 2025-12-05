@@ -54,4 +54,15 @@ enum DisplayResolutionEnum: int
             self::OTHER => 0,
         };
     }
+
+    public static function toArray(): array
+    {
+        return array_map(
+            fn(self $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            self::cases()
+        );
+    }
 }

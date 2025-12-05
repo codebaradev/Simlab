@@ -5,10 +5,10 @@ namespace App\Enums;
 enum UserRoleEnum: string
 {
     case ADMIN = 'adm';
-    case KEPALA_LAB = 'kpl';
+    case LAB_HEAD = 'kpl';
     case LABORAN = 'lbr';
-    case DOSEN = 'dsn';
-    case MAHASISWA = 'mhs';
+    case LECTURER = 'dsn';
+    case STUDENT = 'mhs';
 
     /**
      * Label dalam bahasa Indonesia (untuk tampilan/UI)
@@ -17,10 +17,10 @@ enum UserRoleEnum: string
     {
         return match ($this) {
             self::ADMIN => 'Admin',
-            self::KEPALA_LAB => 'Kepala Laboratorium',
+            self::LAB_HEAD => 'Kepala Laboratorium',
             self::LABORAN => 'Laboran',
-            self::DOSEN => 'Dosen',
-            self::MAHASISWA => 'Mahasiswa',
+            self::LECTURER => 'Dosen',
+            self::STUDENT => 'Mahasiswa',
         };
     }
 
@@ -31,10 +31,10 @@ enum UserRoleEnum: string
     {
         return match ($this) {
             self::ADMIN => 'ADMIN',
-            self::KEPALA_LAB => 'Head of Laboratory',
+            self::LAB_HEAD => 'Head of Laboratory',
             self::LABORAN => 'Laboran',
-            self::DOSEN => 'Lecturer',
-            self::MAHASISWA => 'Student',
+            self::LECTURER => 'Lecturer',
+            self::STUDENT => 'Student',
         };
     }
 
