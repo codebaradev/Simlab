@@ -6,49 +6,32 @@
                 {{-- Search Bar --}}
                 <x-table.search-bar name="search" placeholder="Cari mahasiswa berdasarkan NIM atau nama..." />
 
-                {{-- Actions --}}
-                <a href="/mahasiswa/tambah" wire:navigate>
-                    <div class="flex items-center gap-3">
-                        <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Mahasiswa</x-button>
-                    </div>
-                </a>
-            </x-table.header-actions>
+                <div>
+                    {{-- <x-table.filter-dropdown
+                        :filters="[
+                            [
+                                'name' => 'selectedDepartment',
+                                'label' => 'Jurusan',
+                                'options' => $studyPrograms,
+                                'optionValue' => 'id',
+                                'optionLabel' => 'name',
+                                'placeholder' => 'Semua Prodi'
+                            ]
+                        ]"
+                        :activeCount="$activeFilterCount"
+                        label="Filter"
+                        icon="funnel"
+                    /> --}}
 
-            {{-- Additional Filters (optional) --}}
-            @if(isset($studyPrograms) && $studyPrograms->count())
-                <div class="mt-4 flex flex-wrap items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-600">Filter:</span>
-                        <x-form.select
-                            name="study_program_id"
-                            wire:model.live="selectedStudyProgram"
-                            label="Program Studi"
-                            :options="$studyPrograms"
-                            optionValue="id"
-                            optionLabel="name"
-                            placeholder="Semua Program Studi"
-                            class="w-64"
-                            inline
-                            noLabel
-                        />
-                    </div>
-
-                    @if(isset($academicYears) && $academicYears->count())
-                        <x-form.select
-                            name="generation"
-                            wire:model.live="selectedAcademicYear"
-                            label="Angkatan"
-                            :options="$academicYears"
-                            optionValue="id"
-                            optionLabel="name"
-                            placeholder="Semua Angkatan"
-                            class="w-48"
-                            inline
-                            noLabel
-                        />
-                    @endif
+                    {{-- Actions --}}
+                    <a href="/mahasiswa/tambah" wire:navigate>
+                        <div class="flex items-center gap-3">
+                            <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Mahasiswa</x-button>
+                        </div>
+                    </a>
                 </div>
-            @endif
+
+            </x-table.header-actions>
         </div>
 
         {{-- Bulk Actions --}}

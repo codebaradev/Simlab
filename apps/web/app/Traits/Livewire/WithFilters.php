@@ -46,6 +46,8 @@ trait WithFilters
      */
     public $search = '';
 
+    public $activeFilterCount;
+
     /**
      * Additional filter properties
      * Override this in your component to add custom filters
