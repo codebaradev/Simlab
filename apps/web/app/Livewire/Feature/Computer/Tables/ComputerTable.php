@@ -70,12 +70,12 @@ class ComputerTable extends Component
     public function deleteComputer($computerId)
     {
         try {
-            $computer = $this->rService->findById($computerId);
-            $this->rService->delete($computer);
+            $computer = $this->cpService->findById($computerId);
+            $this->cpService->delete($computer);
 
             $this->showSuccessAlert('Data komputer berhasil dihapus.');
         } catch (\Exception $e) {
-            $this->showErrorAlert('Gagal menghapus komputer: ' . $e->getMessage());
+            $this->showErrorAlert('Gagal menghapus komputer: ');
         }
     }
 
@@ -89,14 +89,14 @@ class ComputerTable extends Component
         }
 
         try {
-            $this->rService->bulkDelete($this->selected);
+            $this->cpService->bulkDelete($this->selected);
 
             $this->clearSelection();
 
             $this->showSuccessAlert('Data komputer terpilih berhasil dihapus.');
             $this->dispatch('computerDeleted');
         } catch (\Exception $e) {
-            $this->showErrorAlert('Gagal menghapus komputer terpilih: ' . $e->getMessage());
+            $this->showErrorAlert('Gagal menghapus komputer terpilih: ');
         }
     }
 

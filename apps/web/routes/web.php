@@ -36,6 +36,6 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/ruangan/tambah', RoomFormPage::class)->name('room.add');
     Route::get('/ruangan/{roomId}', RoomFormPage::class)->where('roomId', '[0-9]+')->name('room.edit');
     Route::get('/ruangan/{roomId}/komputer', ComputerList::class)->where('roomId', '[0-9]+')->name('room.computer.index');
-    Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.index');
+    Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.add');
     Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
 });

@@ -24,4 +24,15 @@ enum StorageTypeEnum: int
             self::OTHER => 'Lainnya',
         };
     }
+
+    public static function toArray(): array
+    {
+        return array_map(
+            fn(self $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            self::cases()
+        );
+    }
 }

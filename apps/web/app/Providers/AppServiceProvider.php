@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\ComputerService;
 use App\Services\DepartmentService;
 use App\Services\RoomService;
 use App\Services\StudentService;
@@ -42,6 +43,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(RoomService::class, function ($app) {
             return new RoomService();
+        });
+        $this->app->singleton(ComputerService::class, function ($app) {
+            return new ComputerService();
         });
     }
 }
