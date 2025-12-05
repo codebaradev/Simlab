@@ -3,7 +3,9 @@
 namespace App\Livewire\Feature\Student\Tables;
 
 use App\Enums\User\UserGenderEnum;
+use App\Models\StudyProgram;
 use App\Services\StudentService;
+use App\Services\StudyProgramService;
 use App\Traits\Livewire\WithAlertModal;
 use App\Traits\Livewire\WithBulkActions;
 use App\Traits\Livewire\WithFilters;
@@ -19,6 +21,7 @@ class StudentTable extends Component
     use WithPagination, WithFilters, WithBulkActions, WithSorting, WithAlertModal, WithTableFeatures;
 
     protected StudentService $stService;
+    protected StudyProgramService $spService;
 
     // public $selectedStatus = '';
 
@@ -34,9 +37,10 @@ class StudentTable extends Component
         'bulkDelete' => 'bulkDelete',
     ];
 
-    public function boot(StudentService $stService)
+    public function boot(StudentService $stService, StudyProgramService $spService)
     {
         $this->stService = $stService;
+        $this->spService = $spService;
     }
 
     public function mount()
@@ -116,8 +120,10 @@ class StudentTable extends Component
 
     public function render()
     {
+        $studyPrograms = $this->spService->getAll(isPaginated: false);
         return view('livewire.feature.student.tables.student-table', [
             'students' => $this->students,
+            'studyPrograms' => $studyPrograms
         ]);
     }
 }

@@ -17,11 +17,15 @@ class LecturerService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $filters = [], string $sortField = 'code', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'code', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = Lecturer::query();
+
+        if (!empty($with)) {
+            $query->with($with);
+        }
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -57,12 +61,11 @@ class LecturerService
         return $query->findOrFail($id);
     }
 
-    public function create(int $user_id, int $sp_id, array $data): Lecturer
+    public function create(int $user_id, array $data): Lecturer
     {
-        return DB::transaction(function () use ($user_id, $sp_id, $data) {
+        return DB::transaction(function () use ($user_id, $data) {
             $lecturer = Lecturer::make($data);
 
-            $lecturer->sp_id = $sp_id;
             $lecturer->user_id = $user_id;
 
             $lecturer->save();
@@ -70,12 +73,11 @@ class LecturerService
         });
     }
 
-    public function update(Lecturer $lecturer, int $user_id, int $sp_id, array $data): Lecturer
+    public function update(Lecturer $lecturer, int $user_id, array $data): Lecturer
     {
-        return DB::transaction(function () use ($lecturer, $user_id, $sp_id, $data) {
+        return DB::transaction(function () use ($lecturer, $user_id, $data) {
             $lecturer->fill($data);
 
-            $lecturer->sp_id = $sp_id;
             $lecturer->user_id = $user_id;
 
             $lecturer->update($data);

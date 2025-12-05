@@ -41,7 +41,11 @@ class Student extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
-            $q->where('nim', 'like', '%' . $search . '%');
+            $q->where('nim', 'like', '%' . $search . '%')
+                ->orWhereHas('user', function ($u) use ($search) {
+                    $u->where('username', 'like', '%' . $search . '%')
+                        ->orWhere('name', 'like', '%' . $search . '%');
+                });
         });
     }
 

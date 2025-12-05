@@ -18,7 +18,7 @@ class Lecturer extends Model
 
     protected $fillable = [
         // 'user_id',
-        // 'sp_id',
+        'sp_id',
         'nidn',
         'nip',
         'code'
@@ -28,6 +28,11 @@ class Lecturer extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 
     public function study_program(): BelongsTo
     {
@@ -59,7 +64,11 @@ class Lecturer extends Model
         return $query->where(function ($q) use ($search) {
             $q->where('code', 'like', '%' . $search . '%')
                 ->orWhere('nidn', 'like', '%' . $search . '%')
-                ->orWhere('nip', 'like', '%' . $search . '%');
+                ->orWhere('nip', 'like', '%' . $search . '%')
+                ->orWhereHas('user', function ($u) use ($search) {
+                    $u->where('username', 'like', '%' . $search . '%')
+                        ->orWhere('name', 'like', '%' . $search . '%');
+                });;
         });
     }
 
