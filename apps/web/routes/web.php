@@ -8,6 +8,8 @@ use App\Livewire\Feature\Dashboard\Index as Dashboard;
 use App\Livewire\Feature\Department\Pages\DepartmentList;
 use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
 use App\Livewire\Feature\Lecturer\Pages\LecturerList;
+use App\Livewire\Feature\Room\Pages\RoomFormPage;
+use App\Livewire\Feature\Room\Pages\RoomList;
 use App\Livewire\Feature\Student\Pages\StudentFormPage;
 use App\Livewire\Feature\Student\Pages\StudentList;
 use App\Livewire\Feature\StudyProgram\Pages\StudyProgramList;
@@ -27,4 +29,8 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/dosen', LecturerList::class)->name('lecturer.index');
     Route::get('/dosen/tambah', LecturerFormPage::class)->name('lecturer.add');
     Route::get('/dosen/{lecturerId}', LecturerFormPage::class)->where('lecturerId', '[0-9]+')->name('lecturer.edit');
+
+    Route::get('/ruangan', RoomList::class)->name('room.index');
+    Route::get('/ruangan/tambah', RoomFormPage::class)->name('room.add');
+    Route::get('/ruangan/{roomId}', RoomFormPage::class)->where('roomId', '[0-9]+')->name('room.edit');
 });

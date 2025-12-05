@@ -41,7 +41,7 @@ class UserFactory extends Factory
     public function lecturer(): static
     {
         return $this->afterCreating(function (User $user) {
-            $role = Role::where('code', UserRoleEnum::DOSEN->value)->first();
+            $role = Role::where('code', UserRoleEnum::LECTURER->value)->first();
 
             if ($role) {
                 $user->roles()->attach($role->id);
@@ -53,7 +53,7 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => $overrides)
                 ->afterCreating(function (User $user) {
-                    $role = Role::where('code', UserRoleEnum::MAHASISWA->value)->first();
+                    $role = Role::where('code', UserRoleEnum::STUDENT->value)->first();
 
                     if ($role) {
                         $user->roles()->attach($role->id);

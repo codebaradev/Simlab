@@ -79,7 +79,7 @@ class UserService
         return $query->findOrFail($id);
     }
 
-    public function create(array $data): User
+    public function create(array $data, string $role = "mhs"): User
     {
         return DB::transaction(function () use ($data) {
             $user = User::make($data);
