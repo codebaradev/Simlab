@@ -68,7 +68,7 @@ class RoomTable extends Component
 
             $this->showSuccessAlert('Data ruangan berhasil dihapus.');
         } catch (\Exception $e) {
-            $this->showErrorAlert('Gagal menghapus ruangan: ' . $e->getMessage());
+            $this->showErrorAlert('Gagal menghapus ruangan: ');
         }
     }
 

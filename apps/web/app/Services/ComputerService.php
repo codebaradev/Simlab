@@ -65,10 +65,11 @@ class ComputerService
         return $query->findOrFail($id);
     }
 
-    public function create(array $data): Computer
+    public function create(int $room_id, array $data): Computer
     {
-        return DB::transaction(function () use ( $data) {
+        return DB::transaction(function () use ( $data, $room_id) {
             $computer = Computer::make($data);
+            $computer->room_id = $room_id;
 
             $computer->save();
             return $computer;
