@@ -55,18 +55,14 @@
                     wire:click="editRoom({{ $room->id }})"
                     @click.stop>
                     <x-table.checkbox-cell :value="$room->id" />
-                    <td class="font-mono font-bold">{{ $room->nip }}</td>
+                    <td class="font-mono font-bold">{{ $room->code }}</td>
                     <td>
                         <div class="flex flex-col">
                             <span class="font-semibold">{{ $room->user->name ?? $room->name }}</span>
-                            <span class="text-xs text-gray-500">{{ $room->user->email ?? $room->email }}</span>
                         </div>
                     </td>
                     <td>
-                        <div class="flex flex-col">
-                            <span>{{ $room->study_program->name ?? '-' }}</span>
-                            <span class="text-xs text-gray-500">{{ $room->study_program->code ?? '' }}</span>
-                        </div>
+                        <div class="badge badge-{{$room->status->color()}}">{{ $room->status->label() }}</div>
                     </td>
                     {{-- <td>
                         @php

@@ -101,7 +101,7 @@ class RoomTable extends Component
     public function getRoomsProperty()
     {
         return $this->rService->getAll(
-            ['user', 'study_program'],
+            [],
             $this->getFilters(),
             $this->sortField,
             $this->sortDirection,

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\RoomStatusEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,7 @@ class RoomFactory extends Factory
     public function definition(): array
     {
         return [
-            'status' => $this->faker->numberBetween(0, 6),
+            'status' => $this->faker->randomElement(RoomStatusEnum::values()),
             'name' => $this->faker->word(),
             'code' => $this->faker->unique()->bothify('ROOM-####'),
         ];
