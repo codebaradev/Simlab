@@ -25,7 +25,7 @@
             </div>
 
             <div class="card-actions ">
-                <x-button type="submit" class="w-full">Login</x-button>
+                <x-button type="submit" class="w-full" target="login">Login</x-button>
               {{-- <button class="btn btn-primary w-full">Login</button> --}}
             </div>
         </form>

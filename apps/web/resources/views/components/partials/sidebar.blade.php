@@ -1,5 +1,8 @@
 @php
+    use App\Enums\UserRoleEnum;
+
     $user = auth()->user();
+    $role = $user->roles()->first()->name ?? 'mahasiswa';
 @endphp
 
 <div
@@ -26,13 +29,16 @@
     <nav class="flex-1 p-4 overflow-y-auto">
         <ul class="space-y-2">
             <x-partials.sidebar-menu name="Dashboard" url="/dashboard" selected="dashboard" />
-            <x-partials.sidebar-menu name="Jadwal" url="/jadwal" selected="jadwal" icon="calendar"/>
-            <x-partials.sidebar-menu name="Mahasiswa" url="/mahasiswa" selected="mahasiswa" icon="users"/>
-            <x-partials.sidebar-menu name="Dosen" url="/dosen" selected="dosen" icon="user"/>
-            <x-partials.sidebar-menu name="Matakuliah" url="/matakuliah" selected="matakuliah" icon="book"/>
-            <x-partials.sidebar-menu name="Ruangan" url="/ruangan" selected="ruangan" icon="computer"/>
-            <x-partials.sidebar-menu name="Jurusan" url="/jurusan" selected="jurusan" icon="office"/>
-            <x-partials.sidebar-menu name="Prodi" url="/prodi" selected="prodi" icon="puzzle"/>
+
+            @if ($role === UserRoleEnum::LABORAN->label())
+                <x-partials.sidebar-menu name="Jadwal" url="/jadwal" selected="jadwal" icon="calendar"/>
+                <x-partials.sidebar-menu name="Mahasiswa" url="/mahasiswa" selected="mahasiswa" icon="users"/>
+                <x-partials.sidebar-menu name="Dosen" url="/dosen" selected="dosen" icon="user"/>
+                <x-partials.sidebar-menu name="Matakuliah" url="/matakuliah" selected="matakuliah" icon="book"/>
+                <x-partials.sidebar-menu name="Ruangan" url="/ruangan" selected="ruangan" icon="computer"/>
+                <x-partials.sidebar-menu name="Jurusan" url="/jurusan" selected="jurusan" icon="office"/>
+                <x-partials.sidebar-menu name="Prodi" url="/prodi" selected="prodi" icon="puzzle"/>
+            @endif
         </ul>
     </nav>
 
@@ -49,6 +55,7 @@
                     </div>
                     <div class="flex-1 min-w-0 text-left">
                         <p class="text-sm font-medium text-gray-900 truncate">{{ $user->username }}</p>
+                        <span class="text-sm text-gray-400">{{ $role }}</span>
                         {{-- <p class="text-xs text-gray-500 truncate">admin@example.com</p> --}}
                     </div>
                 </div>
@@ -75,6 +82,7 @@
             <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
                 <li class="menu-title">
                     <span>{{ $user->username }}</span>
+                    <span class="text-xs text-base-300">{{ $role }}</span>
                 </li>
                 <li>
                     <livewire:shared.buttons.logout-button/>
