@@ -7,12 +7,14 @@ use App\Livewire\Feature\Application\Pages\ApplicationList;
 use App\Livewire\Feature\Auth\Login;
 use App\Livewire\Feature\Computer\Pages\ComputerFormPage;
 use App\Livewire\Feature\Computer\Pages\ComputerList;
+use App\Livewire\Feature\Course\Pages\CourseList;
 use App\Livewire\Feature\Dashboard\Index as Dashboard;
 use App\Livewire\Feature\Department\Pages\DepartmentList;
 use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
 use App\Livewire\Feature\Lecturer\Pages\LecturerList;
 use App\Livewire\Feature\Room\Pages\RoomFormPage;
 use App\Livewire\Feature\Room\Pages\RoomList;
+use App\Livewire\Feature\Schedule\Pages\ScheduleIndexPage;
 use App\Livewire\Feature\Student\Pages\StudentFormPage;
 use App\Livewire\Feature\Student\Pages\StudentList;
 use App\Livewire\Feature\StudyProgram\Pages\StudyProgramList;
@@ -40,4 +42,7 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.add');
     Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
     Route::get('/ruangan/{roomId}/aplikasi', ApplicationList::class)->where('roomId', '[0-9]+')->name('room.app.index');
+
+    Route::get('/matakuliah', CourseList::class)->name('course.index');
+    Route::get('/jadwal', ScheduleIndexPage::class)->name('schedule.index');
 });

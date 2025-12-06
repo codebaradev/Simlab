@@ -17,6 +17,7 @@ class AcademicClassFactory extends Factory
     public function definition(): array
     {
         return [
+            // 'type' => $this->faker->,
             'name' => $this->faker->word(),
             'code' => strtoupper($this->faker->bothify('???###')),
             'year' => $this->faker->numberBetween(2000, 2024),
