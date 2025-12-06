@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\UserRoleEnum;
+use App\Models\Role;
 use App\Models\Student;
+use App\Models\User;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -67,10 +70,13 @@ class StudentService
     {
         return DB::transaction(function () use ($user_id, $data) {
             $Student = Student::make($data);
-
             $Student->user_id = $user_id;
-
             $Student->save();
+
+            $user = User::findOrFail($user_id);
+            $studentRoleId = Role::where('code', UserRoleEnum::STUDENT->value)->value('id');
+            $user->roles()->syncWithoutDetaching([$studentRoleId]);
+
             return $Student;
         });
     }

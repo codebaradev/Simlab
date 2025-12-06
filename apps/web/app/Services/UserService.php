@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\UserRoleEnum;
+use App\Models\Role;
 use App\Models\User;
 use DB;
 use Illuminate\Support\Facades\Auth;
@@ -81,10 +83,13 @@ class UserService
 
     public function create(array $data, string $role = "mhs"): User
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $role) {
             $user = User::make($data);
-
             $user->save();
+
+            $role = Role::where('code', operator: $role)->first();
+
+            $user->roles()->attach([$role]);
             return $user;
         });
     }

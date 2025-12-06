@@ -123,7 +123,7 @@ class StudentForm extends Component
             });
 
         } catch (\Exception $e) {
-            $this->addError('code', $e->getMessage());
+            $this->showErrorAlert('Terjadi kesalahan, silahkan coba lagi!');
         }
     }
 

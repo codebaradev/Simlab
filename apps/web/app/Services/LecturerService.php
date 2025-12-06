@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\UserRoleEnum;
 use App\Models\Lecturer;
+use App\Models\Role;
+use App\Models\User;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -65,10 +68,13 @@ class LecturerService
     {
         return DB::transaction(function () use ($user_id, $data) {
             $lecturer = Lecturer::make($data);
-
             $lecturer->user_id = $user_id;
-
             $lecturer->save();
+
+            $user = User::findOrFail($user_id);
+            $lecturerRoleId = Role::where('code', UserRoleEnum::LECTURER->value)->value('id');
+            $user->roles()->syncWithoutDetaching([$lecturerRoleId]);
+
             return $lecturer;
         });
     }

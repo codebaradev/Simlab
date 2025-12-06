@@ -118,14 +118,14 @@ class LecturerForm extends Component
                     $this->leService->update($this->lecturer, $user->id, $lecturerData);
                 } else {
                     $user = $this->userService->create( $userData);
-                    $this->leService->create( $user->id, $lecturerData);
+                    $this->leService->create( $user->id, $lecturerData, );
                     return $this->redirectRoute('lecturer.index', navigate: true);
                 }
 
                 return $this->showSuccessAlert('Data Dosen Berhasil Diupdate');
             });
         } catch (\Exception $e) {
-            $this->addError('code', $e->getMessage());
+            $this->showErrorAlert('Terjadi kesalahan, silahkan coba lagi!');
         }
     }
 
