@@ -13,8 +13,8 @@ entity "User" as user {
     fp_id: int
     email: string <U>
     phone_number: string <13>
-    birth_place: string
-    birth_date: date
+    ' birth_place: string
+    ' birth_date: date
     gender: int
     address: string
 }
@@ -56,7 +56,7 @@ entity "Student" as student {
     * user_id: int <FK>
     * sp_id: int <FK>
     ---
-    * nim: string
+    * nim: string <U>
     * generation: year  
 }
 
@@ -159,6 +159,7 @@ entity " AcademicClass" as AcademicClass {
     * id: int <PK>
     cl_id: int <FK>
     ---
+    * type: int
     * name: string
     * code: string <U>
     * year: int
@@ -172,8 +173,6 @@ entity "Room" as room {
     * name: string
     * code: string <U>
 }
-
-
     
 entity Computer {
     * id : int <PK>
@@ -181,8 +180,8 @@ entity Computer {
     ---
     * computer_count: int
     * name : string
-    * processor : int
-    * gpu : int
+    * processor : string
+    * gpu : string
     * ram_capacity : int
     * ram_type : int
     * storage_type : int
