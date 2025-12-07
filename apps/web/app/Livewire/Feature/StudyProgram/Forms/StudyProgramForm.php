@@ -2,20 +2,25 @@
 
 namespace App\Livewire\Feature\StudyProgram\Forms;
 
+use App\Models\StudyProgram;
 use App\Services\StudyProgramService;
+use App\Traits\Livewire\WithAlertModal;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class StudyProgramForm extends Component
 {
+    use WithAlertModal;
+
     protected StudyProgramService $spService;
+
+    public ?StudyProgram $studyProgram;
 
     public $code;
     public $name;
     public $department_id;
 
-    #[Reactive]
-    public $editingId = null;
+    public bool $isEditing;
 
     protected $messages = [
         'code.required' => 'Kode program studi wajib diisi.',
@@ -31,44 +36,44 @@ class StudyProgramForm extends Component
         $this->spService = $spService;
     }
 
-    public function mount($editingId = null, $formData = [])
+    public function mount($studyProgram = null)
     {
-        $this->editingId = $editingId;
+        $this->studyProgram = $studyProgram;
+        $this->isEditing = (bool) $this->studyProgram;
 
-        if ($formData) {
-            $this->code = $formData['code'] ?? '';
-            $this->name = $formData['name'] ?? '';
-            $this->department_id = $formData['department_id'] ?? null;
+        if ($this->isEditing) {
+            $this->code = $this->studyProgram->code;
+            $this->name = $this->studyProgram->name;
+            $this->department_id = $this->studyProgram->department_id;
         }
     }
 
     public function save()
     {
         $validated = $this->validate([
-            'code' => 'required|string|max:10|unique:study_programs,code'  . ($this->editingId ? ',' . $this->editingId : '') ,
+            'code' => 'required|string|max:10|unique:study_programs,code'  . ($this->isEditing ? ',' . $this->studyProgram->id : '') ,
             'name' => 'required|string|max:100',
             'department_id' => 'required|exists:departments,id',
         ]);
 
         try {
-            if ($this->editingId) {
-                $studyProgram = $this->spService->findById($this->editingId);
-                $this->spService->update($studyProgram, $validated, null, $this->department_id);
+            if ($this->isEditing) {
+                $this->spService->update($this->studyProgram, $validated, null, $this->department_id);
             } else {
                 $this->spService->create($validated, null, $this->department_id);
+                return $this->redirectRoute('study-program.index', navigate: true );
             }
 
-            $this->dispatch('studyProgramSaved');
-            $this->resetForm();
+            return $this->showSuccessAlert('Data Program Studi Berhasil Diupdate');
 
         } catch (\Exception $e) {
-            $this->addError('code', $e->getMessage());
+            $this->showErrorAlert('Terjadi kesalahan, silahkan coba lagi!');
         }
     }
 
     public function resetForm()
     {
-        $this->reset(['code', 'name', 'department_id', 'editingId']);
+        $this->reset(['code', 'name', 'department_id']);
         $this->resetErrorBag();
     }
 

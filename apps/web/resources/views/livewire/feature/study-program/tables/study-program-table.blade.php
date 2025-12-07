@@ -25,9 +25,12 @@
                     />
 
                     {{-- Actions --}}
-                    <div class="flex items-center gap-3">
-                        <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Program Studi</x-button>
-                    </div>
+
+                    <a href="/prodi/tambah">
+                        <div class="flex items-center gap-3">
+                            <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Program Studi</x-button>
+                        </div>
+                    </a>
                 </div>
             </x-table.header-actions>
         </div>

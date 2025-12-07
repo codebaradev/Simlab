@@ -17,6 +17,7 @@ use App\Livewire\Feature\Room\Pages\RoomList;
 use App\Livewire\Feature\Schedule\Pages\ScheduleIndexPage;
 use App\Livewire\Feature\Student\Pages\StudentFormPage;
 use App\Livewire\Feature\Student\Pages\StudentList;
+use App\Livewire\Feature\StudyProgram\Pages\StudyProgramFormPage;
 use App\Livewire\Feature\StudyProgram\Pages\StudyProgramList;
 use Illuminate\Support\Facades\Route;
 
@@ -29,7 +30,10 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
 
     Route::middleware([LbrOnlyMiddleware::class])->group(function () {
         Route::get('/jurusan', DepartmentList::class)->name('department.index');
+
         Route::get('/prodi', StudyProgramList::class)->name('study-program.index');
+        Route::get('/prodi/tambah', StudyProgramFormPage::class)->where(['spId' =>'[0-9]+'])->name('study-program.add');
+        Route::get('/prodi/{spId}', StudyProgramFormPage::class)->where(['spId' =>'[0-9]+'])->name('study-program.edit');
 
         Route::get('/mahasiswa', StudentList::class)->name('student.index');
         Route::get('/mahasiswa/tambah', StudentFormPage::class)->name('student.add');
