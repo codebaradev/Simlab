@@ -37,11 +37,11 @@
 
                             <x-form.select
                                 name="category"
-                                label="Kategori *"
+                                label="Spesifikasi *"
                                 :options="$options['categories']"
                                 optionValue="value"
                                 optionLabel="label"
-                                placeholder="Pilih Kategori"
+                                placeholder="Pilih Spesifikasi"
                                 :required="true"
                                 wire:model="category"
                             />
