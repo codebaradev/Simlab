@@ -93,6 +93,7 @@ entity "StudyProgram" as study_program {
 entity "Course" as course {
     * id: int <PK>
     ---
+    * type: int
     * name: string
     * sks: int
     * year: YEAR
@@ -157,6 +158,7 @@ entity AttendanceMonitoring {
 
 entity " AcademicClass" as AcademicClass {
     * id: int <PK>
+    * sp_id: int <FK>
     cl_id: int <FK>
     ---
     * type: int
@@ -222,6 +224,7 @@ user |o--|| RFID
 
 ' AcademicClass
 
+study_program ||--|{ AcademicClass
 student }|--|{ AcademicClass: ""
 student ||--|{ AcademicClass: "AcademicClass Leader"
 

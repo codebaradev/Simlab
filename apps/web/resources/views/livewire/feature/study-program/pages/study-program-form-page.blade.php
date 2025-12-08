@@ -17,7 +17,7 @@
                 />
             </div>
 
-            <a href="/prodi/{{ $studyProgram->id  }}" class="tab cursor-pointer" wire:navigate>Kelas</a>
+            <a href="/prodi/{{ $studyProgram->id}}/kelas" class="tab cursor-pointer" wire:navigate>Kelas</a>
         </div>
     @else
         <div class="card bg-base-100 border-base-300 p-6">

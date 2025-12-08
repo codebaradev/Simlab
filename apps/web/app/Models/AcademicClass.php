@@ -29,6 +29,11 @@ class AcademicClass extends Model
         return $this->belongsTo(Student::class, 'cl_id', 'id');
     }
 
+    public function study_program(): BelongsTo
+    {
+        return $this->belongsTo(StudyProgram::class, 'sp_id', 'id');
+    }
+
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'course_academic_class', 'academic_class_id', 'course_id');
