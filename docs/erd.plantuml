@@ -164,6 +164,7 @@ entity " AcademicClass" as AcademicClass {
     * type: int
     * name: string
     * code: string <U>
+    * generation: int
     * year: int
     * semester: int
 }

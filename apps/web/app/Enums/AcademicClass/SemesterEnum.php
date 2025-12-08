@@ -2,24 +2,24 @@
 
 namespace App\Enums\AcademicClass;
 
-enum TypeEnum: int
+enum SemesterEnum: int
 {
-    case GENERAL = 1;
-    case SPECIALIZATION = 2;
+    case ODD = 1;
+    case EVEN = 2;
 
     public function label(): string
     {
         return match($this) {
-            self::GENERAL => 'Umum',
-            self::SPECIALIZATION => 'Peminatan',
+            self::ODD => 'Ganjil',
+            self::EVEN => 'Genap',
         };
     }
 
     public function color(): string
     {
         return match($this) {
-            self::GENERAL => 'info',
-            self::SPECIALIZATION => 'warning',
+            self::ODD => 'info',
+            self::EVEN => 'warning',
         };
     }
 
@@ -28,7 +28,7 @@ enum TypeEnum: int
         return array_map(
             fn(self $case) => [
                 'value' => $case->value,
-                'la\bel' => $case->label(),
+                'label' => $case->label(),
             ],
             self::cases()
         );
