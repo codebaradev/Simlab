@@ -28,7 +28,7 @@ enum TypeEnum: int
         return array_map(
             fn(self $case) => [
                 'value' => $case->value,
-                'la\bel' => $case->label(),
+                'label' => $case->label(),
             ],
             self::cases()
         );

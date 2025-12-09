@@ -65,7 +65,7 @@ class AcademicClassTable extends Component
 
     public function edit($acId)
     {
-        $this->redirectRoute('study-program.class.edit', ['spId' => $this->studyProgram->id, 'acId' => $acId], navigate: true);
+        $this->redirectRoute('study-program.class.edit', ['spId' => $this->studyProgram->id, 'classId' => $acId], navigate: true);
     }
 
     public function delete($acId)

@@ -4,7 +4,8 @@
         title="Prodi"
         :breadcrumbs="[
             ['label' => 'Prodi', 'url' => '/prodi'],
-            ['label' => $studyProgram ? $studyProgram->code : 'Tambah'],
+            ['label' => $studyProgram->code, 'url' => '/prodi/' . $studyProgram->id],
+            ['label' => 'kelas'],
         ]"
     />
 
