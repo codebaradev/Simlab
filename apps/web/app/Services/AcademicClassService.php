@@ -151,6 +151,25 @@ class AcademicClassService
         });
     }
 
+    public function bulkAddStudent(AcademicClass $academicClass, array $ids)
+    {
+
+        return DB::transaction(function () use ($academicClass, $ids) {
+            $ids = $academicClass->students()->syncWithoutDetaching($ids);
+
+            return $ids;
+        });
+    }
+
+    public function bulkDeleteStudent(AcademicClass $academicClass, array $ids)
+    {
+        return DB::transaction(function () use ($academicClass, $ids) {
+            $ids = $academicClass->students()->detach($ids);
+
+            return $ids;
+        });
+    }
+
     public function bulkForceDelete(array $ids): int
     {
         return DB::transaction(function () use ($ids) {

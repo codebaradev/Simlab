@@ -5,6 +5,7 @@ use App\Http\Middleware\LbrOnlyMiddleware;
 use App\Http\Middleware\UserOnlyMiddleware;
 use App\Livewire\Feature\AcademicClass\Pages\AcademicClassFormPage;
 use App\Livewire\Feature\AcademicClass\Pages\AcademicClassListPage;
+use App\Livewire\Feature\AcademicClass\Pages\StudentListPage;
 use App\Livewire\Feature\Application\Pages\ApplicationList;
 use App\Livewire\Feature\Auth\Login;
 use App\Livewire\Feature\Computer\Pages\ComputerFormPage;
@@ -39,6 +40,7 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
         Route::get('/prodi/{spId}/kelas', AcademicClassListPage::class)->where(['spId' =>'[0-9]+'])->name('study-program.class.index');
         Route::get('/prodi/{spId}/kelas/tambah', AcademicClassFormPage::class)->where(['spId' =>'[0-9]+'])->name('study-program.class.add');
         Route::get('/prodi/{spId}/kelas/{classId}', AcademicClassFormPage::class)->where(['spId' =>'[0-9]+', 'classId' =>'[0-9]+'])->name('study-program.class.edit');
+        Route::get('/prodi/{spId}/kelas/{classId}/mahasiswa', StudentListPage::class)->where(['spId' =>'[0-9]+', 'classId' =>'[0-9]+'])->name('study-program.class.student.index');
 
         Route::get('/mahasiswa', StudentList::class)->name('student.index');
         Route::get('/mahasiswa/tambah', StudentFormPage::class)->name('student.add');

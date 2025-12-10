@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,6 +39,19 @@ class Student extends Model
             ->whereHas('department');
     }
 
+    public function academic_classes(): BelongsToMany
+    {
+        return $this->belongsToMany(AcademicClass::class, 'student_academic_class', 'student_id', 'academic_class_id');
+    }
+
+    public function getFirstClassAttribute()
+    {
+        return $this->academic_classes()
+            ->orderBy('year')
+            ->orderBy('semester')
+            ->first();
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
@@ -52,5 +66,20 @@ class Student extends Model
     public function scopeActive($query)
     {
         return $query->whereNull('deleted_at');
+    }
+
+    public function scopeExcludeSameCohort($query, AcademicClass $academicClass)
+    {
+        return $query->whereDoesntHave('academic_classes', function ($q) use ($academicClass) {
+            $q->where('year', $academicClass->year)
+            ->where('semester', $academicClass->semester);
+        });
+    }
+
+    public function scopeExcludeSameClass($query, $acId)
+    {
+        return $query->whereDoesntHave('academic_classes', function ($q) use ($acId) {
+            $q->where('id', $acId);
+        });
     }
 }

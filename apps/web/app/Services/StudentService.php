@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\UserRoleEnum;
+use App\Models\AcademicClass;
 use App\Models\Role;
 use App\Models\Student;
 use App\Models\User;
@@ -20,13 +21,23 @@ class StudentService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $with = [], array $filters = [], string $sortField = 'generation', string $sortDirection = 'desc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'generation', string $sortDirection = 'desc', ?int $perPage = null, bool $isPaginated = true, ?int $classId = null, bool $isExcludeSameClass = false): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = Student::query();
 
         $query->whereHas('study_program');
+
+        if ($classId) {
+            if ($isExcludeSameClass) {
+                $query->excludeSameClass($classId);
+            } else {
+                $query->whereHas('academic_classes', function ($q) use ($classId) {
+                    $q->where('id', $classId);
+                });
+            }
+        }
 
         if (!empty($with)) {
             $query->with($with);

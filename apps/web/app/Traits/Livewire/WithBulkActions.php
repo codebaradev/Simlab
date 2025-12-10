@@ -63,6 +63,23 @@ trait WithBulkActions
         return collect([]);
     }
 
+    public function toggleSelect(int $id)
+    {
+        // pastikan bertipe int (casting) untuk perbandingan konsisten
+        $id = (int) $id;
+
+        if (in_array($id, $this->selected, true)) {
+            // hapus
+            $this->selected = array_values(array_filter($this->selected, fn($id) => (int)$id !== $id));
+        } else {
+            // tambahkan
+            $this->selected[] = $id;
+        }
+
+        // opsional: emit event agar parent/komponen lain tahu
+        // $this->emit('selectionUpdated', $this->selected);
+    }
+
     /**
      * Handle select all checkbox change
      */

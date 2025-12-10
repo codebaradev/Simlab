@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Livewire\Feature\Student\Tables;
+namespace App\Livewire\Feature\AcademicClass\Tables;
 
 use App\Enums\User\UserGenderEnum;
+use App\Models\AcademicClass;
 use App\Models\StudyProgram;
+use App\Services\AcademicClassService;
 use App\Services\StudentService;
 use App\Services\StudyProgramService;
 use App\Traits\Livewire\WithAlertModal;
@@ -12,18 +14,21 @@ use App\Traits\Livewire\WithFilters;
 use App\Traits\Livewire\WithSorting;
 use App\Traits\Livewire\WithTableFeatures;
 use Filament\Navigation\NavigationManager;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
-
 
 class StudentTable extends Component
 {
     use WithPagination, WithFilters, WithBulkActions, WithSorting, WithAlertModal, WithTableFeatures;
 
+    protected AcademicClassService $acService;
     protected StudentService $stService;
     protected StudyProgramService $spService;
+    public ?AcademicClass $academicClass;
 
-    // public $selectedStatus = '';
+    #[Locked]
+    public $classId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -37,16 +42,20 @@ class StudentTable extends Component
         'bulkDelete' => 'bulkDelete',
     ];
 
-    public function boot(StudentService $stService, StudyProgramService $spService)
+    public function boot(AcademicClassService $acService, StudentService $stService, StudyProgramService $spService)
     {
+        $this->acService = $acService;
         $this->stService = $stService;
         $this->spService = $spService;
     }
 
-    public function mount()
+    public function mount($academicClass)
     {
         $this->sortField = 'generation';
         $this->sortDirection = 'desc';
+        $this->academicClass = $academicClass;
+
+        $this->classId = $this->academicClass->id;
     }
 
     protected function getDefaultSortField(): string
@@ -64,18 +73,13 @@ class StudentTable extends Component
         return $this->students;
     }
 
-    public function editStudent($studentId)
-    {
-        $this->redirectRoute('student.edit', ['studentId' => $studentId], navigate: true);
-    }
-
     public function deleteStudent($studentId)
     {
         try {
             $student = $this->stService->findById($studentId);
             $this->stService->delete($student);
 
-            $this->showSuccessAlert('Data mahasiswa berhasil dihapus.');
+            $this->showSuccessAlert('Data mahasiswa berhasil dihapus dikelas ini.');
         } catch (\Exception $e) {
             $this->showErrorAlert('Gagal menghapus mahasiswa: ' . $e->getMessage());
         }
@@ -91,7 +95,7 @@ class StudentTable extends Component
         }
 
         try {
-            $this->stService->bulkDelete($this->selected);
+            $this->acService->bulkDeleteStudent($this->academicClass, $this->selected);
 
             $this->clearSelection();
 
@@ -115,15 +119,14 @@ class StudentTable extends Component
             $this->sortField,
             $this->sortDirection,
             $this->perPage,
+            classId: $this->classId
         );
     }
 
     public function render()
     {
-        $studyPrograms = $this->spService->getAll(isPaginated: false);
-        return view('livewire.feature.student.tables.student-table', [
+        return view('livewire.feature.academic-class.tables.student-table', [
             'students' => $this->students,
-            'studyPrograms' => $studyPrograms
         ]);
     }
 }
