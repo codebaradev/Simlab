@@ -9,6 +9,6 @@
 
     <!-- Content -->
     <div class="bg-white rounded-lg shadow">
-        {{-- <livewire:feature.student.tables.student-table /> --}}
+        <livewire:feature.course.cards.course-card-list />
     </div>
 </div>

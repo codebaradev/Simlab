@@ -93,7 +93,6 @@ entity "StudyProgram" as study_program {
 entity "Course" as course {
     * id: int <PK>
     ---
-    * type: int
     * name: string
     * sks: int
     * year: YEAR

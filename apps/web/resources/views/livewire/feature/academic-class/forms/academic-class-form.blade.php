@@ -1,3 +1,7 @@
+@php
+    $currentYear = now()->year;
+@endphp
+
 <div class="card">
     <div class="card-body p-0">
 
@@ -39,15 +43,14 @@
                     <x-form.input
                         name="generation"
                         type="number"
-                        :placeholder="now()->year"
+                        :placeholder="$currentYear"
                         label="Angkatan"
                         :required="true"
                     />
 
                     <x-form.input
                         name="year"
-                        type="number"
-                        :placeholder="now()->year"
+                        placeholder="{{ $currentYear - 1 }}/{{ $currentYear }}"
                         label="Tahun Ajaran"
                         :required="true"
                     />

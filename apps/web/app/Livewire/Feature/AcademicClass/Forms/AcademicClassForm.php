@@ -64,7 +64,7 @@ class AcademicClassForm extends Component
             'type' => ['required', Rule::enum(TypeEnum::class)],
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:255', $uniqueCodeRule],
-            'year' => ['required', 'integer', 'between:1900,2100'],
+            'year' => ['required', 'max:9', 'regex:/^\d{4}\/\d{4}$/'],
             'semester' => ['required', Rule::enum(SemesterEnum::class)],
         ]);
 

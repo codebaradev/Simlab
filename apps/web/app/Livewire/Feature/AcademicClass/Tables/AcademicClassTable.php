@@ -113,7 +113,8 @@ class AcademicClassTable extends Component
             $this->getFilters(),
             $this->sortField,
             $this->sortDirection,
-            $this->perPage
+            $this->perPage,
+            spId: $this->studyProgram->id
         );
     }
 
