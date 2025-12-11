@@ -39,9 +39,6 @@
     aria-live="polite"
 >
 
-
-
-
     {{-- TEXT: show when NOT loading; hidden when loading --}}
     <span class="flex items-center gap-1" >
         {{-- LOADING SPINNER (only visible during Livewire loading of target) --}}
@@ -57,6 +54,7 @@
             class=""
             @if ($target)
                 wire:loading.class="hidden"
+                wire:target="{{ $target }}"
             @endif
         >
             @include('components.icon.' . $leftIcon)

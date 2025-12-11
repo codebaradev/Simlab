@@ -2,28 +2,133 @@
 
 namespace App\Livewire\Feature\Schedule\Calendars;
 
-use App\Models\Student;
+use App\Models\Schedule;
 use Asantibanez\LivewireCalendar\LivewireCalendar;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Livewire\Component;
 
 class ScheduleCalendar extends LivewireCalendar
 {
+    protected $listeners = [
+        'previousMonth',
+        'nextMonth',
+        'goToMonth',
+        'goToToday'
+    ];
+
     public function events(): Collection
     {
-        return Student::query()
-            ->whereDate('created_at', '>=', $this->gridStartsAt)
-            ->whereDate('created_at', '<=', $this->gridEndsAt)
+        // ...existing code...
+        $start = $this->gridStartsAt instanceof Carbon ? $this->gridStartsAt->toDateString() : Carbon::parse($this->gridStartsAt)->toDateString();
+        $end   = $this->gridEndsAt instanceof Carbon ? $this->gridEndsAt->toDateString() : Carbon::parse($this->gridEndsAt)->toDateString();
+
+        return Schedule::query()
+            ->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
             ->get()
-            ->map(function (Student $model) {
+            ->map(callback: function (Schedule $model) {
                 return [
                     'id' => $model->id,
                     'title' => $model->nim,
                     'description' => $model->generation,
-                    'time' => $model->nim,
-                    'date' => $model->created_at,
+                    'time' => optional($model->created_at)->format('H:i') ?? null,
+                    'start_at' => optional($model->start_datetime)->toDateTimeString(),
+                    'end_at' => optional($model->start_datetime)->toDateTimeString(),
+                    'date' => optional($model->created_at)->toDateString(),
                 ];
             });
+    }
+
+    public function onDayClick($year, $month, $day)
+    {
+        $date = Carbon::create($year, $month, $day)->toDateString();
+
+        $eventsForDate = Schedule::whereDate('created_at', $date)
+            ->get()
+            ->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'title' => $m->nim,
+                    'description' => $m->generation,
+                    'time' => optional($m->created_at)->format('H:i') ?? null,
+                    'start_at' => optional($m->start_datetime)->format('Y-m-d H:i') ?? null,
+                    'end_at' => optional($m->end_datetime)->format('Y-m-d H:i') ?? null,
+                    'date' => optional($m->created_at)->toDateString(),
+                ];
+            })->values()->all();
+
+        // emit ke client/modal
+        $this->dispatch('openDateModal', $date, $eventsForDate);
+    }
+
+    // when gridStartsAt changes, notify parent/page so it can update month/year display
+    public function updatedGridStartsAt($value)
+    {
+        $dt = $value instanceof Carbon ? $value : Carbon::parse($value);
+
+        // emitUp supaya parent Livewire (ScheduleIndexPage) menerima update
+        $this->dispatch('calendarMonthChanged', [
+            'month' => (int) $dt->format('n'),
+            'year'  => (int) $dt->format('Y'),
+            'label' => $dt->format('F Y'),
+        ]);
+    }
+
+    public function goToMonth($year, $month)
+    {
+        $date = Carbon::create($year, $month, 1);
+
+        // set startsAt sebagai first-of-month (dipakai view untuk label)
+        $this->startsAt = $date->copy()->startOfMonth();
+
+        // set grid range (Carbon instances)
+        $this->gridStartsAt = $this->startsAt->copy()->startOfWeek();
+        $this->gridEndsAt   = $this->startsAt->copy()->endOfMonth()->endOfWeek();
+
+        $this->updatedGridStartsAt($this->gridStartsAt);
+    }
+
+    public function previousMonth()
+    {
+        // gunakan startsAt jika tersedia, fallback ke gridStartsAt
+        $base = $this->startsAt instanceof Carbon ? $this->startsAt : ($this->gridStartsAt instanceof Carbon ? $this->gridStartsAt : Carbon::now());
+
+        $firstOfPrev = $base->copy()->subMonth()->startOfMonth();
+
+        $this->startsAt    = $firstOfPrev->copy()->startOfMonth();
+        $this->gridStartsAt = $this->startsAt->copy()->startOfWeek();
+        $this->gridEndsAt   = $this->startsAt->copy()->endOfMonth()->endOfWeek();
+
+        $this->updatedGridStartsAt($this->gridStartsAt);
+    }
+
+    public function nextMonth()
+    {
+        $base = $this->startsAt instanceof Carbon ? $this->startsAt : ($this->gridStartsAt instanceof Carbon ? $this->gridStartsAt : Carbon::now());
+
+        $firstOfNext = $base->copy()->addMonth()->startOfMonth();
+
+        $this->startsAt    = $firstOfNext->copy()->startOfMonth();
+        $this->gridStartsAt = $this->startsAt->copy()->startOfWeek();
+        $this->gridEndsAt   = $this->startsAt->copy()->endOfMonth()->endOfWeek();
+
+        $this->updatedGridStartsAt($this->gridStartsAt);
+    }
+
+    public function goToToday()
+    {
+        $today = Carbon::now();
+        $firstOfMonth = $today->copy()->startOfMonth();
+
+        $this->startsAt    = $firstOfMonth->copy()->startOfMonth();
+        $this->gridStartsAt = $this->startsAt->copy()->startOfWeek();
+        $this->gridEndsAt   = $this->startsAt->copy()->endOfMonth()->endOfWeek();
+
+        $this->updatedGridStartsAt($this->gridStartsAt);
+    }
+
+    public function requestSchedule( )
+    {
+
     }
 }
