@@ -66,14 +66,20 @@
             <tr>
                 <x-table.checkbox-header />
                 <x-table.sortable-header
-                    field="nip"
-                    label="NIP"
+                    field="name"
+                    label="Nama Dosen"
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
                 <x-table.sortable-header
-                    field="name"
-                    label="Nama Dosen"
+                    field="nidn"
+                    label="NIDN"
+                    :sortField="$sortField"
+                    :sortDirection="$sortDirection"
+                />
+                <x-table.sortable-header
+                    field="code"
+                    label="Kode Dosen"
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
@@ -94,13 +100,14 @@
                     wire:click="editLecturer({{ $lecturer->id }})"
                     @click.stop>
                     <x-table.checkbox-cell :value="$lecturer->id" />
-                    <td class="font-mono font-bold">{{ $lecturer->nip }}</td>
                     <td>
                         <div class="flex flex-col">
                             <span class="font-semibold">{{ $lecturer->user->name ?? $lecturer->name }}</span>
                             <span class="text-xs text-gray-500">{{ $lecturer->user->email ?? $lecturer->email }}</span>
                         </div>
                     </td>
+                    <td class="font-mono font-bold">{{ $lecturer->nidn }}</td>
+                    <td class="font-mono font-bold">{{ $lecturer->code }}</td>
                     <td>
                         <div class="flex flex-col">
                             <span>{{ $lecturer->study_program->name ?? '-' }}</span>

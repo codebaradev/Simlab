@@ -8,4 +8,12 @@
         ]"
     />
 
+    <div class="tabs tabs-lift">
+        <a href="/jadwal" class="tab cursor-pointer tab-active" wire:navigate>Jadwal</a>
+        <div class="tab-content bg-base-100 border-base-300 p-2">
+            <livewire:feature.schedule.calendars.schedule-calendar
+                week-starts-at="1"
+            />
+        </div>
+    </div>
 </div>
