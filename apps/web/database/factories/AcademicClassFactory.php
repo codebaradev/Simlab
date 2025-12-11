@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\AcademicClass\TypeEnum;
+use App\Models\StudyProgram;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,6 +19,9 @@ class AcademicClassFactory extends Factory
     public function definition(): array
     {
         return [
+            'sp_id' => StudyProgram::factory(),
+            'generation' => $this->faker->numberBetween(2020, 2025),
+            'type' => $this->faker->randomElement(TypeEnum::cases()),
             'name' => $this->faker->word(),
             'code' => strtoupper($this->faker->bothify('???###')),
             'year' => $this->faker->numberBetween(2000, 2024),

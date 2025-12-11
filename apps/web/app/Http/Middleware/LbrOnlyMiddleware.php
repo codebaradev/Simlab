@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\UserRoleEnum;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +21,8 @@ class LbrOnlyMiddleware
             return redirect()->route('login');
         }
 
-        if (Auth::user()->roles->contains('code', 'lbr')) {
-            abort(404);
+        if (!Auth::user()->roles->contains('code', UserRoleEnum::LABORAN->value)) {
+            abort(code: 404);
         }
 
         return $next($request);

@@ -116,7 +116,7 @@ class StudyProgramTable extends Component
 
     public function editStudyProgram($studyProgramId)
     {
-        $this->dispatch('showEditForm', studyProgramId: $studyProgramId);
+        $this->redirectRoute('study-program.edit', ['spId' => $studyProgramId]);
     }
 
     public function deleteStudyProgram($studyProgramId)

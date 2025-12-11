@@ -17,11 +17,19 @@ class AcademicClassService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true, ?int $limit = 10 ,?int $spId = null): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = AcademicClass::query();
+
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        if ($spId) {
+            $query->where('sp_id', $spId);
+        }
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -37,12 +45,19 @@ class AcademicClassService
             }
         }
 
-        $sortField = in_array($sortField, ['name', 'year', 'code', 'created_at']) ? $sortField : 'created_at';
+        $sortField = in_array($sortField, ['name', 'year_semester', 'code', 'generation', 'created_at']) ? $sortField : 'created_at';
         $sortDirection = $sortDirection === 'desc' ? 'desc' : 'asc';
-        $query->orderBy($sortField, $sortDirection);
+
+        if ($sortField == "year_semester") {
+            $query->orderBy('year', $sortDirection)->orderBy('semester', $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
 
         if ($isPaginated) {
             return $query->paginate($perPage);
+        } else {
+            $query->limit($limit);
         }
 
         return $query->get();
@@ -139,6 +154,25 @@ class AcademicClassService
             $count = AcademicClass::whereIn('id', $ids)->delete();
 
             return $count;
+        });
+    }
+
+    public function bulkAddStudent(AcademicClass $academicClass, array $ids)
+    {
+
+        return DB::transaction(function () use ($academicClass, $ids) {
+            $ids = $academicClass->students()->syncWithoutDetaching($ids);
+
+            return $ids;
+        });
+    }
+
+    public function bulkDeleteStudent(AcademicClass $academicClass, array $ids)
+    {
+        return DB::transaction(function () use ($academicClass, $ids) {
+            $ids = $academicClass->students()->detach($ids);
+
+            return $ids;
         });
     }
 

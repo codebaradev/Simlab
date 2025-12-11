@@ -36,6 +36,11 @@ class StudyProgram extends Model
         return $this->belongsTo(Lecturer::class, 'head_id', 'id');
     }
 
+    public function academic_classes(): HasMany
+    {
+        return $this->hasMany(AcademicClass::class, 'sp_id', 'id');
+    }
+
     public function lecturers(): HasMany
     {
         return $this->hasMany(Lecturer::class, 'sp_id', 'id');

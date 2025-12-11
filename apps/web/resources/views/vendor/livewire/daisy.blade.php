@@ -1,5 +1,5 @@
 {{-- @if ($paginator->hasPages()) --}}
-    <div class="flex sticky bottom-0 z-20 rounded-b-lg flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-white">
+    <div class="flex z-20 rounded-b-lg flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-white">
         {{-- Page Info --}}
         <div class="flex items-center gap-4">
             <div class="text-sm text-gray-600">

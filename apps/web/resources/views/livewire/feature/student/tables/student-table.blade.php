@@ -72,12 +72,9 @@
                     :sortField="$sortField"
                     :sortDirection="$sortDirection"
                 />
-                {{-- <x-table.sortable-header
-                    field="status"
-                    label="Status"
-                    :sortField="$sortField"
-                    :sortDirection="$sortDirection"
-                /> --}}
+                <x-table.unsortable-header
+                    label="Kelas"
+                />
                 <th class="w-32"></th>
             </tr>
         </x-table.sticky-thead>
@@ -107,21 +104,9 @@
                             {{ $student->generation ?? '-' }}
                         </span>
                     </td>
-                    {{-- <td>
-                        @php
-                            $statusColors = [
-                                'aktif' => 'bg-green-50 text-green-700 ring-green-600/20',
-                                'nonaktif' => 'bg-red-50 text-red-700 ring-red-600/20',
-                                'cuti' => 'bg-yellow-50 text-yellow-700 ring-yellow-600/20',
-                                'lulus' => 'bg-blue-50 text-blue-700 ring-blue-600/20',
-                                'dropout' => 'bg-gray-50 text-gray-700 ring-gray-600/20',
-                            ];
-                            $color = $statusColors[$student->status] ?? 'bg-gray-50 text-gray-700 ring-gray-600/20';
-                        @endphp
-                        <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset {{ $color }}">
-                            {{ ucfirst($student->status) }}
-                        </span>
-                    </td> --}}
+                    <td>
+                        {{ $student->first_class->code ?? '-' }}
+                    </td>
                     <x-table.action-menu
                         :id="$student->id"
                         :actions="[

@@ -17,11 +17,15 @@ class CourseService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
         $query = Course::query();
+
+        if ($with) {
+            $query->with($with);
+        }
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -62,6 +66,15 @@ class CourseService
         return DB::transaction(function () use ($data) {
             $course = Course::make($data);
             $course->save();
+
+            if (isset($data['class_id'])) {
+                $course->academic_classes()->attach($data['class_id']);
+            }
+
+            if (isset($data['lecturer_id'])) {
+                $course->lecturers()->attach($data['lecturer_id']);
+            }
+
             return $course;
         });
     }
@@ -72,6 +85,11 @@ class CourseService
             $course->fill($data);
 
             $course->save();
+
+            if (isset($data['class_id'])) {
+                $course->academic_classes()->sync([$data['class_id']]);
+            }
+
             return $course;
         });
     }

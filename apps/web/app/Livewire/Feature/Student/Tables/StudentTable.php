@@ -114,7 +114,7 @@ class StudentTable extends Component
             $this->getFilters(),
             $this->sortField,
             $this->sortDirection,
-            $this->perPage
+            $this->perPage,
         );
     }
 

@@ -1,12 +1,12 @@
 @props([
     'id' => '',
     'actions' => [],
-    'dropdownPosition' => 'left',
+    'dropdownPosition' => 'end',
     'class' => '',
 ])
 
 <td class="{{ $class }}" @click.stop>
-    <div class="dropdown dropdown-{{ $dropdownPosition }} ">
+    <div class="dropdown dropdown-bottom dropdown-{{ $dropdownPosition }} ">
         <label tabindex="0" class="btn btn-ghost btn-xs">
             <x-icon.ellipsis class="size-6"/>
         </label>

@@ -1,5 +1,5 @@
 @props([
-    'sticky' => true,
+    'sticky' => false,
     'class' => '',
 ])
 
