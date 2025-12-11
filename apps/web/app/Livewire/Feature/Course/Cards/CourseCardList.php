@@ -49,14 +49,14 @@ class CourseCardList extends Component
 
     public function edit($id)
     {
-        $this->redirectRoute('student.edit', ['courseId' => $id], navigate: true);
+        $this->redirectRoute('course.edit', ['courseId' => $id], navigate: true);
     }
 
     public function delete($id)
     {
         try {
-            $student = $this->cService->findById($id);
-            $this->cService->delete($student);
+            $course = $this->cService->findById($id);
+            $this->cService->delete($course);
 
             $this->showSuccessAlert('Data matakuliah berhasil dihapus.');
         } catch (\Exception $e) {
@@ -79,7 +79,7 @@ class CourseCardList extends Component
             $this->clearSelection();
 
             $this->showSuccessAlert('Data matakuliah terpilih berhasil dihapus.');
-            $this->dispatch('StudentDeleted');
+            $this->dispatch('courseDeleted');
         } catch (\Exception $e) {
             $this->showErrorAlert('Gagal menghapus matakuliah terpilih');
         }

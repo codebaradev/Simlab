@@ -9,9 +9,9 @@
 
                 <div>
                     {{-- Actions --}}
-                    <a href="/mahasiswa/tambah" wire:navigate>
+                    <a href="/matakuliah/tambah" wire:navigate>
                         <div class="flex items-center gap-3">
-                            <x-button leftIcon="add" wire:click="$dispatch('showCreateForm')">Tambah Matakuliah</x-button>
+                            <x-button leftIcon="add">Tambah Matakuliah</x-button>
                         </div>
                     </a>
                 </div>
@@ -32,7 +32,7 @@
         @forelse ($courses as $course)
             <x-cards.course-card :course="$course">
                 <x-slot:actions>
-                    <a href="/course/{{ $course->id }}" class="btn btn-primary btn-sm">Detail</a>
+                    {{-- <a href="/course/{{ $course->id }}" class="btn btn-primary btn-sm">Detail</a> --}}
                     {{-- <button wire:click="$dispatch('showEditForm', { id: {{ $course->id }} }})" class="btn btn-outline btn-sm">Edit</button> --}}
                     <x-cards.action-menu
                         :id="$course->id"

@@ -17,7 +17,7 @@ class AcademicClassService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true, ?int $spId = null): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true, ?int $limit = 10 ,?int $spId = null): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
@@ -56,6 +56,8 @@ class AcademicClassService
 
         if ($isPaginated) {
             return $query->paginate($perPage);
+        } else {
+            $query->limit($limit);
         }
 
         return $query->get();

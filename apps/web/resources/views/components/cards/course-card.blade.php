@@ -15,7 +15,7 @@
     @php
         // Prepare lecturer names (fall back to nidn/code if user name not available)
         $lecturers = $course->lecturers->map(function($l){
-            return optional($l->user)->name ?? ($l->nidn ?? $l->code ?? '—');
+            return optional(value: $l->user)->name ?? ($l->nidn ?? $l->code ?? '—');
         })->unique()->values()->all();
 
         $lecturersText = count($lecturers) ? implode(', ', $lecturers) : null;

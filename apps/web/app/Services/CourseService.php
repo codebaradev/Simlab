@@ -66,6 +66,15 @@ class CourseService
         return DB::transaction(function () use ($data) {
             $course = Course::make($data);
             $course->save();
+
+            if (isset($data['class_id'])) {
+                $course->academic_classes()->attach($data['class_id']);
+            }
+
+            if (isset($data['lecturer_id'])) {
+                $course->lecturers()->attach($data['lecturer_id']);
+            }
+
             return $course;
         });
     }
@@ -76,6 +85,11 @@ class CourseService
             $course->fill($data);
 
             $course->save();
+
+            if (isset($data['class_id'])) {
+                $course->academic_classes()->sync([$data['class_id']]);
+            }
+
             return $course;
         });
     }
