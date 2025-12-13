@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\GuestOnlyMiddleware;
+use App\Http\Middleware\KplOnlyMiddleware;
 use App\Http\Middleware\LbrOnlyMiddleware;
+use App\Http\Middleware\LbrOrKplOnlyMiddleware;
 use App\Http\Middleware\UserOnlyMiddleware;
 use App\Livewire\Feature\AcademicClass\Pages\AcademicClassFormPage;
 use App\Livewire\Feature\AcademicClass\Pages\AcademicClassListPage;
@@ -10,6 +12,7 @@ use App\Livewire\Feature\Application\Pages\ApplicationList;
 use App\Livewire\Feature\Auth\Login;
 use App\Livewire\Feature\Computer\Pages\ComputerFormPage;
 use App\Livewire\Feature\Computer\Pages\ComputerList;
+use App\Livewire\Feature\Course\Pages\CourseAttendanceIndexPage;
 use App\Livewire\Feature\Course\Pages\CourseFormPage;
 use App\Livewire\Feature\Course\Pages\CourseList;
 use App\Livewire\Feature\Dashboard\Index as Dashboard;
@@ -18,6 +21,7 @@ use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
 use App\Livewire\Feature\Lecturer\Pages\LecturerList;
 use App\Livewire\Feature\Room\Pages\RoomFormPage;
 use App\Livewire\Feature\Room\Pages\RoomList;
+use App\Livewire\Feature\Schedule\Pages\RequestListPage;
 use App\Livewire\Feature\Schedule\Pages\ScheduleIndexPage;
 use App\Livewire\Feature\Student\Pages\StudentFormPage;
 use App\Livewire\Feature\Student\Pages\StudentList;
@@ -30,11 +34,13 @@ Route::get('/', Login::class)->middleware([GuestOnlyMiddleware::class])->name('l
 Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/jadwal', ScheduleIndexPage::class)->name('schedule.index');
+    Route::get('/jadwal/request', RequestListPage::class)->name('schedule.request.index');
     Route::get('/matakuliah', CourseList::class)->name('course.index');
     Route::get('/matakuliah/tambah', CourseFormPage::class)->name('course.add');
     Route::get('/matakuliah/{courseId}', CourseFormPage::class)->name('course.edit');
+    Route::get('/matakuliah/{courseId}/absensi', CourseAttendanceIndexPage::class)->name('course.attendance.index');
 
-    Route::middleware([LbrOnlyMiddleware::class])->group(function () {
+    Route::middleware([LbrOrKplOnlyMiddleware::class])->group(function () {
         Route::get('/jurusan', DepartmentList::class)->name('department.index');
 
         Route::get('/prodi', StudyProgramList::class)->name('study-program.index');
@@ -60,5 +66,8 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
         Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.add');
         Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
         Route::get('/ruangan/{roomId}/aplikasi', ApplicationList::class)->where('roomId', '[0-9]+')->name('room.app.index');
+    });
+    Route::middleware([KplOnlyMiddleware::class])->group(function () {
+        Route::get('/jurusan', DepartmentList::class)->name('department.index');
     });
 });

@@ -21,4 +21,29 @@ enum CategoryEnum: int
             self::OTHERS => 'Lainnya',
         };
     }
+
+    public static function toArray(): array
+    {
+        return array_map(
+            fn(self $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            self::cases()
+        );
+    }
+
+    public static function toArrayExclude(array $excludeValues = []): array
+    {
+        return array_map(
+            fn(self $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            array_filter(
+                self::cases(),
+                fn($case) => !in_array($case->value, $excludeValues)
+            )
+        );
+    }
 }

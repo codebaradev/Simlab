@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use App\Enums\Schedule\StatusEnum;
+use App\Enums\ScheduleRequest\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,8 +22,9 @@ class Schedule extends Model
         'room_id',
         'sr_id',
         'course_id',
-        'start_datetime',
-        'end_datetime',
+        'start_date',
+        'start_time',
+        'end_time',
         'status',
         'is_open',
         'building',
@@ -30,8 +32,9 @@ class Schedule extends Model
     ];
 
     protected $casts = [
-        'start_datetime' => 'datetime',
-        'end_datetime'   => 'datetime',
+        'start_date' => 'date',
+        // 'start_time' => 'time',
+        // 'end_time'   => 'time',
         'is_open'        => 'boolean',
         'status'         => StatusEnum::class,
         'created_at'     => 'datetime',
@@ -42,6 +45,11 @@ class Schedule extends Model
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function rooms(): BelongsToMany
+    {
+        return $this->belongsToMany(Room::class, 'schedule_room', 'schedule_id', 'room_id');
     }
 
     public function schedule_request(): BelongsTo

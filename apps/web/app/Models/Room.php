@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\RoomStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -42,9 +43,14 @@ class Room extends Model
         return $this->hasOne(FingerPrint::class, 'room_id', 'id');
     }
 
-    public function schedules(): HasMany
+    // public function schedules(): HasMany
+    // {
+    //     return $this->hasMany(Schedule::class, 'room_id', 'id');
+    // }
+
+    public function schedules(): BelongsToMany
     {
-        return $this->hasMany(Schedule::class, 'room_id', 'id');
+        return $this->belongsToMany(Schedule::class, 'schedule_room', 'room_id', 'schedule_id');
     }
 
     public function scopeSearch($query, $search)

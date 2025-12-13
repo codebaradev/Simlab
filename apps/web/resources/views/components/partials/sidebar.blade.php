@@ -29,10 +29,11 @@
     <nav class="flex-1 p-4 overflow-y-auto">
         <ul class="space-y-2">
             <x-partials.sidebar-menu name="Dashboard" url="/dashboard" selected="dashboard" />
+            <x-partials.sidebar-menu name="Notifikasi" url="/notifikasi" selected="notifikasi" icon="book"/>
             <x-partials.sidebar-menu name="Jadwal" url="/jadwal" selected="jadwal" icon="calendar"/>
             <x-partials.sidebar-menu name="Matakuliah" url="/matakuliah" selected="matakuliah" icon="book"/>
 
-            @if ($role === UserRoleEnum::LABORAN->label())
+            @if ($role === UserRoleEnum::LABORAN->label() || $role === UserRoleEnum::LAB_HEAD->label())
                 <x-partials.sidebar-menu name="Mahasiswa" url="/mahasiswa" selected="mahasiswa" icon="users"/>
                 <x-partials.sidebar-menu name="Dosen" url="/dosen" selected="dosen" icon="user"/>
                 <x-partials.sidebar-menu name="Ruangan" url="/ruangan" selected="ruangan" icon="computer"/>

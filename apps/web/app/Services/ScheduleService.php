@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Attendance;
+use App\Models\AttendanceMonitoring;
+use App\Models\Course;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -133,6 +136,46 @@ class ScheduleService
                 ->restore();
 
             return $count;
+        });
+    }
+
+    public function createMultiple(array $items): \Illuminate\Support\Collection
+    {
+        $course = Course::findOrFail($items[0]['course_id']);
+        $lecturers = $course->lecturers()->with('user')->get();
+        $students = $course->academic_classes[0]->students()->with(['user'])->get();
+
+
+        return DB::transaction(function () use ($items, $lecturers, $students) {
+            $created = [];
+            foreach ($items as $data) {
+                // Use mass assignment; ensure Schedule::$fillable contains required fields
+                $schedule = Schedule::create($data);
+                $created[] = $schedule;
+
+                AttendanceMonitoring::create([
+                    'schedule_id' => $schedule->id,
+                ]);
+
+                foreach ($students as $student) {
+                    $user = $student->user;
+
+                    Attendance::create([
+                        'user_id' => $user->id,
+                        'schedule_id' => $schedule->id,
+                    ]);
+                }
+
+                foreach ($lecturers as $lecturer) {
+                    $user = $lecturer->user;
+
+                    Attendance::create([
+                        'user_id' => $user->id,
+                        'schedule_id' => $schedule->id,
+                    ]);
+                }
+            }
+            return collect($created);
         });
     }
 }

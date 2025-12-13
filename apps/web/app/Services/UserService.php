@@ -27,7 +27,7 @@ class UserService
             return $user;
         }
 
-        throw new \Exception('Login gagal. Periksa kembali Nomor Kartu Keluarga dan kata sandi Anda');
+        throw new \Exception(message: 'Login gagal. Periksa kembali username dan password Anda');
     }
 
     public function logout()

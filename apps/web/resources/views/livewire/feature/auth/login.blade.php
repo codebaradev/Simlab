@@ -18,11 +18,18 @@
         </div>
 
         <form action="" class="" wire:submit="login">
-            <div class="flex flex-col gap-4 mb-8">
-                <x-form.input name="username" label="Username"/>
-
-                <x-form.input name="password" type="password" label="Password"/>
+          @error('general')
+            <div class="alert alert-error alert-soft mb-4">
+              <div>
+                <span>{{ $message }}</span>
+              </div>
             </div>
+          @enderror
+          <div class="flex flex-col gap-4 mb-8">
+            <x-form.input name="username" label="Username"/>
+
+            <x-form.input name="password" type="password" label="Password"/>
+          </div>
 
             <div class="card-actions ">
                 <x-button type="submit" class="w-full" target="login">Login</x-button>

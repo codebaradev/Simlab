@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Feature\Lecturer\Forms;
 
+use App\Enums\UserRoleEnum;
 use App\Services\LecturerService;
 use App\Services\StudyProgramService;
 use App\Services\UserService;
@@ -117,7 +118,7 @@ class LecturerForm extends Component
                     $user = $this->userService->update($this->lecturer->user, $userData);
                     $this->leService->update($this->lecturer, $user->id, $lecturerData);
                 } else {
-                    $user = $this->userService->create( $userData);
+                    $user = $this->userService->create( $userData, role: UserRoleEnum::LECTURER->value);
                     $this->leService->create( $user->id, $lecturerData, );
                     return $this->redirectRoute('lecturer.index', navigate: true);
                 }
