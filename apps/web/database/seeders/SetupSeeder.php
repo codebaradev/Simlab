@@ -20,7 +20,7 @@ class SetupSeeder extends Seeder
                 DepartmentSeeder::class,
                 StudyProgramSeeder::class,
                 LaboranSeeder::class,
-                StudentService::class,
+                StudentSeeder::class,
                 LecturerSeeder::class,
             ]);
         });
