@@ -17,6 +17,10 @@ class StudentSeeder extends Seeder
     {
         $sp = StudyProgram::where('code', 'IK')->first();
 
+        if (!$sp) {
+            $sp = StudyProgram::factory()->create(['code' => "IK", 'name' => 'Ilmu Komputer']);
+        }
+
         DB::transaction(function () use ($sp)  {
             Student::factory()->count(10)->create(['sp_id' => $sp->id]);
         });
