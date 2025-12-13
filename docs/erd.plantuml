@@ -128,6 +128,7 @@ entity ScheduleRequest {
     * user_id: int <FK>
     lecturer_id: int
     ---
+    * repeat_count: int
     * status: int    
     * category: int 
     information: string
@@ -139,8 +140,9 @@ entity "Schedule" as schedule {
     sr_id: int <FK>
     course_id: int <FK>
     ---
-    * start_datetime: datetime
-    * end_datetime: datetime
+    * start_date: date
+    * start_time: time
+    * end_time: time
     * status: int
     * is_open: bool
     * campus: int

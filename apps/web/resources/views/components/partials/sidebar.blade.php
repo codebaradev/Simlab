@@ -32,7 +32,7 @@
             <x-partials.sidebar-menu name="Jadwal" url="/jadwal" selected="jadwal" icon="calendar"/>
             <x-partials.sidebar-menu name="Matakuliah" url="/matakuliah" selected="matakuliah" icon="book"/>
 
-            @if ($role === UserRoleEnum::LABORAN->label())
+            @if ($role === UserRoleEnum::LABORAN->label() || $role === UserRoleEnum::LAB_HEAD->label())
                 <x-partials.sidebar-menu name="Mahasiswa" url="/mahasiswa" selected="mahasiswa" icon="users"/>
                 <x-partials.sidebar-menu name="Dosen" url="/dosen" selected="dosen" icon="user"/>
                 <x-partials.sidebar-menu name="Ruangan" url="/ruangan" selected="ruangan" icon="computer"/>

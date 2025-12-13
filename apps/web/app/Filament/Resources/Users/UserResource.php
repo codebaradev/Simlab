@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Enums\User\UserGenderEnum;
+use App\Enums\UserStatusEnum;
 use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\Role;
 use App\Models\User;
@@ -19,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -29,6 +32,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\MultiSelect;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use SebastianBergmann\CodeCoverage\Driver\Selector;
 
 class UserResource extends Resource
 {
@@ -53,10 +57,11 @@ class UserResource extends Resource
     ->schema([ // pastikan memakai schema() kalau konteksnya Form Resource
         TextInput::make('name')->required(),
         TextInput::make('username')->required(),
-        TextInput::make('status')
+        Select::make('status')
             ->required()
-            ->numeric()
-            ->default(1),
+            ->options(UserStatusEnum::options())
+            ->default(UserStatusEnum::ACTIVE->value)
+            ->native(false), // optional, biar dropdown lebih bagus (Filament UI)
 
         // GANTI: pakai MultiSelect untuk belongsToMany
         MultiSelect::make('roles')
@@ -114,9 +119,10 @@ class UserResource extends Resource
                     ->searchable(),
                 TextColumn::make('username')
                     ->searchable(),
-                TextColumn::make('status')
-                    ->numeric()
-                    ->sortable(),
+                SelectColumn::make('status')
+                ->options(UserStatusEnum::options())
+                ->sortable()
+                ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
@@ -124,9 +130,10 @@ class UserResource extends Resource
                     ->searchable(),
                 TextColumn::make('address')
                     ->searchable(),
-                TextColumn::make('gender')
-                    ->numeric()
-                    ->sortable(),
+                SelectColumn::make('status')
+                    ->options(UserGenderEnum::options())
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),

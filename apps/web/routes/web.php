@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\GuestOnlyMiddleware;
+use App\Http\Middleware\KplOnlyMiddleware;
 use App\Http\Middleware\LbrOnlyMiddleware;
+use App\Http\Middleware\LbrOrKplOnlyMiddleware;
 use App\Http\Middleware\UserOnlyMiddleware;
 use App\Livewire\Feature\AcademicClass\Pages\AcademicClassFormPage;
 use App\Livewire\Feature\AcademicClass\Pages\AcademicClassListPage;
@@ -34,7 +36,7 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/matakuliah/tambah', CourseFormPage::class)->name('course.add');
     Route::get('/matakuliah/{courseId}', CourseFormPage::class)->name('course.edit');
 
-    Route::middleware([LbrOnlyMiddleware::class])->group(function () {
+    Route::middleware([LbrOrKplOnlyMiddleware::class])->group(function () {
         Route::get('/jurusan', DepartmentList::class)->name('department.index');
 
         Route::get('/prodi', StudyProgramList::class)->name('study-program.index');
@@ -60,5 +62,8 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
         Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.add');
         Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
         Route::get('/ruangan/{roomId}/aplikasi', ApplicationList::class)->where('roomId', '[0-9]+')->name('room.app.index');
+    });
+    Route::middleware([KplOnlyMiddleware::class])->group(function () {
+        Route::get('/jurusan', DepartmentList::class)->name('department.index');
     });
 });

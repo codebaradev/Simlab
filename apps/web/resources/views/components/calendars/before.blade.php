@@ -21,7 +21,7 @@
     </div>
 
     <div>
-        <x-button leftIcon="add" target="requestSchedule" wire:click="requestSchedule">
+        <x-button leftIcon="add" target="$dispatch('showRequestFormModal')" wire:click="$dispatch('showRequestFormModal')">
             Request Jadwal
         </x-button>
     </div>

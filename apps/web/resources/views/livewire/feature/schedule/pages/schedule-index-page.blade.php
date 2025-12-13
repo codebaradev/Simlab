@@ -18,4 +18,23 @@
             />
         </div>
     </div>
+
+    <!-- Form Modal -->
+    <dialog id="request_modal" class="modal" @if($showRequestFormModal) open @endif>
+        <div class="modal-box w-3/4 max-w-5xl max-h-[90vh]">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" wire:click="closeRequestFormModal">✕</button>
+            </form>
+
+            <h3 class="font-bold text-lg mb-4">Request Jadwal</h3>
+
+            <livewire:feature.schedule.forms.request-schedule-form
+                key="request-schedule-form"
+            />
+        </div>
+
+        <form method="dialog" class="modal-backdrop">
+            <button wire:click="closeRequestFormModal">close</button>
+        </form>
+    </dialog>
 </div>

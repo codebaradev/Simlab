@@ -6,6 +6,8 @@ use App\Services\ApplicationService;
 use App\Services\ComputerService;
 use App\Services\DepartmentService;
 use App\Services\RoomService;
+use App\Services\ScheduleRequestService;
+use App\Services\ScheduleService;
 use App\Services\StudentService;
 use App\Services\StudyProgramService;
 use App\Services\UserService;
@@ -50,6 +52,14 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(ApplicationService::class, function ($app) {
             return new ApplicationService();
+        });
+        $this->app->singleton(ScheduleService::class, function ($app) {
+            return new ScheduleService();
+        });
+        $this->app->singleton(ScheduleRequestService::class, function ($app) {
+            return new ScheduleRequestService(
+                $app->make(ScheduleService::class)
+            );
         });
     }
 }

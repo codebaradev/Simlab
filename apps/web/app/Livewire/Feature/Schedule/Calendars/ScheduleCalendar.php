@@ -29,12 +29,12 @@ class ScheduleCalendar extends LivewireCalendar
             ->map(callback: function (Schedule $model) {
                 return [
                     'id' => $model->id,
-                    'title' => $model->nim,
-                    'description' => $model->generation,
+                    'title' => $model->course->name ,
+                    'description' => $model->course->academic_classes[0]->code . $model->room->code,
                     'time' => optional($model->created_at)->format('H:i') ?? null,
                     'start_at' => optional($model->start_datetime)->toDateTimeString(),
                     'end_at' => optional($model->start_datetime)->toDateTimeString(),
-                    'date' => optional($model->created_at)->toDateString(),
+                    'date' => optional($model->start_date)->toDateString(),
                 ];
             });
     }

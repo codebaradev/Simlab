@@ -9,9 +9,12 @@ class ScheduleIndexPage extends Component
 {
     public int $currentMonth;
     public int $currentYear;
+    public bool $showRequestFormModal = false;
 
     protected $listeners = [
         'calendarMonthChanged' => 'onCalendarMonthChanged', // dari child emitUp
+        'showRequestFormModal',
+        'closeRequestFormModal'
     ];
 
     public function mount()
@@ -26,6 +29,16 @@ class ScheduleIndexPage extends Component
         // payload: ['month' => n, 'year' => YYYY, 'label' => 'April 2025']
         $this->currentMonth = (int) ($payload['month'] ?? $this->currentMonth);
         $this->currentYear  = (int) ($payload['year']  ?? $this->currentYear);
+    }
+
+    public function showRequestFormModal()
+    {
+        $this->showRequestFormModal = true;
+    }
+
+    public function closeRequestFormModal(): void
+    {
+        $this->showRequestFormModal = false;
     }
 
     public function render()

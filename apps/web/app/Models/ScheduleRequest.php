@@ -19,6 +19,7 @@ class ScheduleRequest extends Model
     protected $fillable = [
         'user_id',
         'lecturer_id',
+        'repeat_count',
         'status',
         'category',
         'information'

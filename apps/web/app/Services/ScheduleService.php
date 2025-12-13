@@ -135,4 +135,16 @@ class ScheduleService
             return $count;
         });
     }
+
+    public function createMultiple(array $items): \Illuminate\Support\Collection
+    {
+        return DB::transaction(function () use ($items) {
+            $created = [];
+            foreach ($items as $data) {
+                // Use mass assignment; ensure Schedule::$fillable contains required fields
+                $created[] = Schedule::create($data);
+            }
+            return collect($created);
+        });
+    }
 }
