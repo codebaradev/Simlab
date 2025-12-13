@@ -21,7 +21,7 @@
 
                         <x-form.input class="col-span-2" name="repeat_count" label="Repeat (jumlah pertemuan)" :required="true" :live="true"/>
 
-                        <x-form.date type="date" class="col-span-2" name="start_date" label="Tanggal" type="time" :required="true" :live="true"/>
+                        <x-form.input type="date" class="col-span-2" name="start_date" label="Tanggal" :required="true" :live="true"/>
                         <x-form.input type="time" name="start_time" label="Mulai" type="time" :required="true" :live="true"/>
                         <x-form.input type="time" name="end_time" label="Selesai" type="time" :required="true" :live="true"/>
 

@@ -61,6 +61,11 @@ class ScheduleCalendar extends LivewireCalendar
         $this->dispatch('openDateModal', $date, $eventsForDate);
     }
 
+    public function onAddDayClick($year, $month, $day)
+    {
+        $this->dispatch('showRequestFormModal', $year, $month, $day);
+    }
+
     // when gridStartsAt changes, notify parent/page so it can update month/year display
     public function updatedGridStartsAt($value)
     {

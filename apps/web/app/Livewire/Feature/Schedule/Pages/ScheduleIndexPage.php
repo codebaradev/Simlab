@@ -31,8 +31,11 @@ class ScheduleIndexPage extends Component
         $this->currentYear  = (int) ($payload['year']  ?? $this->currentYear);
     }
 
-    public function showRequestFormModal()
+    public function showRequestFormModal($year = null, $month = null, $day = null)
     {
+        if ($year && $month && $day) {
+            $this->dispatch('changeDateRequestForm', $year, $month, $day);
+        }
         $this->showRequestFormModal = true;
     }
 

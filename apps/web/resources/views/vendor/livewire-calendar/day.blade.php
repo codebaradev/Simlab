@@ -20,7 +20,7 @@
 
             {{-- Number of Day --}}
 
-            <div class="flex items-center ">
+            <div class="flex items-center justify-between">
                 <p class="text-sm flex justify-center items-center size-[22px] rounded-full {{ $isToday ? 'bg-red-500  text-white' : '' }} {{ $dayInMonth ? ' font-medium ' : '' }}">
                     {{ $day->format('j') }}
                 </p>
@@ -29,6 +29,9 @@
                         {{ $events->count() }} {{ Str::plural('event', $events->count()) }}
                     @endif
                 </p>
+                <button class="btn btn-xs btn-ghost rounded-full" wire:click="onAddDayClick({{ $day->year }}, {{ $day->month }}, {{ $day->day }})">
+                    <x-icon.add class="size-3"/>
+                </button>
             </div>
 
             {{-- Events --}}

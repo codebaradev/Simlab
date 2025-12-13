@@ -41,6 +41,10 @@ class RequestScheduleForm extends Component
     // each item: ['room_id' => int|null, 'start' => 'Y-m-d\TH:i', 'end' => 'Y-m-d\TH:i']
     public $occurrences = [];
 
+    protected $listeners = [
+        'changeDateRequestForm' => 'changeDate'
+    ];
+
     protected ScheduleRequestService $srService;
 
     public function boot(ScheduleRequestService $srService)
@@ -103,6 +107,12 @@ class RequestScheduleForm extends Component
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after_or_equal:start_time'],
         ];
+    }
+
+    public function changeDate($year, $month, $day)
+    {
+        $date = Carbon::create($year, $month, $day);
+        $this->start_date = $date->toDateString();
     }
 
     public function updatedActiveTab()
