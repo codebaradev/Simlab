@@ -20,7 +20,7 @@ class LaboranSeeder extends Seeder
                 'name' => 'laboran1',
                 'username' => 'laboran1',
                 'email' => 'laboran@gmail.com',
-                'password' => Hash::make('  123'),
+                'password' => Hash::make('123'),
             ]);
         });
     }
