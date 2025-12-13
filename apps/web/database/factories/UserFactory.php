@@ -38,6 +38,17 @@ class UserFactory extends Factory
         ];
     }
 
+    public function laboran(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $role = Role::where('code', UserRoleEnum::LABORAN->value)->first();
+
+            if ($role) {
+                $user->roles()->attach($role->id);
+            }
+        });
+    }
+
     public function lecturer(): static
     {
         return $this->afterCreating(function (User $user) {
