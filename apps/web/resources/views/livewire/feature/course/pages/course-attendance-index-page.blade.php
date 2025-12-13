@@ -15,7 +15,9 @@
 
         <a href="/matakuliah/{{ $course->id  }}/absensi" class="tab cursor-pointer tab-active" wire:navigate>Absensi</a>
         <div class="tab-content bg-base-100 border-base-300 p-6">
-            <livewire:feature.course.tables.course-attendance-table/>
+            <livewire:feature.course.tables.course-attendance-table
+                :courseId="$course->id"
+            />
         </div>
     </div>
 </div>

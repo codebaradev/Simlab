@@ -136,7 +136,7 @@ entity ScheduleRequest {
 
 entity "Schedule" as schedule {
     * id: int <PK>
-    * room_id: int <FK>
+    ' * room_id: int <FK>
     sr_id: int <FK>
     course_id: int <FK>
     ---
@@ -237,7 +237,7 @@ lecturer ||--|| ScheduleRequest
 ScheduleRequest ||--|{ schedule
 ' lecturer }|--|{ schedule: ""
 ' student }|--|{ schedule: ""
-room ||--|{ schedule: ""
+room }|--|{ schedule: ""
 course ||--|{ schedule:""
 schedule ||--|| AttendanceMonitoring
 
