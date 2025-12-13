@@ -17,6 +17,8 @@
                 after-calendar-view="components/calendars/after"
             />
         </div>
+
+        <a href="/jadwal/request" class="tab cursor-pointer" wire:navigate>Request</a>
     </div>
 
     <!-- Form Modal -->

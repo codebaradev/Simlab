@@ -20,6 +20,7 @@ use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
 use App\Livewire\Feature\Lecturer\Pages\LecturerList;
 use App\Livewire\Feature\Room\Pages\RoomFormPage;
 use App\Livewire\Feature\Room\Pages\RoomList;
+use App\Livewire\Feature\Schedule\Pages\RequestListPage;
 use App\Livewire\Feature\Schedule\Pages\ScheduleIndexPage;
 use App\Livewire\Feature\Student\Pages\StudentFormPage;
 use App\Livewire\Feature\Student\Pages\StudentList;
@@ -32,6 +33,7 @@ Route::get('/', Login::class)->middleware([GuestOnlyMiddleware::class])->name('l
 Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/jadwal', ScheduleIndexPage::class)->name('schedule.index');
+    Route::get('/jadwal/request', RequestListPage::class)->name('schedule.request.index');
     Route::get('/matakuliah', CourseList::class)->name('course.index');
     Route::get('/matakuliah/tambah', CourseFormPage::class)->name('course.add');
     Route::get('/matakuliah/{courseId}', CourseFormPage::class)->name('course.edit');

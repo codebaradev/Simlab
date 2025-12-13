@@ -5,7 +5,7 @@ namespace App\Enums\ScheduleRequest;
 enum StatusEnum: int
 {
     case PENDING = 1;
-    case APPROVE = 2;
+    case APPROVED = 2;
     case REJECTED = 3;
     case CANCELED = 4;
     case FINISHED = 5;
@@ -14,7 +14,7 @@ enum StatusEnum: int
     {
         return match ($this) {
             self::PENDING => 'Menunggu Persetujuan',
-            self::APPROVE => 'Disetujui',
+            self::APPROVED => 'Disetujui',
             self::REJECTED => 'Ditolak',
             self::CANCELED => 'Dibatalkan',
             self::FINISHED => 'Selesai',

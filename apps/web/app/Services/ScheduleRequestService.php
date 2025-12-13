@@ -3,8 +3,9 @@
 namespace App\Services;
 
 use App\Enums\ScheduleRequest\CategoryEnum;
-use App\Models\Room;
+use App\Enums\ScheduleRequest\StatusEnum;
 use App\Models\ScheduleRequest;
+use App\Models\Room;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,6 +40,28 @@ class ScheduleRequestService
                 $query->active();
             } elseif ($filters['status'] === 'deleted') {
                 $query->onlyTrashed();
+            }
+        }
+
+        // filter by user_id
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        // filter by schedule-request status (pending/approved/rejected) using enum
+        if (!empty($filters['sr_status'])) {
+            $statusFilter = $filters['sr_status'];
+            if (is_string($statusFilter)) {
+                $statusFilter = strtolower($statusFilter);
+                if ($statusFilter === 'masuk' || $statusFilter === 'pending') {
+                    $query->where('status', StatusEnum::PENDING->value ?? StatusEnum::PENDING);
+                } elseif ($statusFilter === 'disetujui' || $statusFilter === 'approved') {
+                    $query->where('status', StatusEnum::APPROVED->value ?? StatusEnum::APPROVED);
+                } elseif ($statusFilter === 'ditolak' || $statusFilter === 'rejected') {
+                    $query->where('status', StatusEnum::REJECTED->value ?? StatusEnum::REJECTED);
+                }
+            } elseif (is_int($statusFilter)) {
+                $query->where('status', $statusFilter);
             }
         }
 
@@ -158,7 +181,7 @@ class ScheduleRequestService
                 'information' => $data['information'] ?? null,
             ];
             $scheduleRequest = ScheduleRequest::create($srPayload);
- 
+
             // If caller provided explicit schedules (occurrences), use them directly
             if (!empty($data['schedules']) && is_array($data['schedules'])) {
                 $schedules = [];
