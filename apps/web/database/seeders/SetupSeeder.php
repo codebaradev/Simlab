@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Services\StudentService;
+use DB;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,13 +14,15 @@ class SetupSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            RoleSeeder::class,
-            DepartmentSeeder::class,
-            StudyProgramSeeder::class,
-            LaboranSeeder::class,
-            StudentService::class,
-            LecturerSeeder::class,
-        ]);
+        DB::transaction(function () {
+            $this->call([
+                RoleSeeder::class,
+                DepartmentSeeder::class,
+                StudyProgramSeeder::class,
+                LaboranSeeder::class,
+                StudentService::class,
+                LecturerSeeder::class,
+            ]);
+        });
     }
 }
