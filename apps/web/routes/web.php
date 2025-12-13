@@ -12,6 +12,7 @@ use App\Livewire\Feature\Application\Pages\ApplicationList;
 use App\Livewire\Feature\Auth\Login;
 use App\Livewire\Feature\Computer\Pages\ComputerFormPage;
 use App\Livewire\Feature\Computer\Pages\ComputerList;
+use App\Livewire\Feature\Course\Pages\CourseAttendanceIndexPage;
 use App\Livewire\Feature\Course\Pages\CourseFormPage;
 use App\Livewire\Feature\Course\Pages\CourseList;
 use App\Livewire\Feature\Dashboard\Index as Dashboard;
@@ -37,6 +38,7 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
     Route::get('/matakuliah', CourseList::class)->name('course.index');
     Route::get('/matakuliah/tambah', CourseFormPage::class)->name('course.add');
     Route::get('/matakuliah/{courseId}', CourseFormPage::class)->name('course.edit');
+    Route::get('/matakuliah/{courseId}/absensi', CourseAttendanceIndexPage::class)->name('course.attendance.index');
 
     Route::middleware([LbrOrKplOnlyMiddleware::class])->group(function () {
         Route::get('/jurusan', DepartmentList::class)->name('department.index');

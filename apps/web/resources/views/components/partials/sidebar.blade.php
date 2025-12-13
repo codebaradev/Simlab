@@ -29,6 +29,7 @@
     <nav class="flex-1 p-4 overflow-y-auto">
         <ul class="space-y-2">
             <x-partials.sidebar-menu name="Dashboard" url="/dashboard" selected="dashboard" />
+            <x-partials.sidebar-menu name="Notifikasi" url="/notifikasi" selected="notifikasi" icon="book"/>
             <x-partials.sidebar-menu name="Jadwal" url="/jadwal" selected="jadwal" icon="calendar"/>
             <x-partials.sidebar-menu name="Matakuliah" url="/matakuliah" selected="matakuliah" icon="book"/>
 

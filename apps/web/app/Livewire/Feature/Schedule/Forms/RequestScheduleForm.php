@@ -304,12 +304,7 @@ class RequestScheduleForm extends Component
                 $this->srService->createWithSchedules($payload);
             }
 
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('closeRequestFormModal');
-            } else {
-                $this->emitUp('closeRequestFormModal');
-            }
-
+            $this->dispatch('closeRequestFormModal');
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Request jadwal berhasil dikirim.']);
 
             $this->reset(['course_id','lecturer_id','room_ids','category','information','repeat_count','occurrences']);
