@@ -15,10 +15,13 @@ class ComputerSeeder extends Seeder
      */
     public function run(): void
     {
-        $room = Room::where('code', '202')->first();
+        $rooms = Room::get();
 
-        DB::transaction(function () use ($room) {
-            Computer::factory()->count(10)->create(['room_id' => $room->id]);
+        DB::transaction(function () use ($rooms) {
+            foreach ($rooms as $room) {
+                Computer::factory()->count(10)->create(['room_id' => $room->id]);
+            }
         });
+
     }
 }

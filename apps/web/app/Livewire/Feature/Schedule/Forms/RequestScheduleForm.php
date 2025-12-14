@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Livewire\Feature\Schedule\Forms;
+use Illuminate\Support\Facades\Http;
 
 use App\Enums\Schedule\BuildingEnum;
 use App\Enums\ScheduleRequest\CategoryEnum;
@@ -45,11 +46,75 @@ class RequestScheduleForm extends Component
         'changeDateRequestForm' => 'changeDate'
     ];
 
+    public $recommendations = [];
+    public $isLoadingAi = false;
+
     protected ScheduleRequestService $srService;
 
     public function boot(ScheduleRequestService $srService)
     {
         $this->srService = $srService;
+    }
+
+    public function updatedCourseId($value)
+    {   // Ambil matkul
+        $course = Course::find($value);
+
+        if (!$course) {
+            $this ->recommendations = [];
+            return;
+        }
+        
+        // Ambil ruangan
+        $rooms = Room::all();
+
+        $payload = [
+            'matkul' => [
+                'course_name' => $course->name,
+                'num_students' => (int) $course->academic_classes[0]->students()->count() ?? 30,
+                'ram_required_gb' => (float) ($course->ram_required ?? 4),
+                'cpu_cores_required' => (int) ($course->cpu_required ?? 2),
+                'gpu_required' => $course->gpu_required ? 'yes' : 'no',
+                'required_software' => $course->software_list ?? '',
+                'difficulty_level' => $course->difficulty ?? 'medium',
+            ],
+            'ruangan' => $rooms->map(function ($room) {
+                return [
+                    'room_id' => (string) $room->id,
+                    'room_name' => $room->name,
+                    'capacity' => $room->computers->sum('computer_count'),
+                    'ram_available_gb' => (float) ($room->ram_spec ?? 4),
+                    'cpu_cores_available' => (int) ($room->cpu_spec ?? 2),
+                    'gpu_available' => $room->has_gpu ? 'yes' : 'no',
+                    'os_type' => $room->os_type ?? 'windows',
+                ];
+            })->toArray(),
+        ];
+
+        // Kirim API ke python
+        $this->isLoadingAi = true;
+        try {
+            $response = Http::timeout(5)->post('http://127.0.0.1:8080/predict', $payload);
+            // dd($response->body());
+
+            if ($response->successful()) {
+                $result = $response->json();
+                // dd($result);
+                $this->recommendations = $result['recommendations'];
+
+                $this->dispatch('notify', ['type' => 'success', 'message' => 'AI berhasil memberikan rekomendasi ruangan.']);
+            }else{
+                throw new \Exception('AI response not successful');
+                $this->recommendations = [];
+            }
+        }catch (\Exception $e) {
+            $this->recommendations = [];
+            throw $e;
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal mendapatkan rekomendasi dari AI.']);
+        }
+        // dd($this->recommendations);
+
+        $this->isLoadingAi = false;
     }
 
     public function mount()
@@ -76,6 +141,21 @@ class RequestScheduleForm extends Component
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
         ];
+
+        if ($this->course_id) {
+            $this->updatedCourseId($this->course_id);
+        }
+    }
+
+    public function selectRecommendedRoom($roomId)
+    {
+        // Reset array room_ids dan isi dengan yang dipilih
+        $this->room_ids = [$roomId];
+        
+        // Trigger update occurrences agar jadwal di generate ulang
+        $this->updatedRoomIds();
+        
+        $this->dispatch('notify', ['type' => 'info', 'message' => 'Ruangan diterapkan dari rekomendasi.']);
     }
 
     protected function rules(): array
