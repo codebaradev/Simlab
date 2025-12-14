@@ -3,6 +3,7 @@
 namespace App\Livewire\Feature\Schedule\Forms;
 
 use App\Enums\Schedule\BuildingEnum;
+use App\Enums\Schedule\TimeEnum;
 use App\Enums\ScheduleRequest\CategoryEnum;
 use App\Enums\ScheduleRequest\StatusEnum;
 use App\Models\Course;
@@ -26,8 +27,7 @@ class RequestScheduleForm extends Component
     public $repeat_count = 1;
 
     public $start_date;
-    public $start_time;
-    public $end_time;
+    public $time;
 
     // lists for selects/cards
     public $courses = [];
@@ -65,7 +65,6 @@ class RequestScheduleForm extends Component
 
         $now = Carbon::now()->addHour()->startOfHour();
         $this->start_date = $now->toDateString();
-        $this->start_time = $now->format('H:i');
         $this->end_time = $now->copy()->addHour()->format('H:i');
         $this->repeat_count = 1;
         $this->occurrences = [];
@@ -73,8 +72,7 @@ class RequestScheduleForm extends Component
         $this->occurrences[] = [
             'room_id' => $this->room_ids[0] ?? null,
             'start_date' => $this->start_date,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
+            'time' => $this->time
         ];
     }
 
@@ -90,8 +88,7 @@ class RequestScheduleForm extends Component
                 'information' => ['nullable', 'string'],
                 'repeat_count' => ['nullable', 'integer', 'min:1'],
                 'start_date' => ['required', 'date'],
-                'start_time' => ['required', 'date_format:H:i'],
-                'end_time' => ['required', 'date_format:H:i', 'after_or_equal:start_time'],
+                'time' => ['required', Rule::enum(TimeEnum::class)],
             ];
         }
 
@@ -104,8 +101,7 @@ class RequestScheduleForm extends Component
             'room_ids' => ['required', 'array', 'min:1'],
             'room_ids.*' => ['required', 'exists:rooms,id'],
             'start_date' => ['required', 'date'],
-            'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after_or_equal:start_time'],
+            'time' => ['required', Rule::enum(TimeEnum::class)],
         ];
     }
 
@@ -120,8 +116,7 @@ class RequestScheduleForm extends Component
         $this->occurrences = [[
             'room_id' => $this->room_ids[0] ?? null,
             'start_date' => $this->start_date,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
+            'time' => $this->time,
         ]];
     }
 
@@ -163,7 +158,8 @@ class RequestScheduleForm extends Component
     public function generateOccurrences(): void
     {
         $this->occurrences = [];
-        if (empty($this->start_date) || empty($this->start_time) || empty($this->end_time) || empty($this->repeat_count)) {
+
+        if (empty($this->start_date) || empty($this->time) || empty($this->repeat_count)) {
             $this->dispatch('notify', ['type' => 'warning', 'message' => 'Isi tanggal, waktu mulai, waktu selesai dan repeat terlebih dahulu.']);
             return;
         }
@@ -187,8 +183,7 @@ class RequestScheduleForm extends Component
                 $this->occurrences[] = [
                     'room_id' => null,
                     'start_date' => $startIter->toDateString(),
-                    'start_time' => $startIter->format('H:i'),
-                    'end_time' => $endIter->format('H:i'),
+                    'time' => $startIter->format('H:i'),
                 ];
                 continue;
             }
@@ -197,32 +192,10 @@ class RequestScheduleForm extends Component
                 $this->occurrences[] = [
                     'room_id' => $roomId,
                     'start_date' => $startIter->toDateString(),
-                    'start_time' => $startIter->format('H:i'),
-                    'end_time' => $endIter->format('H:i'),
+                    'time' => $this->time,
                 ];
             }
         }
-    }
-
-    public function removeOccurrence(int $index): void
-    {
-        if (isset($this->occurrences[$index])) {
-            array_splice($this->occurrences, $index, 1);
-        }
-    }
-
-    public function addOccurrence(): void
-    {
-        $date = $this->start_date ?? Carbon::now()->toDateString();
-        $start = $this->start_time ?? Carbon::now()->addHour()->format('H:i');
-        $end = $this->end_time ?? Carbon::now()->addHour()->addHour()->format('H:i');
-
-        $this->occurrences[] = [
-            'room_id' => $this->room_ids[0] ?? null,
-            'start_date' => $date,
-            'start_time' => $start,
-            'end_time' => $end,
-        ];
     }
 
     public function save()
@@ -230,33 +203,38 @@ class RequestScheduleForm extends Component
         $this->validate();
 
         try {
+            // Build ScheduleRequest payload
+            $srData = [
+                'user_id' => auth()->id(),
+                'lecturer_id' => $this->lecturer_id ?? null,
+                'repeat_count' => max(1, (int) $this->repeat_count),
+                'status' => StatusEnum::PENDING,
+                'category' => $this->category ?? CategoryEnum::COURSE->value,
+                'information' => $this->information ?? null,
+            ];
+
+            // If there are explicit occurrences, convert them into schedules payload
             if (!empty($this->occurrences)) {
-                // create ScheduleRequest
-                $srData = [
-                    'user_id' => auth()->id(),
-                    'lecturer_id' => $this->lecturer_id ?? null,
-                    'repeat_count' => max(1, (int) $this->repeat_count),
-                    'status' => StatusEnum::PENDING,
-                    'category' => $this->category ?? CategoryEnum::COURSE->value,
-                    'information' => $this->information ?? null,
-                ];
-
-                $createdSr = $this->srService->create($srData);
-
-                // build schedules from occurrences (already separate date/time)
-                $toCreate = [];
+                $schedules = [];
                 foreach ($this->occurrences as $occ) {
-                    if (empty($occ['start_date']) || empty($occ['start_time']) || empty($occ['end_time'])) {
+                    if (empty($occ['start_date'])) {
                         continue;
                     }
 
-                    $toCreate[] = [
-                        'room_id' => $occ['room_id'] ?? null,
-                        'sr_id' => $createdSr->id,
+                    $roomIds = [];
+                    if (!empty($occ['room_id'])) {
+                        // each occurrence currently represents a single room selection
+                        $roomIds[] = (int) $occ['room_id'];
+                    }
+
+                    // prefer explicit enum `time` from form, otherwise leave null and include start/end as fallback
+                    $timeVal = $occ['time'] ?? $this->time ?? null;
+
+                    $schedules[] = [
+                        'room_ids' => $roomIds,
                         'course_id' => $this->course_id ?? null,
                         'start_date' => $occ['start_date'],
-                        'start_time' => strlen($occ['start_time']) > 5 ? $occ['start_time'] : ($occ['start_time'] . ':00'),
-                        'end_time' => strlen($occ['end_time']) > 5 ? $occ['end_time'] : ($occ['end_time'] . ':00'),
+                        'time' => $timeVal,
                         'status' => StatusEnum::PENDING,
                         'is_open' => false,
                         'building' => BuildingEnum::CAMPUS_1,
@@ -266,43 +244,39 @@ class RequestScheduleForm extends Component
                     ];
                 }
 
-
-                if (property_exists($this->srService, 'scheduleService') && $this->srService->scheduleService) {
-                    $this->srService->scheduleService->createMultiple($toCreate);
-                } else {
-                    $groupedRoomIds = array_values(array_unique(array_filter(array_column($this->occurrences, 'room_id'))));
-                    $this->srService->createWithSchedules([
-                        'user_id' => $srData['user_id'],
-                        'lecturer_id' => $srData['lecturer_id'],
-                        'course_id' => $this->course_id ?? null,
-                        'room_ids' => $groupedRoomIds,
-                        'start_date' => $this->start_date,
-                        'start_time' => $this->start_time,
-                        'end_time' => $this->end_time,
-                        'repeat_count' => $srData['repeat_count'],
-                        'category' => $srData['category'],
-                        'information' => $srData['information'],
-                    ]);
-                }
+                $this->srService->createWithSchedules(array_merge($srData, ['schedules' => $schedules]));
             } else {
-                // fallback: use createWithSchedules (it will split into date/time)
-                $payload = [
-                    'user_id' => auth()->id(),
-                    'lecturer_id' => $this->lecturer_id,
+                // fallback: no explicit occurrences, use grouped rooms + start/end + optional time
+                $groupedRoomIds = array_values(array_unique(array_filter($this->room_ids)));
+                $payload = array_merge($srData, [
                     'course_id' => $this->course_id,
-                    'room_ids' => $this->room_ids,
+                    'room_ids' => $groupedRoomIds,
                     'start_date' => $this->start_date,
-                    'start_time' => $this->start_time,
-                    'end_time' => $this->end_time,
-                    'repeat_count' => $this->repeat_count ?? 1,
-                    'category' => $this->category,
-                    'information' => $this->information,
-                    'status' => StatusEnum::PENDING,
-                    'is_open' => false,
-                ];
+                    'time' => $this->time ?? null,
+                    'repeat_count' => $srData['repeat_count'],
+                ]);
 
                 $this->srService->createWithSchedules($payload);
             }
+            // } else {
+            //     // fallback: use createWithSchedules (it will split into date/time)
+            //     $payload = [
+            //         'user_id' => auth()->id(),
+            //         'lecturer_id' => $this->lecturer_id,
+            //         'course_id' => $this->course_id,
+            //         'room_ids' => $this->room_ids,
+            //         'start_date' => $this->start_date,
+            //         'start_time' => $this->start_time,
+            //         'end_time' => $this->end_time,
+            //         'repeat_count' => $this->repeat_count ?? 1,
+            //         'category' => $this->category,
+            //         'information' => $this->information,
+            //         'status' => StatusEnum::PENDING,
+            //         'is_open' => false,
+            //     ];
+
+            //     $this->srService->createWithSchedules($payload);
+            // }
 
             $this->dispatch('closeRequestFormModal');
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Request jadwal berhasil dikirim.']);
@@ -320,7 +294,8 @@ class RequestScheduleForm extends Component
     public function render()
     {
         $options = [
-            'categories' => CategoryEnum::toArrayExclude([CategoryEnum::COURSE->value])
+            'categories' => CategoryEnum::toArrayExclude([CategoryEnum::COURSE->value]),
+            'times' => TimeEnum::toArray(),
         ];
 
         return view('livewire.feature.schedule.forms.request-schedule-form', [

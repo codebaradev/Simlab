@@ -67,7 +67,4 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
         Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
         Route::get('/ruangan/{roomId}/aplikasi', ApplicationList::class)->where('roomId', '[0-9]+')->name('room.app.index');
     });
-    Route::middleware([KplOnlyMiddleware::class])->group(function () {
-        Route::get('/jurusan', DepartmentList::class)->name('department.index');
-    });
 });

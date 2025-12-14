@@ -141,8 +141,9 @@ entity "Schedule" as schedule {
     course_id: int <FK>
     ---
     * start_date: date
-    * start_time: time
-    * end_time: time
+    ' * start_time: time
+    ' * end_time: time
+    * time: int
     * status: int
     * is_open: bool
     * campus: int

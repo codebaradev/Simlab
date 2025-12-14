@@ -141,16 +141,42 @@ class ScheduleService
 
     public function createMultiple(array $items): \Illuminate\Support\Collection
     {
-        $course = Course::findOrFail($items[0]['course_id']);
-        $lecturers = $course->lecturers()->with('user')->get();
-        $students = $course->academic_classes[0]->students()->with(['user'])->get();
-
+        // Pre-fetch course-related participants if available on first item
+        $course = null;
+        $lecturers = collect();
+        $students = collect();
+        if (!empty($items[0]['course_id'])) {
+            $course = Course::find($items[0]['course_id']);
+            if ($course) {
+                $lecturers = $course->lecturers()->with('user')->get();
+                // attempt to get students from first academic class if exists
+                if ($course->academic_classes->isNotEmpty()) {
+                    $students = $course->academic_classes->first()->students()->with(['user'])->get();
+                }
+            }
+        }
 
         return DB::transaction(function () use ($items, $lecturers, $students) {
             $created = [];
             foreach ($items as $data) {
+                // Extract room ids (support 'room_id' or 'room_ids') then remove them from payload
+                $roomIds = [];
+                if (!empty($data['room_ids']) && is_array($data['room_ids'])) {
+                    $roomIds = array_values(array_filter($data['room_ids']));
+                } elseif (!empty($data['room_id'])) {
+                    $roomIds = [(int) $data['room_id']];
+                }
+
+                unset($data['room_id'], $data['room_ids']);
+
                 // Use mass assignment; ensure Schedule::$fillable contains required fields
                 $schedule = Schedule::create($data);
+
+                // attach rooms if provided
+                if (!empty($roomIds)) {
+                    $schedule->rooms()->sync($roomIds);
+                }
+
                 $created[] = $schedule;
 
                 AttendanceMonitoring::create([

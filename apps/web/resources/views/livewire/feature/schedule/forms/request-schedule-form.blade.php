@@ -22,8 +22,7 @@
                         <x-form.input class="col-span-2" name="repeat_count" label="Repeat (jumlah pertemuan)" :required="true" :live="true"/>
 
                         <x-form.input type="date" class="col-span-2" name="start_date" label="Tanggal" :required="true" :live="true"/>
-                        <x-form.input type="time" name="start_time" label="Mulai" type="time" :required="true" :live="true"/>
-                        <x-form.input type="time" name="end_time" label="Selesai" type="time" :required="true" :live="true"/>
+                        <x-form.select class="col-span-2" name="time" label="Waktu" :required="true" :live="true" :options="$options['times']" optionValue="value" optionLabel="label"/>
 
                         <x-form.textarea class="col-span-2" name="information" label="Informasi Tambahan" rows="3"  />
 
@@ -64,14 +63,12 @@
 
                     <div class="space-y-3 overflow-y-auto overflow-x-auto max-h-[80vh] whitespace-nowrap">
                         @forelse($occurrences as $i => $occ)
-                            <div class="border rounded-lg p-3 bg-base-50 w-fit">
+                            <div class="border rounded-lg p-3 bg-base-50 w-full">
                                 <div class="flex items-center justify-between gap-2 ">
                                     <div class="flex-1 flex gap-2 items-center">
                                         <x-form.input type="date" name="occurrences.{{ $i }}.start_date"/>
-                                        <x-form.input type="time" name="occurrences.{{ $i }}.start_time"/>
-                                        <p>-</p>
-                                        <x-form.input type="time" name="occurrences.{{ $i }}.end_time"/>
-                                        <x-form.select class="min-w-32" name="occurrences.{{ $i }}.room_id" :options="$rooms" placeholder="Pilih Ruangan"/>
+                                        <x-form.select type="time" name="occurrences.{{ $i }}.time" placeholder="Pilih Sesi" :options="$options['times']" optionValue="value" optionLabel="label"/>
+                                        {{-- <x-form.select class="min-w-32" name="occurrences.{{ $i }}.room_id" :options="$rooms" placeholder="Pilih Ruangan"/> --}}
                                     </div>
 
                                     <div class="flex flex-col items-center ml-2">

@@ -186,11 +186,20 @@ class ScheduleRequestService
             if (!empty($data['schedules']) && is_array($data['schedules'])) {
                 $schedules = [];
                 foreach ($data['schedules'] as $sched) {
+                    // support schedules providing either 'room_id' or 'room_ids'
+                    $roomIds = [];
+                    if (!empty($sched['room_ids']) && is_array($sched['room_ids'])) {
+                        $roomIds = array_values(array_filter($sched['room_ids']));
+                    } elseif (!empty($sched['room_id'])) {
+                        $roomIds = [(int) $sched['room_id']];
+                    }
+
                     $s = [
-                        'room_id' => $sched['room_id'] ?? null,
+                        'room_ids' => $roomIds,
                         'sr_id' => $scheduleRequest->id,
                         'course_id' => $sched['course_id'] ?? ($data['course_id'] ?? null),
                         'start_date' => $sched['start_date'] ?? ($sched['date'] ?? null),
+                        'time' => $sched['time'] ?? null,
                         'start_time' => isset($sched['start_time']) ? (strlen($sched['start_time']) > 5 ? $sched['start_time'] : ($sched['start_time'] . ':00')) : null,
                         'end_time' => isset($sched['end_time']) ? (strlen($sched['end_time']) > 5 ? $sched['end_time'] : ($sched['end_time'] . ':00')) : null,
                         'status' => $sched['status'] ?? ($data['status'] ?? 0),
@@ -201,8 +210,8 @@ class ScheduleRequestService
                         'updated_at' => now(),
                     ];
 
-                    // only include valid entries
-                    if (!empty($s['start_date']) && !empty($s['start_time']) && !empty($s['end_time'])) {
+                    // only include valid entries (require start_date and either time or start/end)
+                    if (!empty($s['start_date']) && (!empty($s['time']) || (!empty($s['start_time']) && !empty($s['end_time'])))) {
                         $schedules[] = $s;
                     }
                 }

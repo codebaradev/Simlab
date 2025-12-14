@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Schedule\TimeEnum;
 use App\Enums\ScheduleRequest\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,8 +24,9 @@ class Schedule extends Model
         'sr_id',
         'course_id',
         'start_date',
-        'start_time',
-        'end_time',
+        // 'start_time',
+        // 'end_time',
+        'time',
         'status',
         'is_open',
         'building',
@@ -35,6 +37,7 @@ class Schedule extends Model
         'start_date' => 'date',
         // 'start_time' => 'time',
         // 'end_time'   => 'time',
+        'time'          => TimeEnum::class,
         'is_open'        => 'boolean',
         'status'         => StatusEnum::class,
         'created_at'     => 'datetime',
