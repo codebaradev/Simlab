@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Feature\Schedule\Calendars;
 
+use App\Enums\Schedule\StatusEnum;
 use App\Models\Schedule;
 use Asantibanez\LivewireCalendar\LivewireCalendar;
 use Carbon\Carbon;
@@ -25,13 +26,14 @@ class ScheduleCalendar extends LivewireCalendar
         $end   = $this->gridEndsAt instanceof Carbon ? $this->gridEndsAt->toDateString() : Carbon::parse($this->gridEndsAt)->toDateString();
 
         return Schedule::query()
-            ->whereDate('created_at', '>=', $start)
+            ->whereNot('status', StatusEnum::REJECTED)
+            ->whereDate('created_at', '<=', $end)
             ->whereDate('created_at', '<=', $end)
             ->get()
             ->map(callback: function (Schedule $schedule) {
                 return [
                     'id' => $schedule->id,
-                    'status' => $schedule->schedule_request->status,
+                    'status' => $schedule->status,
                     'title' => $schedule->course ? $schedule->course->name : $schedule->schedule_request->category->label(),
                     'lecturerCode' => $schedule->schedule_request->lecturer ? $schedule->schedule_request->lecturer->code : null,
                     'class' => $schedule->course ? $schedule->course->academic_classes[0]->code : null,

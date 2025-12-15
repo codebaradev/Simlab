@@ -7,6 +7,7 @@ use App\Enums\ScheduleRequest\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ScheduleRequest extends Model
@@ -38,6 +39,11 @@ class ScheduleRequest extends Model
     public function lecturer(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class, 'lecturer_id', 'id');
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'sr_id', 'id');
     }
 
     public function scopeSearch($query, $search)

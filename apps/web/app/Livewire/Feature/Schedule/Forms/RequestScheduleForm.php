@@ -9,14 +9,18 @@ use App\Enums\ScheduleRequest\StatusEnum;
 use App\Models\Course;
 use App\Models\Lecturer;
 use App\Models\Room;
+use App\Models\Schedule;
 use App\Services\ScheduleRequestService;
+use App\Traits\Livewire\WithAlertModal;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class RequestScheduleForm extends Component
 {
     // ...existing code...
+    use WithAlertModal;
 
     // form fields
     public $course_id;
@@ -71,30 +75,28 @@ class RequestScheduleForm extends Component
 
     protected function rules(): array
     {
-        // rules vary by active tab
-        if ($this->activeTab === 'matakuliah') {
-            return [
-                'course_id' => ['required', 'exists:courses,id'],
-                'lecturer_id' => ['required', 'exists:lecturers,id'],
-                'room_ids' => ['required', 'array', 'min:1'],
-                'room_ids.*' => ['required', 'exists:rooms,id'],
-                'information' => ['nullable', 'string'],
-                'repeat_count' => ['nullable', 'integer', 'min:1'],
-                'start_date' => ['required', 'date'],
-                'time' => ['required', Rule::enum(TimeEnum::class)],
-            ];
-        }
-
-        // 'lainnya' tab: no course/lecturer required, require purpose/title (category) and datetime + rooms
-        return [
-            'lecturer_id' => ['nullable', 'exists:lecturers,id'],
-            'category' => ['required', Rule::enum(CategoryEnum::class)],
-            'information' => ['nullable', 'string'],
+        $rule = [
             'room_ids' => ['required', 'array', 'min:1'],
             'room_ids.*' => ['required', 'exists:rooms,id'],
+            'information' => ['nullable', 'string'],
+            'repeat_count' => ['nullable', 'integer', 'min:1'],
             'start_date' => ['required', 'date'],
             'time' => ['required', Rule::enum(TimeEnum::class)],
+            'occurrences' => ['required', 'array', 'min:1'],
+            'occurrences.*.start_date' => ['required', 'date'],
+            'occurrences.*.time' => ['required', Rule::enum(TimeEnum::class)],
+            'occurrences.*.room_ids' => ['required', 'array', 'min:1'],
         ];
+
+        if ($this->activeTab === 'matakuliah') {
+            $rule['lecturer_id'] = ['required', 'exists:lecturers,id'];
+            $rule['course_id'] = ['required', 'exists:courses,id'];
+        } else {
+            $rule['lecturer_id'] = ['nullable', 'exists:lecturers,id'];
+            $rule['category'] = ['required', Rule::enum(CategoryEnum::class)];
+        }
+
+        return $rule;
     }
 
     public function changeDate($year, $month, $day)
@@ -171,6 +173,30 @@ class RequestScheduleForm extends Component
     {
         $this->validate();
 
+        $validator = Validator::make($this->all(), $this->rules());
+
+        $validator->after(function ($validator) {
+            foreach ($this->occurrences as $index => $occ) {
+
+                $conflictExists = Schedule::where('start_date', $occ['start_date'])
+                    ->where('time', $occ['time'])
+                    ->whereNot('status', StatusEnum::REJECTED) // ✅ BENAR
+                    ->whereHas('rooms', function ($q) use ($occ) {
+                        $q->whereIn('rooms.id', $occ['room_ids']);
+                    })
+                    ->exists();
+
+                if ($conflictExists) {
+                    $validator->errors()->add(
+                        "occurrences.$index.start_date",
+                        'Sudah ada jadwal lain pada tanggal, waktu, dan ruangan yang sama.'
+                    );
+                }
+            }
+        });
+
+        $validator->validate();
+
         try {
             // Build ScheduleRequest payload
             $srData = [
@@ -227,7 +253,7 @@ class RequestScheduleForm extends Component
 
             return true;
         } catch (\Throwable $e) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal menyimpan request jadwal.']);
+            $this->showErrorAlert('Terjadi kesalahan, silahkan coba lagi!');
             throw $e;
         }
     }
