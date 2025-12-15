@@ -15,7 +15,7 @@
     @if($selectedSchedule)
         <div class="mb-4">
             <div class="flex gap-2 items-center">
-                <h3 class="font-semibold">
+                <h3 class="font-semibold mb-4">
                     {{ $selectedSchedule->formatted_start_date }}
                 </h3>
 
@@ -39,36 +39,37 @@
     @endif
 
 
-
-    <x-table.wrapper>
-        <x-table.container>
-            <x-table.thead>
-                <tr>
-                    <th>Mahasiswa</th>
-                    <th>NIM</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </x-table.thead>
-
-            <tbody>
-                @forelse($attendances as $att)
+    @if(!$schedules->isEmpty())
+        <x-table.wrapper>
+            <x-table.container>
+                <x-table.thead>
                     <tr>
-                        <td>{{ $att->user?->name ?? '-' }}</td>
-                        <td>{{ $att->user?->student->nim ?? '-' }}</td>
-                        <td>{{ $att->status ? $att->status->label() : 'Belum Hadir' }}</td>
-                        <td>
-                            <button wire:click="$emit('view-attendance', {{ $att->id }})" class="btn btn-ghost btn-sm">Detail</button>
-                        </td>
+                        <th>Mahasiswa</th>
+                        <th>NIM</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
-                @empty
-                    <x-table.empty-state :colspan="5" message="Belum ada attendance untuk pertemuan ini." />
-                @endforelse
-            </tbody>
-        </x-table.container>
+                </x-table.thead>
 
-        <div class="mt-4 px-4">
-            {{ $attendances->links() }}
-        </div>
-    </x-table.wrapper>
+                <tbody>
+                    @forelse($attendances as $att)
+                        <tr>
+                            <td>{{ $att->user?->name ?? '-' }}</td>
+                            <td>{{ $att->user?->student->nim ?? '-' }}</td>
+                            <td>{{ $att->status ? $att->status->label() : 'Belum Hadir' }}</td>
+                            <td>
+                                <button wire:click="$emit('view-attendance', {{ $att->id }})" class="btn btn-ghost btn-sm">Detail</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <x-table.empty-state :colspan="5" message="Belum ada attendance untuk pertemuan ini." />
+                    @endforelse
+                </tbody>
+            </x-table.container>
+
+            <div class="mt-4 px-4">
+                {{ $attendances->links() }}
+            </div>
+        </x-table.wrapper>
+    @endif
 </div>

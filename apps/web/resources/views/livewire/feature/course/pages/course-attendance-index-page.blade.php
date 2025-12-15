@@ -11,7 +11,6 @@
 
     <div class="tabs tabs-lift">
         <a href="/matakuliah/{{ $course->id  }}" class="tab cursor-pointer" wire:navigate>Data Matakuliah</a>
-        <a href="/matakuliah/{{ $course->id  }}/jadwal" class="tab cursor-pointer" wire:navigate>Jadwal</a>
 
         <a href="/matakuliah/{{ $course->id  }}/absensi" class="tab cursor-pointer tab-active" wire:navigate>Absensi</a>
         <div class="tab-content bg-base-100 border-base-300 p-6">
