@@ -14,13 +14,21 @@
 
     @if($selectedSchedule)
         <div class="mb-4">
-            <form wire:submit.prevent="saveMonitoring"
-                class=" space-y-4">
-
+            <div class="flex gap-2 items-center">
                 <h3 class="font-semibold">
                     {{ $selectedSchedule->formatted_start_date }}
                 </h3>
 
+                <span>
+                    @if ($selectedSchedule->is_open)
+                        <div class="badge badge-soft badge-success">Absensi Terbuka</div>
+                    @else
+                        <div class="badge badge-soft badge-error">Absensi Tertutup</div>
+                    @endif
+                </span>
+            </div>
+
+            <form wire:submit.prevent="saveMonitoring" class=" space-y-4">
                 <div class="gap-4 grid grid-cols-2">
                     <x-form.input name="topic" label="Topik" placeholder="Topik pertemuan" :live="true"/>
 
