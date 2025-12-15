@@ -31,9 +31,12 @@ class ScheduleCalendar extends LivewireCalendar
             ->map(callback: function (Schedule $schedule) {
                 return [
                     'id' => $schedule->id,
+                    'status' => $schedule->schedule_request->status,
                     'title' => $schedule->course ? $schedule->course->name : $schedule->schedule_request->category->label(),
-                    'description' => $schedule->course ? $schedule->course->academic_classes[0]->code : '' . ' | ' . $schedule->rooms->pluck('name')->implode(', '),
-                    'time' => optional(value: $schedule->created_at)->format('H:i') ?? null,
+                    'lecturerCode' => $schedule->schedule_request->lecturer ? $schedule->schedule_request->lecturer->code : null,
+                    'class' => $schedule->course ? $schedule->course->academic_classes[0]->code : null,
+                    'rooms' => $schedule->rooms->pluck('name')->implode(' | '),
+                    'time' => $schedule->time->label(),
                     'date' => optional($schedule->start_date)->toDateString(),
                 ];
             });
