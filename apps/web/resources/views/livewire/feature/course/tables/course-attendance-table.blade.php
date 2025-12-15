@@ -1,9 +1,9 @@
 <div>
     <div class="mb-4">
-        <div class="tabs tabs-box">
+        <div class="tabs tabs-border">
             @foreach($schedules as $i => $s)
-                <button wire:click="$set('selectedIndex', {{ $i }})" class="tab {{ $selectedSchedule && $selectedSchedule->id === $s->id ? 'tab-active bg-primary text-white' : '' }}">
-                    Pertemuan {{ $i + 1 }} <span class="text-xs block">{{ optional($s->start_date)->format('Y-m-d') }}</span>
+                <button wire:click="$set('selectedIndex', {{ $i }})" class="tab {{ $selectedSchedule && $selectedSchedule->id === $s->id ? 'tab-active' : '' }}">
+                    {{ $i + 1 }}
                 </button>
             @endforeach
             @if($schedules->isEmpty())
@@ -12,11 +12,30 @@
         </div>
     </div>
 
+    @if($selectedSchedule)
+        <div class="mb-4">
+            <form wire:submit.prevent="saveMonitoring"
+                class=" space-y-4">
+
+                <h3 class="font-semibold">
+                    {{ $selectedSchedule->formatted_start_date }}
+                </h3>
+
+                <div class="gap-4 grid grid-cols-2">
+                    <x-form.input name="topic" label="Topik" placeholder="Topik pertemuan" :live="true"/>
+
+                    <x-form.input name="sub_topic" label="Sub Topik" placeholder="Sub topik" :live="true"/>
+                </div>
+            </form>
+        </div>
+    @endif
+
+
+
     <x-table.wrapper>
         <x-table.container>
             <x-table.thead>
                 <tr>
-                    <th>#</th>
                     <th>Mahasiswa</th>
                     <th>NIM</th>
                     <th>Status</th>
@@ -27,10 +46,9 @@
             <tbody>
                 @forelse($attendances as $att)
                     <tr>
-                        <td>{{ $att->id }}</td>
                         <td>{{ $att->user?->name ?? '-' }}</td>
-                        <td>{{ $att->user?->nim ?? '-' }}</td>
-                        <td>{{ optional($att->status)->label() ?? $att->status }}</td>
+                        <td>{{ $att->user?->student->nim ?? '-' }}</td>
+                        <td>{{ $att->status ? $att->status->label() : 'Belum Hadir' }}</td>
                         <td>
                             <button wire:click="$emit('view-attendance', {{ $att->id }})" class="btn btn-ghost btn-sm">Detail</button>
                         </td>

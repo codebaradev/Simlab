@@ -75,6 +75,13 @@ class Schedule extends Model
         return $this->hasMany(Attendance::class, 'schedule_id', 'id');
     }
 
+    public function getFormattedStartDateAttribute()
+    {
+        return $this->start_date
+            ? $this->start_date->translatedFormat('d F Y')
+            : null;
+    }
+
     public function scopeActive($query)
     {
         return $query->whereNull('deleted_at');
