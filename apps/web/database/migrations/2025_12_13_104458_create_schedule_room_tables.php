@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('schedule_room_tables', function (Blueprint $table) {
+        Schema::create('schedule_room', function (Blueprint $table) {
             $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
             $table->primary(['schedule_id', 'room_id']); // composite primary key
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('schedule_room_tables');
+        Schema::dropIfExists('schedule_room');
     }
 };

@@ -20,7 +20,7 @@ class Schedule extends Model
     public $table = "schedules";
 
     protected $fillable = [
-        'room_id',
+        // 'room_id',
         'sr_id',
         'course_id',
         'start_date',

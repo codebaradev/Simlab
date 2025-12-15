@@ -14,12 +14,12 @@ enum TimeEnum: int
     public function label()
     {
         return match($this) {
-            self::TIME_1 => 'Sesi 1 | 07.30 - 09.00',
-            self::TIME_2 => 'Sesi 2 | 09.05 - 10.35',
-            self::TIME_3 => 'Sesi 3 | 10.40 - 12.10',
-            self::TIME_4 => 'Sesi 4 | 13.30 - 15.00',
-            self::TIME_5 => 'Sesi 5 | 15.05 - 16.35',
-            self::TIME_6 => 'Sesi 6 | 16.40 - 18.10',
+            self::TIME_1 => '07.30 - 09.00',
+            self::TIME_2 => '09.05 - 10.35',
+            self::TIME_3 => '10.40 - 12.10',
+            self::TIME_4 => '13.30 - 15.00',
+            self::TIME_5 => '15.05 - 16.35',
+            self::TIME_6 => '16.40 - 18.10',
         };
     }
 

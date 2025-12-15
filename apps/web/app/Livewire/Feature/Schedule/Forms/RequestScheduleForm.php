@@ -65,15 +65,8 @@ class RequestScheduleForm extends Component
 
         $now = Carbon::now()->addHour()->startOfHour();
         $this->start_date = $now->toDateString();
-        $this->end_time = $now->copy()->addHour()->format('H:i');
         $this->repeat_count = 1;
-        $this->occurrences = [];
-
-        $this->occurrences[] = [
-            'room_id' => $this->room_ids[0] ?? null,
-            'start_date' => $this->start_date,
-            'time' => $this->time
-        ];
+        $this->time = TimeEnum::TIME_1->value;
     }
 
     protected function rules(): array
@@ -94,7 +87,6 @@ class RequestScheduleForm extends Component
 
         // 'lainnya' tab: no course/lecturer required, require purpose/title (category) and datetime + rooms
         return [
-            'course_id' => ['required', 'exists:courses,id'],
             'lecturer_id' => ['nullable', 'exists:lecturers,id'],
             'category' => ['required', Rule::enum(CategoryEnum::class)],
             'information' => ['nullable', 'string'],
@@ -113,14 +105,15 @@ class RequestScheduleForm extends Component
 
     public function updatedActiveTab()
     {
-        $this->occurrences = [[
-            'room_id' => $this->room_ids[0] ?? null,
-            'start_date' => $this->start_date,
-            'time' => $this->time,
-        ]];
+        $this->occurrences = [];
     }
 
     public function updatedRepeatCount()
+    {
+        $this->generateOccurrences();
+    }
+
+    public function updatedRoomIds()
     {
         $this->generateOccurrences();
     }
@@ -130,43 +123,22 @@ class RequestScheduleForm extends Component
         $this->generateOccurrences();
     }
 
-    public function updatedStartTime()
+    public function updatedTime()
     {
         $this->generateOccurrences();
     }
 
-    public function updatedEndTime()
-    {
-        $this->generateOccurrences();
-    }
-
-    public function updatedRoomIds()
-    {
-        $this->generateOccurrences();
-    }
-    // public function updatedActiveTab()
-    // {
-    //     $this->generateOccurrences();
-    // }
-
-    // ...existing code...
-
-    /**
-     * Generate occurrences based on start_date + start_time, end_time and repeat_count.
-     * Each repeat moves the date +1 week. If multiple rooms selected, generates one occurrence per room per week.
-     */
     public function generateOccurrences(): void
     {
         $this->occurrences = [];
 
-        if (empty($this->start_date) || empty($this->time) || empty($this->repeat_count)) {
+        if (empty($this->start_date) || empty($this->time) || empty($this->repeat_count) || empty($this->room_ids)) {
             $this->dispatch('notify', ['type' => 'warning', 'message' => 'Isi tanggal, waktu mulai, waktu selesai dan repeat terlebih dahulu.']);
             return;
         }
 
         try {
-            $startBase = Carbon::parse("{$this->start_date} {$this->start_time}");
-            $endBase = Carbon::parse("{$this->start_date} {$this->end_time}");
+            $startBase = Carbon::parse("{$this->start_date}");
         } catch (\Throwable $e) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Format tanggal/waktu tidak valid.']);
             return;
@@ -174,27 +146,24 @@ class RequestScheduleForm extends Component
 
         $repeat = max(1, (int) $this->repeat_count);
 
+        $roomMap = collect($this->rooms)
+            ->keyBy('id')
+            ->map(fn ($room) => $room->name);
+
+        $roomNames = collect($this->room_ids)
+            ->map(fn ($id) => $roomMap[$id] ?? '-')
+            ->values()
+            ->toArray();
+
         for ($i = 0; $i < $repeat; $i++) {
             $startIter = $startBase->copy()->addWeeks($i);
-            $endIter = $endBase->copy()->addWeeks($i);
 
-            // if no rooms selected, still create occurrence with null room
-            if (empty($this->room_ids)) {
-                $this->occurrences[] = [
-                    'room_id' => null,
-                    'start_date' => $startIter->toDateString(),
-                    'time' => $startIter->format('H:i'),
-                ];
-                continue;
-            }
-
-            foreach ($this->room_ids as $roomId) {
-                $this->occurrences[] = [
-                    'room_id' => $roomId,
-                    'start_date' => $startIter->toDateString(),
-                    'time' => $this->time,
-                ];
-            }
+            $this->occurrences[] = [
+                'room_ids' => $this->room_ids,
+                'room_names' => $roomNames,
+                'start_date' => $startIter->toDateString(),
+                'time' => $this->time,
+            ];
         }
     }
 
@@ -221,65 +190,37 @@ class RequestScheduleForm extends Component
                         continue;
                     }
 
-                    $roomIds = [];
-                    if (!empty($occ['room_id'])) {
-                        // each occurrence currently represents a single room selection
-                        $roomIds[] = (int) $occ['room_id'];
-                    }
-
-                    // prefer explicit enum `time` from form, otherwise leave null and include start/end as fallback
-                    $timeVal = $occ['time'] ?? $this->time ?? null;
-
                     $schedules[] = [
-                        'room_ids' => $roomIds,
+                        'room_ids' => $this->room_ids,
                         'course_id' => $this->course_id ?? null,
                         'start_date' => $occ['start_date'],
-                        'time' => $timeVal,
+                        'time' => $occ['time'],
                         'status' => StatusEnum::PENDING,
                         'is_open' => false,
                         'building' => BuildingEnum::CAMPUS_1,
                         'information' => $this->information ?? null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
                     ];
                 }
 
-                $this->srService->createWithSchedules(array_merge($srData, ['schedules' => $schedules]));
+                $payload = array_merge($srData, ['schedules' => $schedules]);
+
+                $this->srService->createWithSchedules($payload);
             } else {
                 // fallback: no explicit occurrences, use grouped rooms + start/end + optional time
-                $groupedRoomIds = array_values(array_unique(array_filter($this->room_ids)));
                 $payload = array_merge($srData, [
                     'course_id' => $this->course_id,
-                    'room_ids' => $groupedRoomIds,
+                    'room_ids' => $this->room_ids,
                     'start_date' => $this->start_date,
                     'time' => $this->time ?? null,
                     'repeat_count' => $srData['repeat_count'],
                 ]);
 
+
                 $this->srService->createWithSchedules($payload);
             }
-            // } else {
-            //     // fallback: use createWithSchedules (it will split into date/time)
-            //     $payload = [
-            //         'user_id' => auth()->id(),
-            //         'lecturer_id' => $this->lecturer_id,
-            //         'course_id' => $this->course_id,
-            //         'room_ids' => $this->room_ids,
-            //         'start_date' => $this->start_date,
-            //         'start_time' => $this->start_time,
-            //         'end_time' => $this->end_time,
-            //         'repeat_count' => $this->repeat_count ?? 1,
-            //         'category' => $this->category,
-            //         'information' => $this->information,
-            //         'status' => StatusEnum::PENDING,
-            //         'is_open' => false,
-            //     ];
-
-            //     $this->srService->createWithSchedules($payload);
-            // }
 
             $this->dispatch('closeRequestFormModal');
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Request jadwal berhasil dikirim.']);
+            $this->dispatch('refresh-calendar');
 
             $this->reset(['course_id','lecturer_id','room_ids','category','information','repeat_count','occurrences']);
             $this->mount();

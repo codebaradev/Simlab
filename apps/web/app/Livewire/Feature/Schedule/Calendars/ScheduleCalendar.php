@@ -10,11 +10,13 @@ use Illuminate\Support\Collection;
 class ScheduleCalendar extends LivewireCalendar
 {
     protected $listeners = [
+        'refresh-calendar' => '$refresh',
         'previousMonth',
         'nextMonth',
         'goToMonth',
         'goToToday'
     ];
+
 
     public function events(): Collection
     {
@@ -26,15 +28,13 @@ class ScheduleCalendar extends LivewireCalendar
             ->whereDate('created_at', '>=', $start)
             ->whereDate('created_at', '<=', $end)
             ->get()
-            ->map(callback: function (Schedule $model) {
+            ->map(callback: function (Schedule $schedule) {
                 return [
-                    'id' => $model->id,
-                    'title' => $model->course->name ,
-                    'description' => $model->course->academic_classes[0]->code . $model->room->code,
-                    'time' => optional($model->created_at)->format('H:i') ?? null,
-                    'start_at' => optional($model->start_datetime)->toDateTimeString(),
-                    'end_at' => optional($model->start_datetime)->toDateTimeString(),
-                    'date' => optional($model->start_date)->toDateString(),
+                    'id' => $schedule->id,
+                    'title' => $schedule->course ? $schedule->course->name : $schedule->schedule_request->category->label(),
+                    'description' => $schedule->course ? $schedule->course->academic_classes[0]->code : '' . ' | ' . $schedule->rooms->pluck('name')->implode(', '),
+                    'time' => optional(value: $schedule->created_at)->format('H:i') ?? null,
+                    'date' => optional($schedule->start_date)->toDateString(),
                 ];
             });
     }
