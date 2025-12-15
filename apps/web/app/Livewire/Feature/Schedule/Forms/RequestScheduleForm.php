@@ -94,17 +94,22 @@ class RequestScheduleForm extends Component
         // Kirim API ke python
         $this->isLoadingAi = true;
         try {
+            // ... kode request HTTP sebelumnya ...
             $response = Http::timeout(5)->post('http://127.0.0.1:8080/predict', $payload);
-            // dd($response->body());
 
             if ($response->successful()) {
                 $result = $response->json();
-                // dd($result);
-                $this->recommendations = $result['recommendations'];
+                
+                // --- PERUBAHAN DISINI ---
+                // Ambil semua hasil
+                $allRecs = $result['recommendations'] ?? [];
 
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'AI berhasil memberikan rekomendasi ruangan.']);
-            }else{
-                throw new \Exception('AI response not successful');
+                // Cukup ambil 3 urutan pertama (Top 3)
+                // array_slice(array, offset, length)
+                $this->recommendations = array_slice($allRecs, 0, 3); 
+
+                $this->dispatch('notify', ['type' => 'success', 'message' => 'AI berhasil merekomendasikan 3 ruangan terbaik.']);
+            } else {
                 $this->recommendations = [];
             }
         }catch (\Exception $e) {
