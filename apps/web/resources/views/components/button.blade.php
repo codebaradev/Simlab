@@ -17,6 +17,7 @@
         'ghost' => 'btn-ghost',
         'outline' => 'btn-outline',
         'cancel' => 'btn-outline btn-secondary',
+        'error' => 'btn-error',
     ];
     $variantClass = $variants[$variant] ?? $variants['primary'];
 

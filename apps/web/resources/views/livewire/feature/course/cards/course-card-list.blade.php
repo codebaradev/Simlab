@@ -1,4 +1,8 @@
 <!-- filepath: c:\laragon\www\Simlab\apps\web\resources\views\livewire\feature\course\cards\course-card-list.blade.php -->
+@php
+    use App\Enums\UserRoleEnum;
+@endphp
+
 <x-table.wrapper>
     {{-- Sticky Header (search + actions + bulk actions) --}}
     <x-table.header>
@@ -8,12 +12,15 @@
                 <x-table.search-bar name="search" placeholder="Cari matakuliah berdasarkan nama..." />
 
                 <div>
+
+                    @if ($user->roles->contains('code', UserRoleEnum::LECTURER))
                     {{-- Actions --}}
                     <a href="/matakuliah/tambah" wire:navigate>
                         <div class="flex items-center gap-3">
                             <x-button leftIcon="add">Tambah Matakuliah</x-button>
                         </div>
                     </a>
+                    @endif
                 </div>
 
             </x-table.header-actions>
@@ -55,12 +62,19 @@
                 </x-slot:actions>
             </x-cards.course-card>
         @empty
-            <x-cards.empty-state
-                    :class="'col-span-3'"
-                    title="Belum ada matakuliah"
-                    actionLabel="Tambah Matakuliah Pertama"
-                    actionEvent="$dispatch('showCreateForm')"
+            @if ($user->roles->contains('code', UserRoleEnum::LECTURER))
+                <x-cards.empty-state
+                        :class="'col-span-3'"
+                        title="Belum ada matakuliah"
+                        actionLabel="Tambah Matakuliah Pertama"
+                        actionEvent="$dispatch('showCreateForm')"
                 />
+            @else
+                <x-cards.empty-state
+                        :class="'col-span-3'"
+                        title="Belum ada matakuliah"
+                />
+            @endif
         @endforelse
     </x-cards.container>
 

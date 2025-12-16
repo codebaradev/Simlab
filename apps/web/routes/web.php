@@ -17,6 +17,7 @@ use App\Livewire\Feature\Course\Pages\CourseFormPage;
 use App\Livewire\Feature\Course\Pages\CourseList;
 use App\Livewire\Feature\Dashboard\Index as Dashboard;
 use App\Livewire\Feature\Department\Pages\DepartmentList;
+use App\Livewire\Feature\FingerPrint\Pages\FpIndexPage;
 use App\Livewire\Feature\Lecturer\Pages\LecturerFormPage;
 use App\Livewire\Feature\Lecturer\Pages\LecturerList;
 use App\Livewire\Feature\Room\Pages\RoomFormPage;
@@ -66,8 +67,7 @@ Route::middleware([UserOnlyMiddleware::class])->group(function () {
         Route::get('/ruangan/{roomId}/komputer/tambah', ComputerFormPage::class)->where(['roomId' =>'[0-9]+'])->name('room.computer.add');
         Route::get('/ruangan/{roomId}/komputer/{computerId}', ComputerFormPage::class)->where(['roomId' => '[0-9]+', 'computerId' => '[0-9]+'])->name('room.computer.edit');
         Route::get('/ruangan/{roomId}/aplikasi', ApplicationList::class)->where('roomId', '[0-9]+')->name('room.app.index');
-    });
-    Route::middleware([KplOnlyMiddleware::class])->group(function () {
-        Route::get('/jurusan', DepartmentList::class)->name('department.index');
+
+        Route::get('/finger-print/', FpIndexPage::class)->where('roomId', '[0-9]+')->name('room.app.index');
     });
 });

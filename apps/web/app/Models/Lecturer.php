@@ -59,6 +59,11 @@ class Lecturer extends Model
         return $this->hasOne(ScheduleRequest::class, 'user_id', 'idforeignKey: ');
     }
 
+    public function getUserFullNameAttribute()
+    {
+        return $this->user?->name;
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {

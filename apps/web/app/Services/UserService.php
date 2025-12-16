@@ -104,6 +104,21 @@ class UserService
         });
     }
 
+    public function assignFingerprintId(User $user)
+    {
+        return DB::transaction(function () use ($user) {
+            $lastFpId = DB::table('users')
+                ->whereNotNull('fp_id')
+                ->lockForUpdate()
+                ->max('fp_id');
+
+            $user->fp_id = ($lastFpId ?? 0) + 1;
+            $user->save();
+
+            return $user;
+        });
+    }
+
     public function delete(User $user): bool
     {
         return DB::transaction(function () use ($user) {

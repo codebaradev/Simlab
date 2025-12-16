@@ -10,6 +10,7 @@ use App\Services\UserService;
 use App\Traits\Livewire\WithAlertModal;
 use DB;
 use Illuminate\Validation\Rule;
+use Kreait\Firebase\Contract\Database;
 use Livewire\Component;
 use PhpParser\ErrorHandler\Throwing;
 
@@ -19,6 +20,7 @@ class StudentForm extends Component
     protected UserService $userService;
     protected StudentService $stService;
     protected StudyProgramService $spService;
+    protected Database $database;
 
     public $student;
     public bool $isEditing;
@@ -40,11 +42,14 @@ class StudentForm extends Component
     public $generation;
     public $sp_id;
 
-    public function boot(UserService $userService, StudentService $stService, StudyProgramService $spService)
+    public $IsshowScanFpModal = false;
+
+    public function boot(UserService $userService, StudentService $stService, StudyProgramService $spService, Database $database)
     {
         $this->userService = $userService;
         $this->stService = $stService;
         $this->spService = $spService;
+        $this->database = $database;
     }
 
     public function mount($student = null)
@@ -63,6 +68,86 @@ class StudentForm extends Component
             $this->nim = $this->student->nim;
             $this->generation = $this->student->generation;
             $this->sp_id = $this->student->sp_id;
+        }
+    }
+
+    public function scanFingerPrint()
+    {
+        $user = $this->student->user;
+
+        try {
+            $reference = $this->database->getReference('fingerprint');
+
+            // 1. Assign fp_id jika belum ada
+            if (!$user->fp_id) {
+                $user = $this->userService->assignFingerprintId($user);
+            }
+
+            // 2. Kirim perintah enroll
+            $reference->update([
+                'enroll' => [
+                    'fp_id' => $user->fp_id,
+                ],
+                'mode' => 2, // enroll
+            ]);
+
+            // 3. TUNGGU sampai mode berubah
+            $timeout = 60; // detik
+            $interval = 1; // detik
+            $elapsed = 0;
+
+            while ($elapsed < $timeout) {
+                sleep($interval);
+                $elapsed += $interval;
+
+                $mode = $this->database
+                    ->getReference('fingerprint/mode')
+                    ->getValue();
+
+                // mode berubah (misalnya device set ke 3)
+                if ($mode !== 2) {
+                    break;
+                }
+            }
+
+            if ($elapsed >= $timeout) {
+                throw new \Exception('Fingerprint device timeout');
+            }
+
+            $reference = $this->database->getReference('fingerprint/presensi')
+                ->update([
+                    'name' => $user->name
+                ]);
+
+
+            $this->showSuccessAlert("Sidik jari anda berhasil terdaftar");
+        } catch (\Throwable $e) {
+            $user->fp_id = null;
+            $user->save();
+
+
+            $this->showErrorAlert("Terjadi kesalahan, silahkan coba lagi");
+        }
+
+        $this->student->user = $user;
+    }
+
+    public function closeScanFP()
+    {
+        dd('testing triggers');
+
+        try {
+            $reference = $this->database->getReference('fingerprint');
+
+            $reference->update([
+                'mode' => 1, // enroll
+            ]);
+
+            dd('testing success');
+        } catch (\Throwable $e) {
+            dd('testing error');
+
+            $this->showErrorAlert("Terjadi kesalahan, silahkan coba lagi");
         }
     }
 

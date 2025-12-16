@@ -3,19 +3,24 @@
 namespace App\Livewire\Feature\Schedule\Forms;
 
 use App\Enums\Schedule\BuildingEnum;
+use App\Enums\Schedule\TimeEnum;
 use App\Enums\ScheduleRequest\CategoryEnum;
 use App\Enums\ScheduleRequest\StatusEnum;
 use App\Models\Course;
 use App\Models\Lecturer;
 use App\Models\Room;
+use App\Models\Schedule;
 use App\Services\ScheduleRequestService;
+use App\Traits\Livewire\WithAlertModal;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class RequestScheduleForm extends Component
 {
     // ...existing code...
+    use WithAlertModal;
 
     // form fields
     public $course_id;
@@ -26,8 +31,7 @@ class RequestScheduleForm extends Component
     public $repeat_count = 1;
 
     public $start_date;
-    public $start_time;
-    public $end_time;
+    public $time;
 
     // lists for selects/cards
     public $courses = [];
@@ -65,48 +69,34 @@ class RequestScheduleForm extends Component
 
         $now = Carbon::now()->addHour()->startOfHour();
         $this->start_date = $now->toDateString();
-        $this->start_time = $now->format('H:i');
-        $this->end_time = $now->copy()->addHour()->format('H:i');
         $this->repeat_count = 1;
-        $this->occurrences = [];
-
-        $this->occurrences[] = [
-            'room_id' => $this->room_ids[0] ?? null,
-            'start_date' => $this->start_date,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
-        ];
+        $this->time = TimeEnum::TIME_1->value;
     }
 
     protected function rules(): array
     {
-        // rules vary by active tab
-        if ($this->activeTab === 'matakuliah') {
-            return [
-                'course_id' => ['required', 'exists:courses,id'],
-                'lecturer_id' => ['required', 'exists:lecturers,id'],
-                'room_ids' => ['required', 'array', 'min:1'],
-                'room_ids.*' => ['required', 'exists:rooms,id'],
-                'information' => ['nullable', 'string'],
-                'repeat_count' => ['nullable', 'integer', 'min:1'],
-                'start_date' => ['required', 'date'],
-                'start_time' => ['required', 'date_format:H:i'],
-                'end_time' => ['required', 'date_format:H:i', 'after_or_equal:start_time'],
-            ];
-        }
-
-        // 'lainnya' tab: no course/lecturer required, require purpose/title (category) and datetime + rooms
-        return [
-            'course_id' => ['required', 'exists:courses,id'],
-            'lecturer_id' => ['nullable', 'exists:lecturers,id'],
-            'category' => ['required', Rule::enum(CategoryEnum::class)],
-            'information' => ['nullable', 'string'],
+        $rule = [
             'room_ids' => ['required', 'array', 'min:1'],
             'room_ids.*' => ['required', 'exists:rooms,id'],
+            'information' => ['nullable', 'string'],
+            'repeat_count' => ['nullable', 'integer', 'min:1'],
             'start_date' => ['required', 'date'],
-            'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after_or_equal:start_time'],
+            'time' => ['required', Rule::enum(TimeEnum::class)],
+            'occurrences' => ['required', 'array', 'min:1'],
+            'occurrences.*.start_date' => ['required', 'date'],
+            'occurrences.*.time' => ['required', Rule::enum(TimeEnum::class)],
+            'occurrences.*.room_ids' => ['required', 'array', 'min:1'],
         ];
+
+        if ($this->activeTab === 'matakuliah') {
+            $rule['lecturer_id'] = ['required', 'exists:lecturers,id'];
+            $rule['course_id'] = ['required', 'exists:courses,id'];
+        } else {
+            $rule['lecturer_id'] = ['nullable', 'exists:lecturers,id'];
+            $rule['category'] = ['required', Rule::enum(CategoryEnum::class)];
+        }
+
+        return $rule;
     }
 
     public function changeDate($year, $month, $day)
@@ -117,15 +107,15 @@ class RequestScheduleForm extends Component
 
     public function updatedActiveTab()
     {
-        $this->occurrences = [[
-            'room_id' => $this->room_ids[0] ?? null,
-            'start_date' => $this->start_date,
-            'start_time' => $this->start_time,
-            'end_time' => $this->end_time,
-        ]];
+        $this->occurrences = [];
     }
 
     public function updatedRepeatCount()
+    {
+        $this->generateOccurrences();
+    }
+
+    public function updatedRoomIds()
     {
         $this->generateOccurrences();
     }
@@ -135,42 +125,22 @@ class RequestScheduleForm extends Component
         $this->generateOccurrences();
     }
 
-    public function updatedStartTime()
+    public function updatedTime()
     {
         $this->generateOccurrences();
     }
 
-    public function updatedEndTime()
-    {
-        $this->generateOccurrences();
-    }
-
-    public function updatedRoomIds()
-    {
-        $this->generateOccurrences();
-    }
-    // public function updatedActiveTab()
-    // {
-    //     $this->generateOccurrences();
-    // }
-
-    // ...existing code...
-
-    /**
-     * Generate occurrences based on start_date + start_time, end_time and repeat_count.
-     * Each repeat moves the date +1 week. If multiple rooms selected, generates one occurrence per room per week.
-     */
     public function generateOccurrences(): void
     {
         $this->occurrences = [];
-        if (empty($this->start_date) || empty($this->start_time) || empty($this->end_time) || empty($this->repeat_count)) {
+
+        if (empty($this->start_date) || empty($this->time) || empty($this->repeat_count) || empty($this->room_ids)) {
             $this->dispatch('notify', ['type' => 'warning', 'message' => 'Isi tanggal, waktu mulai, waktu selesai dan repeat terlebih dahulu.']);
             return;
         }
 
         try {
-            $startBase = Carbon::parse("{$this->start_date} {$this->start_time}");
-            $endBase = Carbon::parse("{$this->start_date} {$this->end_time}");
+            $startBase = Carbon::parse("{$this->start_date}");
         } catch (\Throwable $e) {
             $this->dispatch('notify', ['type' => 'error', 'message' => 'Format tanggal/waktu tidak valid.']);
             return;
@@ -178,141 +148,112 @@ class RequestScheduleForm extends Component
 
         $repeat = max(1, (int) $this->repeat_count);
 
+        $roomMap = collect($this->rooms)
+            ->keyBy('id')
+            ->map(fn ($room) => $room->name);
+
+        $roomNames = collect($this->room_ids)
+            ->map(fn ($id) => $roomMap[$id] ?? '-')
+            ->values()
+            ->toArray();
+
         for ($i = 0; $i < $repeat; $i++) {
             $startIter = $startBase->copy()->addWeeks($i);
-            $endIter = $endBase->copy()->addWeeks($i);
 
-            // if no rooms selected, still create occurrence with null room
-            if (empty($this->room_ids)) {
-                $this->occurrences[] = [
-                    'room_id' => null,
-                    'start_date' => $startIter->toDateString(),
-                    'start_time' => $startIter->format('H:i'),
-                    'end_time' => $endIter->format('H:i'),
-                ];
-                continue;
-            }
-
-            foreach ($this->room_ids as $roomId) {
-                $this->occurrences[] = [
-                    'room_id' => $roomId,
-                    'start_date' => $startIter->toDateString(),
-                    'start_time' => $startIter->format('H:i'),
-                    'end_time' => $endIter->format('H:i'),
-                ];
-            }
+            $this->occurrences[] = [
+                'room_ids' => $this->room_ids,
+                'room_names' => $roomNames,
+                'start_date' => $startIter->toDateString(),
+                'time' => $this->time,
+            ];
         }
-    }
-
-    public function removeOccurrence(int $index): void
-    {
-        if (isset($this->occurrences[$index])) {
-            array_splice($this->occurrences, $index, 1);
-        }
-    }
-
-    public function addOccurrence(): void
-    {
-        $date = $this->start_date ?? Carbon::now()->toDateString();
-        $start = $this->start_time ?? Carbon::now()->addHour()->format('H:i');
-        $end = $this->end_time ?? Carbon::now()->addHour()->addHour()->format('H:i');
-
-        $this->occurrences[] = [
-            'room_id' => $this->room_ids[0] ?? null,
-            'start_date' => $date,
-            'start_time' => $start,
-            'end_time' => $end,
-        ];
     }
 
     public function save()
     {
         $this->validate();
 
+        $validator = Validator::make($this->all(), $this->rules());
+
+        $validator->after(function ($validator) {
+            foreach ($this->occurrences as $index => $occ) {
+
+                $conflictExists = Schedule::where('start_date', $occ['start_date'])
+                    ->where('time', $occ['time'])
+                    ->whereNot('status', StatusEnum::REJECTED) // ✅ BENAR
+                    ->whereHas('rooms', function ($q) use ($occ) {
+                        $q->whereIn('rooms.id', $occ['room_ids']);
+                    })
+                    ->exists();
+
+                if ($conflictExists) {
+                    $validator->errors()->add(
+                        "occurrences.$index.start_date",
+                        'Sudah ada jadwal lain pada tanggal, waktu, dan ruangan yang sama.'
+                    );
+                }
+            }
+        });
+
+        $validator->validate();
+
         try {
+            // Build ScheduleRequest payload
+            $srData = [
+                'user_id' => auth()->id(),
+                'lecturer_id' => $this->lecturer_id ?? null,
+                'repeat_count' => max(1, (int) $this->repeat_count),
+                'status' => StatusEnum::PENDING,
+                'category' => $this->category ?? CategoryEnum::COURSE->value,
+                'information' => $this->information ?? null,
+            ];
+
+            // If there are explicit occurrences, convert them into schedules payload
             if (!empty($this->occurrences)) {
-                // create ScheduleRequest
-                $srData = [
-                    'user_id' => auth()->id(),
-                    'lecturer_id' => $this->lecturer_id ?? null,
-                    'repeat_count' => max(1, (int) $this->repeat_count),
-                    'status' => StatusEnum::PENDING,
-                    'category' => $this->category ?? CategoryEnum::COURSE->value,
-                    'information' => $this->information ?? null,
-                ];
-
-                $createdSr = $this->srService->create($srData);
-
-                // build schedules from occurrences (already separate date/time)
-                $toCreate = [];
+                $schedules = [];
                 foreach ($this->occurrences as $occ) {
-                    if (empty($occ['start_date']) || empty($occ['start_time']) || empty($occ['end_time'])) {
+                    if (empty($occ['start_date'])) {
                         continue;
                     }
 
-                    $toCreate[] = [
-                        'room_id' => $occ['room_id'] ?? null,
-                        'sr_id' => $createdSr->id,
+                    $schedules[] = [
+                        'room_ids' => $this->room_ids,
                         'course_id' => $this->course_id ?? null,
                         'start_date' => $occ['start_date'],
-                        'start_time' => strlen($occ['start_time']) > 5 ? $occ['start_time'] : ($occ['start_time'] . ':00'),
-                        'end_time' => strlen($occ['end_time']) > 5 ? $occ['end_time'] : ($occ['end_time'] . ':00'),
+                        'time' => $occ['time'],
                         'status' => StatusEnum::PENDING,
                         'is_open' => false,
                         'building' => BuildingEnum::CAMPUS_1,
                         'information' => $this->information ?? null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
                     ];
                 }
 
+                $payload = array_merge($srData, ['schedules' => $schedules]);
 
-                if (property_exists($this->srService, 'scheduleService') && $this->srService->scheduleService) {
-                    $this->srService->scheduleService->createMultiple($toCreate);
-                } else {
-                    $groupedRoomIds = array_values(array_unique(array_filter(array_column($this->occurrences, 'room_id'))));
-                    $this->srService->createWithSchedules([
-                        'user_id' => $srData['user_id'],
-                        'lecturer_id' => $srData['lecturer_id'],
-                        'course_id' => $this->course_id ?? null,
-                        'room_ids' => $groupedRoomIds,
-                        'start_date' => $this->start_date,
-                        'start_time' => $this->start_time,
-                        'end_time' => $this->end_time,
-                        'repeat_count' => $srData['repeat_count'],
-                        'category' => $srData['category'],
-                        'information' => $srData['information'],
-                    ]);
-                }
+                $this->srService->createWithSchedules($payload);
             } else {
-                // fallback: use createWithSchedules (it will split into date/time)
-                $payload = [
-                    'user_id' => auth()->id(),
-                    'lecturer_id' => $this->lecturer_id,
+                // fallback: no explicit occurrences, use grouped rooms + start/end + optional time
+                $payload = array_merge($srData, [
                     'course_id' => $this->course_id,
                     'room_ids' => $this->room_ids,
                     'start_date' => $this->start_date,
-                    'start_time' => $this->start_time,
-                    'end_time' => $this->end_time,
-                    'repeat_count' => $this->repeat_count ?? 1,
-                    'category' => $this->category,
-                    'information' => $this->information,
-                    'status' => StatusEnum::PENDING,
-                    'is_open' => false,
-                ];
+                    'time' => $this->time ?? null,
+                    'repeat_count' => $srData['repeat_count'],
+                ]);
+
 
                 $this->srService->createWithSchedules($payload);
             }
 
             $this->dispatch('closeRequestFormModal');
-            $this->dispatch('notify', ['type' => 'success', 'message' => 'Request jadwal berhasil dikirim.']);
+            $this->dispatch('refresh-calendar');
 
             $this->reset(['course_id','lecturer_id','room_ids','category','information','repeat_count','occurrences']);
             $this->mount();
 
             return true;
         } catch (\Throwable $e) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal menyimpan request jadwal.']);
+            $this->showErrorAlert('Terjadi kesalahan, silahkan coba lagi!');
             throw $e;
         }
     }
@@ -320,7 +261,8 @@ class RequestScheduleForm extends Component
     public function render()
     {
         $options = [
-            'categories' => CategoryEnum::toArrayExclude([CategoryEnum::COURSE->value])
+            'categories' => CategoryEnum::toArrayExclude([CategoryEnum::COURSE->value]),
+            'times' => TimeEnum::toArray(),
         ];
 
         return view('livewire.feature.schedule.forms.request-schedule-form', [

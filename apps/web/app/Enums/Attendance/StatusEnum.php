@@ -20,4 +20,15 @@ enum StatusEnum: int
             self::SICK  => 'Sakit',
         };
     }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::PRESENT => 'Hadir',
+            self::ABSENT => 'Tidak Hadir',
+            self::LATE => 'Terlambat',
+            self::EXCUSED => 'Izin',
+            self::SICK  => 'Sakit',
+        };
+    }
 }

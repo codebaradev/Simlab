@@ -4,16 +4,21 @@ namespace App\Livewire\Feature\Schedule\Lists;
 
 use App\Services\ScheduleRequestService;
 use App\Enums\ScheduleRequest\StatusEnum;
+use App\Traits\Livewire\WithAlertModal;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class RequestList extends Component
 {
-    use WithPagination;
+    use WithPagination, WithAlertModal;
     protected ScheduleRequestService $srService;
 
     public $tab = 'masuk'; // masuk | disetujui | ditolak
     public $perPage = 10;
+
+    public $showSchedulesModal = false;
+    public $selectedRequestId = null;
+    public $selectedSchedules = [];
 
     protected $queryString = [
         'tab' => ['except' => 'masuk'],
@@ -48,11 +53,33 @@ class RequestList extends Component
         $srStatus = $statusMap[$this->tab] ?? null;
 
         return $this->srService->getAll(
-            ['user_id' => auth()->id(), 'sr_status' => $srStatus],
+            ['sr_status' => $srStatus],
             'created_at',
             'desc',
             $this->perPage
         );
+    }
+
+    public function showSchedules(int $requestId)
+    {
+        $sr = $this->srService->findById($requestId);
+
+        $this->selectedRequestId = $requestId;
+        $this->selectedSchedules = $sr->schedules()
+            ->with(['course', 'rooms'])
+            ->orderBy('start_date')
+            ->get();
+
+        $this->showSchedulesModal = true;
+    }
+
+    public function closeSchedulesModal()
+    {
+        $this->reset([
+            'showSchedulesModal',
+            'selectedRequestId',
+            'selectedSchedules',
+        ]);
     }
 
     public function render()
@@ -66,22 +93,13 @@ class RequestList extends Component
     {
         try {
             $sr = $this->srService->findById($id);
-            $this->srService->update($sr, ['status' => StatusEnum::APPROVED->value ?? StatusEnum::APPROVED]);
+            $sr = $this->srService->update($sr, ['status' => StatusEnum::APPROVED->value ?? StatusEnum::APPROVED]);
 
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Request disetujui.']);
-            } else {
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Request disetujui.']);
-            }
+            $sr->schedules()->update(['status' => StatusEnum::APPROVED]);
 
-            $this->dispatch('refresh-requests');
+            $this->showSuccessAlert('Request jadwal berhasil disetujui');
             $this->resetPage();
         } catch (\Throwable $e) {
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal menyetujui request.']);
-            } else {
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal menyetujui request.']);
-            }
             throw $e;
         }
     }
@@ -90,22 +108,13 @@ class RequestList extends Component
     {
         try {
             $sr = $this->srService->findById($id);
-            $this->srService->update($sr, ['status' => StatusEnum::REJECTED->value ?? StatusEnum::REJECTED]);
+            $sr = $this->srService->update($sr, ['status' => StatusEnum::REJECTED->value ?? StatusEnum::REJECTED]);
 
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Request ditolak.']);
-            } else {
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Request ditolak.']);
-            }
+            $sr->schedules()->update(['status' => StatusEnum::REJECTED]);
 
-            $this->dispatch('refresh-requests');
+            $this->showSuccessAlert('Request jadwal berhasil ditolak');
             $this->resetPage();
         } catch (\Throwable $e) {
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal menolak request.']);
-            } else {
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal menolak request.']);
-            }
             throw $e;
         }
     }
@@ -114,23 +123,14 @@ class RequestList extends Component
     {
         try {
             $sr = $this->srService->findById($id);
-            // set back to pending
-            $this->srService->update($sr, ['status' => StatusEnum::PENDING->value ?? StatusEnum::PENDING]);
+            $sr = $this->srService->update($sr, ['status' => StatusEnum::PENDING->value ?? StatusEnum::PENDING]);
 
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Status request dibatalkan (kembali ke pending).']);
-            } else {
-                $this->dispatch('notify', ['type' => 'success', 'message' => 'Status request dibatalkan (kembali ke pending).']);
-            }
+            $sr->schedules()->update(['status' => StatusEnum::PENDING]);
 
-            $this->dispatch('refresh-requests');
+            $this->showSuccessAlert('Request berhasil dibatalkan');
             $this->resetPage();
         } catch (\Throwable $e) {
-            if (method_exists($this, 'dispatch')) {
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal membatalkan request.']);
-            } else {
-                $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal membatalkan request.']);
-            }
+
             throw $e;
         }
     }
