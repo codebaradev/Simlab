@@ -9,9 +9,12 @@
         "php": "^8.2",
         "asantibanez/livewire-calendar": "^2.3",
         "filament/filament": "^4.0",
+        "guzzlehttp/psr7": "*",
+        "kreait/laravel-firebase": "^6.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "livewire/livewire": "^3.6"
+        "livewire/livewire": "^3.6",
+        "nyholm/psr7": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

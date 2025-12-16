@@ -20,7 +20,7 @@ class Schedule extends Model
     public $table = "schedules";
 
     protected $fillable = [
-        'room_id',
+        // 'room_id',
         'sr_id',
         'course_id',
         'start_date',
@@ -73,6 +73,13 @@ class Schedule extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class, 'schedule_id', 'id');
+    }
+
+    public function getFormattedStartDateAttribute()
+    {
+        return $this->start_date
+            ? $this->start_date->translatedFormat('d F Y')
+            : null;
     }
 
     public function scopeActive($query)

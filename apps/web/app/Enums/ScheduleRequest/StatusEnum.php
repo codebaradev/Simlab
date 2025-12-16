@@ -13,11 +13,22 @@ enum StatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::PENDING => 'Menunggu Persetujuan',
+            self::PENDING => 'Pending',
             self::APPROVED => 'Disetujui',
             self::REJECTED => 'Ditolak',
             self::CANCELED => 'Dibatalkan',
             self::FINISHED => 'Selesai',
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::PENDING => 'status-secondary',
+            self::APPROVED => 'status-success',
+            self::REJECTED => 'status-error',
+            self::CANCELED => 'status-warning',
+            self::FINISHED => 'status-success',
         };
     }
 }

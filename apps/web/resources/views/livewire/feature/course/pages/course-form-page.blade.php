@@ -17,7 +17,6 @@
                 />
             </div>
 
-            <a href="/matakuliah/{{ $course->id  }}/jadwal" class="tab cursor-pointer" wire:navigate>Jadwal</a>
             <a href="/matakuliah/{{ $course->id  }}/absensi" class="tab cursor-pointer" wire:navigate>Absensi</a>
         </div>
     @else

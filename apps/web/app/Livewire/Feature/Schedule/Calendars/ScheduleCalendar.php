@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Feature\Schedule\Calendars;
 
+use App\Enums\Schedule\StatusEnum;
 use App\Models\Schedule;
 use Asantibanez\LivewireCalendar\LivewireCalendar;
 use Carbon\Carbon;
@@ -10,11 +11,13 @@ use Illuminate\Support\Collection;
 class ScheduleCalendar extends LivewireCalendar
 {
     protected $listeners = [
+        'refresh-calendar' => '$refresh',
         'previousMonth',
         'nextMonth',
         'goToMonth',
         'goToToday'
     ];
+
 
     public function events(): Collection
     {
@@ -23,18 +26,20 @@ class ScheduleCalendar extends LivewireCalendar
         $end   = $this->gridEndsAt instanceof Carbon ? $this->gridEndsAt->toDateString() : Carbon::parse($this->gridEndsAt)->toDateString();
 
         return Schedule::query()
-            ->whereDate('created_at', '>=', $start)
+            ->whereNot('status', StatusEnum::REJECTED)
+            ->whereDate('created_at', '<=', $end)
             ->whereDate('created_at', '<=', $end)
             ->get()
-            ->map(callback: function (Schedule $model) {
+            ->map(callback: function (Schedule $schedule) {
                 return [
-                    'id' => $model->id,
-                    'title' => $model->course->name ,
-                    'description' => $model->course->academic_classes[0]->code . $model->room->code,
-                    'time' => optional($model->created_at)->format('H:i') ?? null,
-                    'start_at' => optional($model->start_datetime)->toDateTimeString(),
-                    'end_at' => optional($model->start_datetime)->toDateTimeString(),
-                    'date' => optional($model->start_date)->toDateString(),
+                    'id' => $schedule->id,
+                    'status' => $schedule->status,
+                    'title' => $schedule->course ? $schedule->course->name : $schedule->schedule_request->category->label(),
+                    'lecturerCode' => $schedule->schedule_request->lecturer ? $schedule->schedule_request->lecturer->code : null,
+                    'class' => $schedule->course ? $schedule->course->academic_classes[0]->code : null,
+                    'rooms' => $schedule->rooms->pluck('name')->implode(' | '),
+                    'time' => $schedule->time->label(),
+                    'date' => optional($schedule->start_date)->toDateString(),
                 ];
             });
     }

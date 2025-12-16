@@ -139,12 +139,13 @@ class ScheduleService
         });
     }
 
-    public function createMultiple(array $items): \Illuminate\Support\Collection
+    public function createMultiple(int $srId, array $items): \Illuminate\Support\Collection
     {
         // Pre-fetch course-related participants if available on first item
         $course = null;
         $lecturers = collect();
         $students = collect();
+
         if (!empty($items[0]['course_id'])) {
             $course = Course::find($items[0]['course_id']);
             if ($course) {
@@ -156,7 +157,7 @@ class ScheduleService
             }
         }
 
-        return DB::transaction(function () use ($items, $lecturers, $students) {
+        return DB::transaction(function () use ($srId, $items, $lecturers, $students) {
             $created = [];
             foreach ($items as $data) {
                 // Extract room ids (support 'room_id' or 'room_ids') then remove them from payload
@@ -167,7 +168,7 @@ class ScheduleService
                     $roomIds = [(int) $data['room_id']];
                 }
 
-                unset($data['room_id'], $data['room_ids']);
+                $data['sr_id'] = $srId;
 
                 // Use mass assignment; ensure Schedule::$fillable contains required fields
                 $schedule = Schedule::create($data);

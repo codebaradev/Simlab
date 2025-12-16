@@ -21,7 +21,7 @@
             {{-- Number of Day --}}
 
             <div class="flex items-center justify-between">
-                <p class="text-sm flex justify-center items-center size-[22px] rounded-full {{ $isToday ? 'bg-red-500  text-white' : '' }} {{ $dayInMonth ? ' font-medium ' : '' }}">
+                <p c    lass="text-sm flex justify-center items-center size-[22px] rounded-full {{ $isToday ? 'bg-red-500  text-white' : '' }} {{ $dayInMonth ? ' font-medium ' : '' }}">
                     {{ $day->format('j') }}
                 </p>
                 <p class="text-xs text-gray-600 ml-4">

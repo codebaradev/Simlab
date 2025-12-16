@@ -52,6 +52,11 @@ class FingerPrintService
         return $query->get();
     }
 
+    public function userScan()
+    {
+
+    }
+
     public function findById($id, $with = [], $withTrashed = false)
     {
         $query = $withTrashed ? FingerPrint::withTrashed() : FingerPrint::query();

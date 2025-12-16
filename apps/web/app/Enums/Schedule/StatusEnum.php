@@ -9,17 +9,27 @@ enum StatusEnum: int
     case REJECTED = 3;
     case SCHEDULED = 4;
     case CANCELLED = 5;
-    case COMPLETED = 6;
+    case FINISHED = 6;
 
     public function label(): string
     {
-        return match($this) {
-            self::PENDING => 'Belum Terdaftar',
-            self::APPROVED => 'Terdafatar',
-            self::REJECTED => 'Aktif',
-            self::SCHEDULED => 'Tidak Aktif',
-            self::CANCELLED => 'Ditangguhkan',
-            self::COMPLETED => 'Menunggu Absensi',
+        return match ($this) {
+            self::PENDING => 'Pending',
+            self::APPROVED => 'Disetujui',
+            self::REJECTED => 'Ditolak',
+            self::CANCELLED => 'Dibatalkan',
+            self::FINISHED => 'Selesai',
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::PENDING => 'secondary',
+            self::APPROVED => 'success',
+            self::REJECTED => 'error',
+            self::CANCELLED => 'warning',
+            self::FINISHED => 'success',
         };
     }
 }
