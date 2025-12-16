@@ -1,3 +1,7 @@
+@php
+    use App\Enums\UserRoleEnum;
+@endphp
+
 <!-- Main Content -->
 <div class="p-8">
     <x-page.header
@@ -18,7 +22,9 @@
             />
         </div>
 
-        <a href="/jadwal/request" class="tab cursor-pointer" wire:navigate>Request</a>
+        @if ($user->roles->contains('code', UserRoleEnum::LAB_HEAD))
+            <a href="/jadwal/request" class="tab cursor-pointer" wire:navigate>Request</a>
+        @endif
     </div>
 
     <!-- Form Modal -->

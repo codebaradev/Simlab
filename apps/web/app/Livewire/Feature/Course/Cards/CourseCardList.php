@@ -2,19 +2,25 @@
 
 namespace App\Livewire\Feature\Course\Cards;
 
+use App\Enums\UserRoleEnum;
+use App\Models\User;
 use App\Services\CourseService;
 use App\Traits\Livewire\WithTableFeatures;
 use App\Traits\Livewire\WithAlertModal;
 use App\Traits\Livewire\WithBulkActions;
 use App\Traits\Livewire\WithFilters;
 use App\Traits\Livewire\WithSorting;
+use Auth;
+use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
+use \Kreait\Firebase\Contract\Database;
 
 
 class CourseCardList extends Component
 {
     use WithPagination, WithFilters, WithBulkActions, WithSorting, WithAlertModal, WithTableFeatures;
+    public User $user;
 
     protected CourseService $cService;
     // public $selectedStatus = '';
@@ -38,6 +44,7 @@ class CourseCardList extends Component
 
     public function mount()
     {
+        $this->user = Auth::user();
         $this->sortField = 'name';
         $this->sortDirection = 'asc';
     }
@@ -90,8 +97,42 @@ class CourseCardList extends Component
         $this->bulkDelete();
     }
 
+
     public function getCoursesProperty()
     {
+
+        if ($this->user->roles->contains('code', UserRoleEnum::LAB_HEAD)) {
+            return $this->cService->getAll(
+                ['lecturers', 'academic_classes'],
+                $this->getFilters(),
+                $this->sortField,
+                $this->sortDirection,
+                $this->perPage,
+            );
+        }
+
+        if ($this->user->roles->contains('code', UserRoleEnum::STUDENT)) {
+            return $this->cService->getAll(
+                ['lecturers', 'academic_classes'],
+                $this->getFilters(),
+                $this->sortField,
+                $this->sortDirection,
+                $this->perPage,
+                studentId: $this->user->student->id
+            );
+        }
+
+        if ($this->user->roles->contains('code', UserRoleEnum::LECTURER)) {
+            return $this->cService->getAll(
+                ['lecturers', 'academic_classes'],
+                $this->getFilters(),
+                $this->sortField,
+                $this->sortDirection,
+                $this->perPage,
+                lecturerId: $this->user->lecturer->id
+            );
+        }
+
         return $this->cService->getAll(
             ['lecturers', 'academic_classes'],
             $this->getFilters(),

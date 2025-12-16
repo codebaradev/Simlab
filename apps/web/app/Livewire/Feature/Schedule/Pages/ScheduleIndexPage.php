@@ -2,11 +2,15 @@
 
 namespace App\Livewire\Feature\Schedule\Pages;
 
+use App\Enums\UserRoleEnum;
+use App\Models\User;
+use Auth;
 use Carbon\Carbon;
 use Livewire\Component;
 
 class ScheduleIndexPage extends Component
 {
+    public User $user;
     public int $currentMonth;
     public int $currentYear;
     public bool $showRequestFormModal = false;
@@ -19,6 +23,7 @@ class ScheduleIndexPage extends Component
 
     public function mount()
     {
+        $this->user = Auth::user();
         $now = Carbon::now();
         $this->currentMonth = (int) $now->format('n'); // 1..12
         $this->currentYear  = (int) $now->format('Y');

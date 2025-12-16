@@ -53,7 +53,7 @@ class RequestList extends Component
         $srStatus = $statusMap[$this->tab] ?? null;
 
         return $this->srService->getAll(
-            ['user_id' => auth()->id(), 'sr_status' => $srStatus],
+            ['sr_status' => $srStatus],
             'created_at',
             'desc',
             $this->perPage

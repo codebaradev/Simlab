@@ -17,7 +17,7 @@ class CourseService
         $this->maxPerPage = config('pagination.max_limit');
     }
 
-    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true): LengthAwarePaginator|Collection
+    public function getAll(array $with = [], array $filters = [], string $sortField = 'name', string $sortDirection = 'asc', ?int $perPage = null, bool $isPaginated = true, ?int $studentId = null, ?int $lecturerId = null): LengthAwarePaginator|Collection
     {
         $perPage = min($perPage ?? $this->perPage, $this->maxPerPage);
 
@@ -39,6 +39,18 @@ class CourseService
             } elseif ($filters['status'] === 'deleted') {
                 $query->onlyTrashed();
             }
+        }
+
+        if ($studentId) {
+            $query->whereHas('academic_classes.students', function ($q)use ($studentId) {
+                $q->where('id', $studentId);
+            });
+        }
+
+        if ($lecturerId) {
+            $query->whereHas('lecturers', function ($q)use ($lecturerId) {
+                $q->where('id', $lecturerId);
+            });
         }
 
         $sortField = in_array($sortField, ['name', 'year', 'sks', 'created_at']) ? $sortField : 'name';

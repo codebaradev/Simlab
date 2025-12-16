@@ -114,14 +114,17 @@ class StudentForm extends Component
                 throw new \Exception('Fingerprint device timeout');
             }
 
-            $reference->update([
-                'mode' => 1, // enroll
-            ]);
+            $reference = $this->database->getReference('fingerprint/presensi')
+                ->update([
+                    'name' => $user->name
+                ]);
+
 
             $this->showSuccessAlert("Sidik jari anda berhasil terdaftar");
         } catch (\Throwable $e) {
             $user->fp_id = null;
             $user->save();
+
 
             $this->showErrorAlert("Terjadi kesalahan, silahkan coba lagi");
         }

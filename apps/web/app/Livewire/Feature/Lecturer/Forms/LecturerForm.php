@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Feature\Lecturer\Forms;
 
+use App\Enums\User\UserGenderEnum;
 use App\Enums\UserRoleEnum;
 use App\Services\LecturerService;
 use App\Services\StudyProgramService;
@@ -78,7 +79,7 @@ class LecturerForm extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255',$userId ? Rule::unique('users','email')->ignore($userId) : 'unique:users,email'],
             'phone_number' => ['nullable', 'string', 'min:10', 'max:13'],
-            'gender' => ['nullable', Rule::in([1,2])], // atau gunakan Enum Rule jika prefer
+            'gender' => ['nullable', Rule::enum(UserGenderEnum::class)], // atau gunakan Enum Rule jika prefer
             'address' => ['nullable', 'string', 'max:500'],
             'nip' => ['required', 'string', 'max:20', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],
             'nidn' => ['required', 'string', 'max:20', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],

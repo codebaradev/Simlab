@@ -26,6 +26,10 @@
                         <div class="badge badge-soft badge-error">Absensi Tertutup</div>
                     @endif
                 </span>
+
+                <x-button wire:click="openAttendance">
+                    Buka Absensi
+                </x-button>
             </div>
 
             <form wire:submit.prevent="saveMonitoring" class=" space-y-4">

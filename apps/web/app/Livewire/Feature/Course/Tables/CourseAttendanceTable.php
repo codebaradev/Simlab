@@ -2,20 +2,31 @@
 
 namespace App\Livewire\Feature\Course\Tables;
 
+use App\Enums\Attendance\StatusEnum;
+use App\Enums\Schedule\TimeEnum;
 use App\Models\AttendanceMonitoring;
 use App\Models\Schedule;
 use App\Models\Attendance;
+use App\Models\User;
 use App\Traits\Livewire\WithAlertModal;
+use DB;
+use Exception;
+use Kreait\Firebase\Contract\Database;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class CourseAttendanceTable extends Component
 {
     use WithPagination, WithAlertModal;
+    protected Database $database;
+
 
     public $courseId;
     public $selectedIndex = 0; // index of selected schedule
     public $perPage = 10;
+
+    public $data;
 
     public $topic;
     public $sub_topic;
@@ -26,17 +37,79 @@ class CourseAttendanceTable extends Component
     ];
 
     protected $listeners = [
-        'refresh-attendance' => '$refresh'
+        'refresh-attendance' => '$refresh',
     ];
+
+    public function boot(Database $database)
+    {
+        $this->database = $database;
+    }
 
     public function mount($courseId)
     {
         $this->courseId = $courseId;
     }
 
+    #[On('fingerprint-scanned')]
+    public function handleFingerprint($data)
+    {
+        $now = now();
+
+
+
+        $presensi = $data['presensi'];
+        $presensi_status = $data['presensi_status'];
+
+        DB::transaction(function () use ($now, $presensi, $presensi_status) {
+            $selectedSch = $this->selectedSchedule;
+            $selectedSch->is_open = 1;
+            $selectedSch->save();
+
+            $user = User::with(['attendances.schedule'])->where('fp_id', $presensi['fp_id'])->first();
+
+            // dd($user->attendances->toArray());
+
+            $attedance = Attendance::where('user_id', $user->id)
+                ->whereHas('schedule', function ($q) use ($now) {
+                    $q->whereDate('start_date', $now->toDateString())
+                    ->where('is_open', true)
+                    ->where('time', operator: TimeEnum::fromNow($now));
+                })
+                ->with('schedule')
+                ->get()
+                ->first();
+                // ->first(function ($attendance) use ($now) {
+
+                // });
+
+            $attedance->status = StatusEnum::PRESENT;
+            $attedance->save();
+        });
+
+
+        $this->dispatch('$refresh');
+    }
+
     public function updatingSelectedIndex()
     {
         $this->resetPage();
+    }
+
+    public function openAttendance()
+    {
+        try {
+
+            $this->database
+                ->getReference('fingerprint')
+                ->update([
+                    'mode'    => 1,
+                ]);
+            // $this->selectedSchedule->status = ;
+
+
+        } catch (Exception $e) {
+
+        }
     }
 
     public function getSchedulesProperty()
