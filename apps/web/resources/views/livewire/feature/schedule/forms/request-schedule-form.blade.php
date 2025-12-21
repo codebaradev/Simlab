@@ -14,7 +14,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @if ($activeTab === 'matakuliah')
-                            <x-form.search-select class="col-span-2" name="course_id" label="Mata Kuliah" :options="$courses" optionValue="id" optionLabel="name" placeholder="Cari mata kuliah..." :required="true"/>
+                            <x-form.search-select class="col-span-2" name="course_id" label="Mata Kuliah" :options="$courses" optionValue="id" optionLabel="name" placeholder="Cari mata kuliah..." :required="true" :live="true"/>
                         @endif
                         <x-form.search-select class="col-span-2" name="lecturer_id" label="Dosen Pengampu / Terlibat" :options="$lecturers" optionValue="id" optionLabel="user_full_name" placeholder="Cari dosen..." :required="true"/>
 
@@ -30,7 +30,35 @@
 
                         <x-form.textarea class="col-span-2" name="information" label="Informasi Tambahan" rows="3"  />
 
-                        <div class="col-span-2">
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: occurrences list (sidebar) -->
+            <div class="col-span-2">
+                <div class="col-span-2">
+                    {{-- <label class="label mb-2"><span class="label-text font-medium">Ruang (pilih satu atau lebih)</span></label> --}}
+                    {{-- <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        @foreach($rooms as $r)
+                            <label class="cursor-pointer border rounded-lg p-3 hover:shadow transition flex flex-col gap-2" for="room-{{ $r->id }}">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="font-semibold text-sm">{{ $r->name }}</div>
+                                        <div class="text-xs text-gray-500">{{ $r->code ?? '' }}</div>
+                                    </div>
+                                    <input id="room-{{ $r->id }}" type="checkbox" wire:model.live.debounce.300ms="room_ids" value="{{ $r->id }}" class="checkbox checkbox-primary" />
+                                </div>
+                                @if(!empty($r->capacity))
+                                    <div class="text-xs text-gray-500">Kapasitas: {{ $r->capacity }}</div>
+                                @endif
+                                @if(!empty($r->location))
+                                    <div class="text-xs text-gray-500">Lokasi: {{ $r->location }}</div>
+                                @endif
+                            </label>
+                        @endforeach
+                    </div> --}}
+                    <div class="col-span-2">
                             <div class="flex justify-between items-end mb-2">
                                 <label class="label p-0"><span class="label-text font-medium">Ruang (pilih satu atau lebih)</span></label>
 
@@ -116,33 +144,6 @@
                             </div>
                             @error('room_ids') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: occurrences list (sidebar) -->
-            <div class="col-span-2">
-                <div class="col-span-2">
-                    <label class="label mb-2"><span class="label-text font-medium">Ruang (pilih satu atau lebih)</span></label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        @foreach($rooms as $r)
-                            <label class="cursor-pointer border rounded-lg p-3 hover:shadow transition flex flex-col gap-2" for="room-{{ $r->id }}">
-                                <div class="flex items-start justify-between">
-                                    <div>
-                                        <div class="font-semibold text-sm">{{ $r->name }}</div>
-                                        <div class="text-xs text-gray-500">{{ $r->code ?? '' }}</div>
-                                    </div>
-                                    <input id="room-{{ $r->id }}" type="checkbox" wire:model.live.debounce.300ms="room_ids" value="{{ $r->id }}" class="checkbox checkbox-primary" />
-                                </div>
-                                @if(!empty($r->capacity))
-                                    <div class="text-xs text-gray-500">Kapasitas: {{ $r->capacity }}</div>
-                                @endif
-                                @if(!empty($r->location))
-                                    <div class="text-xs text-gray-500">Lokasi: {{ $r->location }}</div>
-                                @endif
-                            </label>
-                        @endforeach
-                    </div>
                     @error('room_ids') <div class="text-xs text-red-600 mt-1">{{ $message }}</div> @enderror
                 </div>
 

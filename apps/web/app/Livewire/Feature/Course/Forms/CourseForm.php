@@ -30,7 +30,6 @@ class CourseForm extends Component
     public $class_id;
     public $lecturerIdf;
 
-
     public bool $isEditing;
 
     public function boot(CourseService $cService, AcademicClassService $acService)
@@ -52,7 +51,6 @@ class CourseForm extends Component
             $this->semester = $this->course->semester;
             $this->class_id = $this->course->academic_classes()->first()->id;
         }
-
     }
 
     public function save()

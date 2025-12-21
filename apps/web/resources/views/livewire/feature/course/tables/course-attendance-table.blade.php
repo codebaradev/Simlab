@@ -17,19 +17,27 @@
             <div class="flex gap-2 items-center">
                 <h3 class="font-semibold mb-4">
                     {{ $selectedSchedule->formatted_start_date }}
+
+                    ({{ $selectedSchedule->time->label() }})
                 </h3>
 
                 <span>
-                    @if ($selectedSchedule->is_open)
+                    @if ($is_open)
                         <div class="badge badge-soft badge-success">Absensi Terbuka</div>
                     @else
                         <div class="badge badge-soft badge-error">Absensi Tertutup</div>
                     @endif
                 </span>
 
-                <x-button wire:click="openAttendance">
-                    Buka Absensi
-                </x-button>
+                @if ($is_open)
+                    <x-button variant="error" wire:click="closeAttendance">
+                        Tutup Absensi
+                    </x-button>
+                @else
+                    <x-button wire:click="openAttendance">
+                        Buka Absensi
+                    </x-button>
+                @endif
             </div>
 
             <form wire:submit.prevent="saveMonitoring" class=" space-y-4">

@@ -30,6 +30,7 @@ class CourseAttendanceTable extends Component
 
     public $topic;
     public $sub_topic;
+    public $is_open;
 
     protected $queryString = [
         'selectedIndex' => ['except' => 0],
@@ -48,47 +49,55 @@ class CourseAttendanceTable extends Component
     public function mount($courseId)
     {
         $this->courseId = $courseId;
+        $this->is_open = $this->selectedSchedule ? $this->selectedSchedule->is_open : false;
     }
 
     #[On('fingerprint-scanned')]
     public function handleFingerprint($data)
     {
-        $now = now();
+        try {
+            $now = now();
+            $presensi = $data['presensi'];
+            $presensi_status = $data['presensi_status'];
 
+            if ($data['mode'] != 1) {
+                return;
+            }
 
+            DB::transaction(function () use ($now, $presensi, $presensi_status) {
+                $selectedSch = $this->selectedSchedule;
+                $selectedSch->is_open = 1;
+                $selectedSch->save();
 
-        $presensi = $data['presensi'];
-        $presensi_status = $data['presensi_status'];
+                $user = User::with(['attendances.schedule'])->where('fp_id', $presensi['fp_id'])->first();
 
-        DB::transaction(function () use ($now, $presensi, $presensi_status) {
-            $selectedSch = $this->selectedSchedule;
-            $selectedSch->is_open = 1;
-            $selectedSch->save();
+                // dd($user->attendances->toArray());
 
-            $user = User::with(['attendances.schedule'])->where('fp_id', $presensi['fp_id'])->first();
+                $attedance = Attendance::where('user_id', $user->id)
+                    ->whereHas('schedule', function ($q) use ($now) {
+                        $q->whereDate('start_date', $now->toDateString())
+                        ->where('is_open', true)
+                        ->where('time', operator: TimeEnum::fromNow($now));
+                    })
+                    ->with('schedule')
+                    ->get()
+                    ->first();
+                    // ->first(function ($attendance) use ($now) {
 
-            // dd($user->attendances->toArray());
+                    // });
 
-            $attedance = Attendance::where('user_id', $user->id)
-                ->whereHas('schedule', function ($q) use ($now) {
-                    $q->whereDate('start_date', $now->toDateString())
-                    ->where('is_open', true)
-                    ->where('time', operator: TimeEnum::fromNow($now));
-                })
-                ->with('schedule')
-                ->get()
-                ->first();
-                // ->first(function ($attendance) use ($now) {
+                $attedance->status = StatusEnum::PRESENT;
+                $attedance->save();
+            });
+        } catch (Exception $e) {
 
-                // });
-
-            $attedance->status = StatusEnum::PRESENT;
-            $attedance->save();
-        });
+        }
 
 
         $this->dispatch('$refresh');
     }
+
+
 
     public function updatingSelectedIndex()
     {
@@ -100,15 +109,27 @@ class CourseAttendanceTable extends Component
         try {
 
             $this->database
-                ->getReference('fingerprint')
-                ->update([
-                    'mode'    => 1,
-                ]);
-            // $this->selectedSchedule->status = ;
-
-
+            ->getReference('fingerprint')
+            ->update([
+                'mode'    => 1,
+            ]);
+            $this->is_open = true;
         } catch (Exception $e) {
+            $this->is_open = false;
+        }
+    }
 
+    public function closeAttendance()
+    {
+        try {
+            $this->database
+            ->getReference('fingerprint')
+            ->update([
+                'mode'    => 0,
+            ]);
+            $this->is_open = false;
+        } catch (Exception $e) {
+            $this->is_open = true;
         }
     }
 

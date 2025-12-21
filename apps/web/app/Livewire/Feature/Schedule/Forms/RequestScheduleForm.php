@@ -116,12 +116,11 @@ class RequestScheduleForm extends Component
             } else {
                 $this->recommendations = [];
             }
+
         }catch (\Exception $e) {
             $this->recommendations = [];
-            throw $e;
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Gagal mendapatkan rekomendasi dari AI.']);
+            $this->showErrorAlert('Gagal mendapatkan rekomendasi dari AI.');
         }
-        // dd($this->recommendations);
 
         $this->isLoadingAi = false;
     }
