@@ -6,7 +6,9 @@
     'optionValue' => 'id',
     'optionLabel' => 'name',
     'live' => false,
-    'required' => false
+    'required' => false,
+    'readonly' => false,
+    'disabled' => false,
 ])
 
 <div
@@ -32,8 +34,10 @@
         wire:model="{{ $name }}"
         @endif
         name="{{ $name }}"
-        class="select select-bordered w-full"
+        class="select select-bordered w-full {{ ($readonly || $disabled) ? 'input-disabled cursor-not-allowed bg-base-200' : '' }}"
         @if ($required) required @endif
+        @if ($disabled) disabled @endif
+        @if ($readonly) tabindex="-1" @endif
     >
         <option value="">{{ $placeholder }}</option>
         @foreach($options as $option)
@@ -51,4 +55,13 @@
     @error($name)
         <p class="text-xs mt-1 text-red-600 dark:text-red-400">{{ $message }}</p>
     @enderror
+
+    @if ($readonly && !$disabled)
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const el = document.querySelector('[name="{{ $name }}"]');
+                el?.addEventListener('mousedown', e => e.preventDefault());
+            });
+        </script>
+    @endif
 </div>

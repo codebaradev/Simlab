@@ -3,6 +3,7 @@
 namespace App\Livewire\Feature\Course\Forms;
 
 use App\Enums\AcademicClass\SemesterEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Course;
 use App\Models\User;
 use App\Services\AcademicClassService;
@@ -32,6 +33,8 @@ class CourseForm extends Component
 
     public bool $isEditing;
 
+    public bool $canEdit = true;
+
     public function boot(CourseService $cService, AcademicClassService $acService)
     {
         $this->cService = $cService;
@@ -43,6 +46,7 @@ class CourseForm extends Component
         $this->user = Auth::user();
         $this->course = $course;
         $this->isEditing = (bool) $this->course;
+        $this->canEdit = !$this->user->roles->contains('code', UserRoleEnum::STUDENT->value);
 
         if ($this->isEditing) {
             $this->name = $this->course->name;
@@ -77,7 +81,6 @@ class CourseForm extends Component
             return $this->showSuccessAlert('Data Matakuliah Berhasil Diupdate');
 
         } catch (\Exception $e) {
-            throw $e;
             $this->showErrorAlert('Terjadi kesalahan, silahkan coba lagi!');
         }
     }

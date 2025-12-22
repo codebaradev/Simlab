@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Feature\Dashboard;
 
+use App\Enums\UserRoleEnum;
 use App\Traits\WithUser;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -9,7 +10,6 @@ use Livewire\Component;
 class Index extends Component
 {
     use WithUser;
-
     public function mount()
     {
         $this->user = Auth::user();
@@ -17,9 +17,8 @@ class Index extends Component
 
     public function render()
     {
-        if ($this->user->roles->contains('code', 'lbr')) {
-            return view('livewire.feature.dashboard.lbr-dashboard');
-        }
-        return view('livewire.feature.dashboard.index');
+        return view('livewire.feature.dashboard.index', [
+            'role' => $this->user->roles->first()->code
+        ]);
     }
 }

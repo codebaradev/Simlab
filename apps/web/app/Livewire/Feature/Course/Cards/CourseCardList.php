@@ -21,6 +21,7 @@ class CourseCardList extends Component
 {
     use WithPagination, WithFilters, WithBulkActions, WithSorting, WithAlertModal, WithTableFeatures;
     public User $user;
+    public bool $canDelete = true;
 
     protected CourseService $cService;
     // public $selectedStatus = '';
@@ -47,6 +48,7 @@ class CourseCardList extends Component
         $this->user = Auth::user();
         $this->sortField = 'name';
         $this->sortDirection = 'asc';
+        $this->canDelete = !$this->user->roles->contains('code', UserRoleEnum::STUDENT->value);
     }
 
     public function getItemsForBulkSelection()

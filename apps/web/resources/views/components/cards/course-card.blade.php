@@ -5,7 +5,7 @@
     'imageUrl' => null,
 ])
 
-<div class="card bg-base-100 shadow-md hover:shadow-lg transition rounded-xl overflow-visible">
+<div {{ $attributes->merge(['class' => 'card bg-base-100 shadow-md hover:shadow-lg transition rounded-xl cursor-pointer overflow-visible']) }}>
     @if($imageUrl)
         <figure>
             <img src="{{ $imageUrl }}" alt="{{ $course->name }}" class="w-full h-40 object-cover" />

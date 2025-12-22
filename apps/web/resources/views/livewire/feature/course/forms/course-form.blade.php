@@ -1,5 +1,8 @@
 @php
-    $currentYear = now()->year;
+
+use App\Enums\UserRoleEnum;
+$currentYear = now()->year;
+
 @endphp
 
 <div class="card">
@@ -8,7 +11,7 @@
          <!-- Header -->
         <div class="mb-4">
             <h2 class="card-title text-2xl font-bold">
-                {{ $isEditing ? 'Edit Matakuliah' : 'Tambah Matakuliah' }}
+                {{ $isEditing ? 'Data Matakuliah' : 'Tambah Matakuliah' }}
             </h2>
         </div>
 
@@ -27,6 +30,7 @@
                         actionEvent="showCreateClassForm"      {{-- Livewire method di parent --}}
                         :required="true"
                         :live="false"
+                        :readonly="!$canEdit"
                     />
 
                     <!-- Code Input -->
@@ -34,6 +38,7 @@
                         name="name"
                         label="Nama Matakuliah"
                         :required="true"
+                        :readonly="!$canEdit"
                     />
 
                     <x-form.input
@@ -41,6 +46,7 @@
                         type="number"
                         label="SKS"
                         :required="true"
+                        :readonly="!$canEdit"
                     />
 
                     <x-form.input
@@ -48,6 +54,7 @@
                         placeholder="{{ $currentYear - 1 }}/{{ $currentYear }}"
                         label="Tahun Ajaran"
                         :required="true"
+                        :readonly="!$canEdit"
                     />
 
                     <x-form.select
@@ -58,6 +65,7 @@
                         optionLabel="label"
                         placeholder="Pilih Semester"
                         :required="true"
+                        :readonly="!$canEdit"
                     />
                 </div>
             </div>
@@ -70,14 +78,17 @@
                     </x-button>
                 </a>
 
-                @if ($isEditing)
-                    <x-button type="submit" leftIcon="check" target="save">
-                        Update
-                    </x-button>
-                @else
-                    <x-button type="submit" leftIcon="add" target="save">
-                        Simpan
-                    </x-button>
+
+                @if ($canEdit)
+                    @if ($isEditing)
+                        <x-button type="submit" leftIcon="check" target="save">
+                            Update
+                        </x-button>
+                    @else
+                        <x-button type="submit" leftIcon="add" target="save">
+                            Simpan
+                        </x-button>
+                    @endif
                 @endif
             </div>
         </form>

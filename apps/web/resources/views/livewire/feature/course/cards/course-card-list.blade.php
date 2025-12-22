@@ -37,28 +37,43 @@
 
     <x-cards.container>
         @forelse ($courses as $course)
-            <x-cards.course-card :course="$course">
+            <x-cards.course-card :course="$course" wire:click="edit({{ $course->id }})">
                 <x-slot:actions>
                     {{-- <a href="/course/{{ $course->id }}" class="btn btn-primary btn-sm">Detail</a> --}}
                     {{-- <button wire:click="$dispatch('showEditForm', { id: {{ $course->id }} }})" class="btn btn-outline btn-sm">Edit</button> --}}
-                    <x-cards.action-menu
-                        :id="$course->id"
-                        :actions="[
-                            [
-                                'action' => 'edit',
-                                'label' => 'Edit',
-                                'icon' => 'pencil-square',
-                                'class' => 'text-info'
-                            ],
-                            [
-                                'action' => 'delete',
-                                'label' => 'Hapus',
-                                'icon' => 'trash',
-                                'class' => 'text-error',
-                                'confirm' => 'Apakah Anda yakin ingin menghapus mahasiswa ini?'
-                            ]
-                        ]"
-                    />
+
+                    @if ($canDelete)
+                        <x-cards.action-menu
+                            :id="$course->id"
+                            :actions="[
+                                [
+                                    'action' => 'edit',
+                                    'label' => 'Detail',
+                                    'icon' => 'pencil-square',
+                                    'class' => 'text-info'
+                                ],
+                                [
+                                    'action' => 'delete',
+                                    'label' => 'Hapus',
+                                    'icon' => 'trash',
+                                    'class' => 'text-error',
+                                    'confirm' => 'Apakah Anda yakin ingin menghapus mahasiswa ini?'
+                                ]
+                            ]"
+                        />
+                    @else
+                        <x-cards.action-menu
+                            :id="$course->id"
+                            :actions="[
+                                [
+                                    'action' => 'edit',
+                                    'label' => 'Detail',
+                                    'icon' => 'pencil-square',
+                                    'class' => 'text-info'
+                                ],
+                            ]"
+                        />
+                    @endif
                 </x-slot:actions>
             </x-cards.course-card>
         @empty
