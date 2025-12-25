@@ -1,5 +1,5 @@
 <!-- resources/views/livewire/admin/dashboard.blade.php -->
-<div class="container mx-auto px-4 py-6">
+<div class="p-8">
     <x-page.header
         class="mb-4"
         title="Dashboard"

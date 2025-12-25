@@ -1,5 +1,5 @@
 <!-- resources/views/livewire/lhead/dashboard.blade.php -->
-<div class="container mx-auto px-4 py-6">
+<div class="p-8">
     <!-- Header -->
     <x-page.header
         class="mb-4"
