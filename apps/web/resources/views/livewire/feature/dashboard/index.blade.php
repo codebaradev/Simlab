@@ -15,6 +15,9 @@ use App\Enums\UserRoleEnum;
         @case(UserRoleEnum::LECTURER->value)
             <livewire:feature.dashboard.lecturer-dashboard/>
             @break
+        @case(UserRoleEnum::LAB_HEAD->value)
+            <livewire:feature.dashboard.lab-head-dashboard/>
+            @break
         @default
     @endswitch
 </div>
