@@ -4,38 +4,92 @@ namespace App\Livewire\Feature\Dashboard;
 
 use Livewire\Component;
 
+use App\Models\Schedule;
+use App\Services\ScheduleService;
+use Illuminate\Support\Facades\Auth;
+
 class StudentDashboard extends Component
 {
-    public $activeTab = 'dashboard';
-    public $selectedCourse = null;
+    public $student;
+    public $todaySchedules = [];
+    public $isLoading = true;
 
-    // Data untuk dashboard
-    public $totalCredits = 18;
-    public $totalCourses = 5;
-    public $gpa = 3.45;
+    protected $scheduleService;
+
+    public function boot(ScheduleService $scheduleService)
+    {
+        $this->scheduleService = $scheduleService;
+    }
 
     public function mount()
     {
-        // Cek jika ada parameter tab di URL
-        if (request()->has('tab')) {
-            $this->activeTab = request()->get('tab');
+        $this->loadStudentData();
+        $this->loadTodaySchedules();
+    }
+
+    public function loadStudentData()
+    {
+        $user = Auth::user();
+        $this->student = $user->student()
+            ->with([
+                'study_program.department',
+                'academic_classes'
+            ])
+            ->first();
+
+        if (!$this->student) {
+            abort(403, 'Anda bukan mahasiswa');
         }
     }
 
-    public function switchTab($tab)
+    public function loadTodaySchedules()
     {
-        $this->activeTab = $tab;
-        $this->selectedCourse = null; // Reset selected course saat ganti tab
+        $today = now()->format('Y-m-d');
+
+        $this->todaySchedules = Schedule::whereDate('start_date', $today)
+            ->where(function($query) {
+                // Get schedules where student is enrolled through academic classes
+                $query->whereHas('course.academic_classes', function($q) {
+                    $q->whereHas('students', function($subQ) {
+                        $subQ->where('id', $this->student->id);
+                    });
+                })
+                ->orWhereHas('attendances', function($q) {
+                    $q->where('user_id', Auth::id());
+                });
+            })
+            ->with([
+                'course',
+                'rooms',
+                'attendance_monitoring',
+                'attendances' => function($query) {
+                    $query->where('user_id', Auth::id());
+                }
+            ])
+            ->orderBy('time')
+            ->get();
+
+        $this->isLoading = false;
     }
 
-    public function selectCourse($courseId)
+    public function getFormattedTime($timeEnum)
     {
-        $this->selectedCourse = $courseId;
+        $timeMap = [
+            1 => '08:00 - 09:40',
+            2 => '10:00 - 11:40',
+            3 => '13:00 - 14:40',
+            4 => '15:00 - 16:40',
+            5 => '18:30 - 20:10',
+            6 => '20:20 - 22:00',
+        ];
+
+        return $timeMap[$timeEnum->value] ?? 'Waktu tidak diketahui';
     }
 
-    public function backToCourses()
+    public function refresh()
     {
-        $this->selectedCourse = null;
+        $this->isLoading = true;
+        $this->loadTodaySchedules();
     }
 
     public function render()

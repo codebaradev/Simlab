@@ -1,386 +1,279 @@
-<div>
-    {{-- Tabs Navigation --}}
-    <div class="tabs tabs-boxed bg-base-200 p-1 mb-6">
-        <a wire:click="switchTab('dashboard')"
-           class="tab {{ $activeTab === 'dashboard' ? 'tab-active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Dashboard
-        </a>
-        <a wire:click="switchTab('schedule')"
-           class="tab {{ $activeTab === 'schedule' ? 'tab-active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Jadwal
-        </a>
-        <a wire:click="switchTab('courses')"
-           class="tab {{ $activeTab === 'courses' ? 'tab-active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            Mata Kuliah
-        </a>
+<!-- resources/views/livewire/student/dashboard.blade.php -->
+<div class="p-8">
+    <x-page.header
+        class="mb-4"
+        title="Dashboard"
+        :breadcrumbs="[
+            ['label' => 'Dashboard'],
+        ]"
+    />
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Profile -->
+        <div class="lg:col-span-1">
+            <div class="card bg-base-100 shadow-lg">
+                <div class="card-body">
+                    <h2 class="card-title text-xl font-bold mb-4">Profil Mahasiswa</h2>
+
+                    <!-- Profile Info -->
+                    <div class="space-y-4">
+                        <!-- Profile Header -->
+                        <div class="flex items-center space-x-4">
+                            <div class="avatar">
+                                <div class="w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center">
+                                    <span class="text-2xl font-bold">
+                                        {{ substr($student->user->name, 0, 1) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold">{{ $student->user->name }}</h3>
+                                <p class="text-sm text-gray-500">{{ $student->nim }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Profile Details -->
+                        <div class="divider"></div>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">NIM:</span>
+                                <span class="font-semibold">{{ $student->nim }}</span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Angkatan:</span>
+                                <span class="font-semibold">{{ $student->generation }}</span>
+                            </div>
+
+                            @if($student->study_program)
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Program Studi:</span>
+                                <span class="font-semibold text-right">{{ $student->study_program->name }}</span>
+                            </div>
+
+                            @if($student->study_program->department)
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Jurusan:</span>
+                                <span class="font-semibold">{{ $student->study_program->department->name }}</span>
+                            </div>
+                            @endif
+                            @endif
+
+                            @if($student->academic_classes->isNotEmpty())
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Kelas:</span>
+                                <span class="font-semibold">
+                                    {{ $student->academic_classes->first()->name ?? 'Tidak ada kelas' }}
+                                </span>
+                            </div>
+                            @endif
+
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Email:</span>
+                                <span class="font-semibold">{{ $student->user->email ?? '-' }}</span>
+                            </div>
+
+                            @if($student->user->phone_number)
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">No. Telepon:</span>
+                                <span class="font-semibold">{{ $student->user->phone_number }}</span>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Today's Schedules -->
+        <div class="lg:col-span-2">
+            <div class="card bg-base-100 shadow-lg">
+                <div class="card-body">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="card-title text-xl font-bold">Jadwal Hari Ini</h2>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-500">
+                                {{ now()->translatedFormat('l, d F Y') }}
+                            </span>
+                            <button wire:click="refresh" class="btn btn-sm btn-ghost"
+                                    wire:loading.attr="disabled" wire:loading.class="loading">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    @if($isLoading)
+                    <!-- Loading State -->
+                    <div class="flex justify-center items-center py-12">
+                        <span class="loading loading-spinner loading-lg text-primary"></span>
+                    </div>
+                    @elseif($todaySchedules->isEmpty())
+                    <!-- No Schedules -->
+                    <div class="text-center py-12">
+                        <div class="text-gray-400 mb-4">
+                            <i class="fas fa-calendar-times text-5xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Tidak ada jadwal hari ini</h3>
+                        <p class="text-gray-500">Anda tidak memiliki jadwal kuliah untuk hari ini.</p>
+                    </div>
+                    @else
+                    <!-- Schedules List -->
+                    <div class="space-y-4">
+                        @foreach($todaySchedules as $schedule)
+                        <div class="card bg-base-100 border border-gray-200 hover:border-primary transition-colors">
+                            <div class="card-body p-4">
+                                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                    <!-- Left: Course Info -->
+                                    <div class="flex-1">
+                                        <div class="flex items-start gap-3">
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-primary">
+                                                    {{ $this->getFormattedTime($schedule->time) }}
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-4  items-center flex-1 ">
+                                                <h4 class="text-lg font-semibold">
+                                                    {{ $schedule->course->name ?? 'Mata Kuliah tidak ditemukan' }}
+                                                </h4>
+
+                                                @if($schedule->rooms->isNotEmpty())
+                                                <div class="mt-2">
+                                                    <span class="text-sm text-gray-600 flex items-center gap-1">
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                        Ruang:
+                                                        {{ $schedule->rooms->pluck('name')->join(', ') }}
+                                                    </span>
+                                                </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Attendance Status -->
+                                    <div class="flex flex-col items-end gap-2">
+                                        @php
+                                            $attendance = $schedule->attendances->first();
+                                        @endphp
+
+                                        <span class="badge badge-soft badge-{{ $attendance->status?->status->color() }} gap-2">
+                                            {{ $attendance->status ? $attendance->status->label() : 'Belum Hadir' }}
+                                        </span>
+
+                                        @if($schedule->attendance_monitoring && $schedule->attendance_monitoring->topic)
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium">Topik:</p>
+                                            <p class="text-sm text-gray-600">{{ $schedule->attendance_monitoring->topic }}</p>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Summary -->
+                    {{-- <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex flex-wrap gap-4 justify-center">
+                            <div class="stats shadow">
+                                <div class="stat">
+                                    <div class="stat-title">Total Jadwal</div>
+                                    <div class="stat-value text-primary">{{ $todaySchedules->count() }}</div>
+                                </div>
+                            </div>
+
+                            @php
+                                $attendedCount = $todaySchedules->filter(function($schedule) {
+                                    return $schedule->attendances->first()?->status->value === 1;
+                                })->count();
+                            @endphp
+
+                            <div class="stats shadow">
+                                <div class="stat">
+                                    <div class="stat-title">Sudah Hadir</div>
+                                    <div class="stat-value text-success">{{ $attendedCount }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> --}}
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 
-    {{-- Dashboard Content --}}
-    @if($activeTab === 'dashboard')
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {{-- Stats Cards --}}
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    <div class="flex items-center">
-                        <div class="bg-primary/10 p-3 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-2xl font-bold">{{ $totalCredits }}</h3>
-                            <p class="text-sm opacity-70">Total SKS</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    <div class="flex items-center">
-                        <div class="bg-secondary/10 p-3 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-2xl font-bold">{{ $totalCourses }}</h3>
-                            <p class="text-sm opacity-70">Mata Kuliah</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    <div class="flex items-center">
-                        <div class="bg-accent/10 p-3 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-2xl font-bold">{{ number_format($gpa, 2) }}</h3>
-                            <p class="text-sm opacity-70">IPK</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Today's Schedule --}}
-        <div class="card bg-base-100 shadow mb-6">
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        {{-- <div class="card bg-base-100 shadow">
             <div class="card-body">
-                <h2 class="card-title">Jadwal Hari Ini</h2>
-                <div class="divider my-2"></div>
-                <div class="space-y-4">
-                    @foreach([
-                        ['course' => 'Pemrograman Web', 'time' => '08:00 - 10:30', 'room' => 'Lab. Komputer 1', 'lecturer' => 'Dr. Ahmad, M.Kom.', 'status' => 'ongoing'],
-                        ['course' => 'Basis Data', 'time' => '13:00 - 15:30', 'room' => 'Lab. Komputer 2', 'lecturer' => 'Prof. Siti, M.Sc.', 'status' => 'upcoming'],
-                    ] as $schedule)
-                        <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                            <div class="flex items-center">
-                                <div class="avatar placeholder">
-                                    <div class="bg-primary text-primary-content rounded-full w-12">
-                                        <span>{{ substr($schedule['course'], 0, 1) }}</span>
-                                    </div>
-                                </div>
-                                <div class="ml-4">
-                                    <h4 class="font-bold">{{ $schedule['course'] }}</h4>
-                                    <p class="text-sm opacity-70">{{ $schedule['time'] }} • {{ $schedule['room'] }}</p>
-                                    <p class="text-sm">{{ $schedule['lecturer'] }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="badge {{ $schedule['status'] === 'ongoing' ? 'badge-success' : 'badge-info' }}">
-                                    {{ $schedule['status'] === 'ongoing' ? 'Sedang Berlangsung' : 'Akan Datang' }}
-                                </span>
-                                <p class="text-sm mt-2">{{ $schedule['time'] }}</p>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- Quick Links --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    <h2 class="card-title">Pengingat</h2>
-                    <ul class="space-y-3">
-                        @foreach(['Tugas Pemrograman Web', 'UTS Basis Data', 'Presentasi Proyek'] as $reminder)
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-warning mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ $reminder }}
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    <h2 class="card-title">Tautan Cepat</h2>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
-                        <button wire:click="switchTab('schedule')" class="btn btn-primary btn-outline">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            Jadwal
-                        </button>
-                        <button wire:click="switchTab('courses')" class="btn btn-secondary btn-outline">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                            Mata Kuliah
-                        </button>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total SKS Semester Ini</h3>
+                        <p class="text-2xl font-bold">
+                            {{ $student->academic_classes->sum('course.sks') ?? 0 }}
+                        </p>
+                    </div>
+                    <div class="text-primary">
+                        <i class="fas fa-book text-3xl"></i>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
-    @elseif($activeTab === 'schedule')
-        {{-- Schedule Tab --}}
-        <div class="card bg-base-100 shadow">
+        {{-- <div class="card bg-base-100 shadow">
             <div class="card-body">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="card-title">Jadwal Perkuliahan</h2>
-                    <div class="join">
-                        <button class="btn join-btn btn-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Minggu Lalu
-                        </button>
-                        <button class="btn join-btn btn-sm btn-active">Minggu Ini</button>
-                        <button class="btn join-btn btn-sm">
-                            Minggu Depan
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Status Akademik</h3>
+                        <p class="text-2xl font-bold">
+                            {{ $student->user->status === 1 ? 'Aktif' : 'Non-Aktif' }}
+                        </p>
                     </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full">
-                        <thead>
-                            <tr>
-                                <th>Hari</th>
-                                <th>Mata Kuliah</th>
-                                <th>Waktu</th>
-                                <th>Ruang</th>
-                                <th>Dosen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach([
-                                ['day' => 'Senin', 'course' => 'Pemrograman Web', 'time' => '08:00 - 10:30', 'room' => 'Lab. Komputer 1', 'lecturer' => 'Dr. Ahmad, M.Kom.'],
-                                ['day' => 'Selasa', 'course' => 'Basis Data', 'time' => '13:00 - 15:30', 'room' => 'Lab. Komputer 2', 'lecturer' => 'Prof. Siti, M.Sc.'],
-                                ['day' => 'Rabu', 'course' => 'Jaringan Komputer', 'time' => '10:00 - 12:30', 'room' => 'Lab. Jaringan', 'lecturer' => 'Ir. Budi, M.T.'],
-                            ] as $schedule)
-                                <tr>
-                                    <td>
-                                        <div class="font-bold">{{ $schedule['day'] }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="font-bold">{{ $schedule['course'] }}</div>
-                                        <div class="text-sm opacity-70">PW123</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-outline">{{ $schedule['time'] }}</span>
-                                    </td>
-                                    <td>{{ $schedule['room'] }}</td>
-                                    <td>{{ $schedule['lecturer'] }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    @elseif($activeTab === 'courses')
-        {{-- Courses Tab --}}
-        @if(!$selectedCourse)
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    <h2 class="card-title">Mata Kuliah Saya</h2>
-                    <p class="text-sm opacity-70">Semester Genap 2023/2024</p>
-
-                    <div class="divider my-4"></div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        @foreach([
-                            ['id' => 1, 'code' => 'PW123', 'name' => 'Pemrograman Web', 'credits' => 3, 'lecturer' => 'Dr. Ahmad, M.Kom.', 'attendance' => 85, 'color' => 'badge-primary'],
-                            ['id' => 2, 'code' => 'BD456', 'name' => 'Basis Data', 'credits' => 3, 'lecturer' => 'Prof. Siti, M.Sc.', 'attendance' => 92, 'color' => 'badge-success'],
-                            ['id' => 3, 'code' => 'JK789', 'name' => 'Jaringan Komputer', 'credits' => 4, 'lecturer' => 'Ir. Budi, M.T.', 'attendance' => 78, 'color' => 'badge-warning'],
-                        ] as $course)
-                            <div class="card bg-base-100 border border-base-300 hover:border-primary transition-all duration-300">
-                                <div class="card-body">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 class="card-title text-lg">{{ $course['name'] }}</h3>
-                                            <p class="text-sm opacity-70">{{ $course['code'] }}</p>
-                                        </div>
-                                        <span class="badge {{ $course['color'] }}">{{ $course['credits'] }} SKS</span>
-                                    </div>
-
-                                    <div class="space-y-2 mb-4">
-                                        <p class="text-sm">
-                                            <span class="opacity-70">Dosen:</span> {{ $course['lecturer'] }}
-                                        </p>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm opacity-70">Kehadiran</span>
-                                            <span class="font-bold {{ $course['attendance'] >= 80 ? 'text-success' : ($course['attendance'] >= 70 ? 'text-warning' : 'text-error') }}">
-                                                {{ $course['attendance'] }}%
-                                            </span>
-                                        </div>
-                                        <progress
-                                            class="progress {{ $course['attendance'] >= 80 ? 'progress-success' : ($course['attendance'] >= 70 ? 'progress-warning' : 'progress-error') }}"
-                                            value="{{ $course['attendance'] }}"
-                                            max="100">
-                                        </progress>
-                                    </div>
-
-                                    <div class="card-actions justify-end">
-                                        <button
-                                            wire:click="selectCourse({{ $course['id'] }})"
-                                            class="btn btn-primary btn-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            Lihat Absensi
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="text-success">
+                        <i class="fas fa-user-graduate text-3xl"></i>
                     </div>
                 </div>
             </div>
-        @else
-            {{-- Attendance Detail --}}
-            <div class="card bg-base-100 shadow">
-                <div class="card-body">
-                    {{-- Breadcrumb --}}
-                    <div class="text-sm breadcrumbs mb-4">
-                        <ul>
-                            <li><button wire:click="backToCourses" class="hover:text-primary">Mata Kuliah</button></li>
-                            <li>Absensi</li>
-                            <li class="font-bold">Pemrograman Web</li>
-                        </ul>
+        </div> --}}
+
+        {{-- <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Kelas Terdaftar</h3>
+                        <p class="text-2xl font-bold">
+                            {{ $student->academic_classes->count() }}
+                        </p>
                     </div>
-
-                    {{-- Course Header --}}
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                        <div>
-                            <h2 class="card-title text-2xl">Absensi: Pemrograman Web</h2>
-                            <p class="opacity-70">PW123 • Kelas A • Dr. Ahmad, M.Kom.</p>
-                        </div>
-                        <button wire:click="backToCourses" class="btn btn-ghost btn-sm mt-2 md:mt-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            Kembali
-                        </button>
-                    </div>
-
-                    {{-- Attendance Stats --}}
-                    <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-8">
-                        <div class="stat">
-                            <div class="stat-figure text-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div class="stat-title">Persentase Kehadiran</div>
-                            <div class="stat-value text-primary">85%</div>
-                            <div class="stat-desc">20 dari 24 pertemuan</div>
-                        </div>
-
-                        <div class="stat">
-                            <div class="stat-figure text-success">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div class="stat-title">Hadir</div>
-                            <div class="stat-value text-success">20</div>
-                            <div class="stat-desc">Pertemuan</div>
-                        </div>
-
-                        <div class="stat">
-                            <div class="stat-figure text-error">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </div>
-                            <div class="stat-title">Tidak Hadir</div>
-                            <div class="stat-value text-error">4</div>
-                            <div class="stat-desc">2 Ijin, 2 Alpa</div>
-                        </div>
-                    </div>
-
-                    {{-- Attendance History --}}
-                    <div class="overflow-x-auto">
-                        <table class="table table-zebra w-full">
-                            <thead>
-                                <tr>
-                                    <th>Pertemuan</th>
-                                    <th>Tanggal</th>
-                                    <th>Topik</th>
-                                    <th>Status</th>
-                                    <th>Waktu Presensi</th>
-                                    <th>Catatan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach([
-                                    ['meeting' => 1, 'date' => '10 Jan 2024', 'topic' => 'Pengenalan Laravel', 'status' => 'Hadir', 'status_class' => 'badge-success', 'time' => '07:55', 'note' => ''],
-                                    ['meeting' => 2, 'date' => '17 Jan 2024', 'topic' => 'Livewire Dasar', 'status' => 'Alpa', 'status_class' => 'badge-error', 'time' => '-', 'note' => 'Terlambat > 15 menit'],
-                                    ['meeting' => 3, 'date' => '24 Jan 2024', 'topic' => 'Blade Templating', 'status' => 'Hadir', 'status_class' => 'badge-success', 'time' => '08:02', 'note' => ''],
-                                    ['meeting' => 4, 'date' => '31 Jan 2024', 'topic' => 'Database & Eloquent', 'status' => 'Ijin', 'status_class' => 'badge-warning', 'time' => '-', 'note' => 'Surat izin terlampir'],
-                                ] as $attendance)
-                                    <tr>
-                                        <th>#{{ $attendance['meeting'] }}</th>
-                                        <td>{{ $attendance['date'] }}</td>
-                                        <td>{{ $attendance['topic'] }}</td>
-                                        <td>
-                                            <span class="badge {{ $attendance['status_class'] }} gap-1">
-                                                {{ $attendance['status'] }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $attendance['time'] }}</td>
-                                        <td class="max-w-xs truncate">{{ $attendance['note'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Attendance Filter --}}
-                    <div class="flex flex-wrap gap-2 mt-6">
-                        <button class="btn btn-sm btn-active">Semua</button>
-                        <button class="btn btn-sm btn-success btn-outline">Hadir</button>
-                        <button class="btn btn-sm btn-warning btn-outline">Ijin</button>
-                        <button class="btn btn-sm btn-error btn-outline">Alpa</button>
+                    <div class="text-info">
+                        <i class="fas fa-users text-3xl"></i>
                     </div>
                 </div>
             </div>
-        @endif
-    @endif
+        </div> --}}
+    </div>
+
+    <!-- Styles -->
+    <style>
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                width: 100%;
+            }
+        }
+    </style>
 </div>

@@ -69,7 +69,7 @@ class CourseCardList extends Component
 
             $this->showSuccessAlert('Data matakuliah berhasil dihapus.');
         } catch (\Exception $e) {
-            $this->showErrorAlert('Gagal menghapus matakuliah');
+            $this->showErrorAlert(message: 'Gagal menghapus matakuliah');
         }
     }
 
@@ -98,7 +98,6 @@ class CourseCardList extends Component
     {
         $this->bulkDelete();
     }
-
 
     public function getCoursesProperty()
     {

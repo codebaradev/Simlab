@@ -144,12 +144,12 @@
     @enderror
 
     {{-- Character counter for text inputs --}}
-    @if(in_array($type, ['text', 'textarea']) && $live && !$isDisabled)
+    {{-- @if(in_array($type, ['text', 'textarea']) && $live && !$isDisabled)
         <div class="mt-1 text-xs text-gray-500 text-right">
             <span x-text="$wire.{{ $name }}?.length || 0"></span>
             @if(isset($maxlength))
                 / {{ $maxlength }}
             @endif
         </div>
-    @endif
+    @endif --}}
 </div>
