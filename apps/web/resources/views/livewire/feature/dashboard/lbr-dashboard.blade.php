@@ -139,7 +139,7 @@
                 <div class="mt-2">
                     <a href="{{ route('room.index') }}" class="text-xs text-pink-600 hover:text-pink-800 flex items-center gap-1">
                         <i class="fas fa-external-link-alt"></i>
-                        Kelola Ruangan
+                        Kelola Komputer
                     </a>
                 </div>
             </div>
