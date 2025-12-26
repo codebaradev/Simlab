@@ -1,13 +1,13 @@
 @startuml Jadwal
 
-|Dosen/Ketua Tingkat|
+|Dosen|
 start
 :Input mata kuliah, kelas,\ndan jumlah pertemuan yang diinginkan;
 
 |Sistem|
-:Menampilkan rekomendasi ruangan lab\nberdasarkan input dosen/ketua tingkat;
+:Menampilkan rekomendasi ruangan lab\nberdasarkan input dosen;
 
-|Dosen/Ketua Tingkat|
+|Dosen|
 :Memilih hari dan salah satu atau lebih ruangan lab;
 
 |Sistem|
@@ -23,12 +23,12 @@ if (Disetujui?) then (Ya)
   |Sistem|
   :Set is_approved = true;
   :Simpan jadwal ke sistem;
-  |Dosen/Ketua Tingkat|
+  |Dosen|
   :Mendapatkan konfirmasi bahwa jadwal disetujui;
 else (Tidak)
   |Sistem|
   :Set is_approved = false;
-  |Dosen/Ketua Tingkat|
+  |Dosen|
   :Mendapatkan notifikasi bahwa\npermintaan jadwal ditolak;
 endif
 

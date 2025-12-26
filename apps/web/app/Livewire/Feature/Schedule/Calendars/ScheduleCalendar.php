@@ -18,7 +18,6 @@ class ScheduleCalendar extends LivewireCalendar
         'goToToday'
     ];
 
-
     public function events(): Collection
     {
         // ...existing code...

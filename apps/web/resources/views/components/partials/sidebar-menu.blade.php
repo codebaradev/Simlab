@@ -1,8 +1,8 @@
 @props([
-    'name',
-    'url' => '#',
+    'name' => 'sidebar-menu',
+    'url' => '/',
     'icon' => 'dashboard',
-    'selected' => ''
+    'selected' => null
 ])
 
 @php

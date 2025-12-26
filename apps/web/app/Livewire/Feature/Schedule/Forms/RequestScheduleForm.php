@@ -143,7 +143,7 @@ class RequestScheduleForm extends Component
         $this->time = TimeEnum::TIME_1->value;
     }
 
-    public function selectRecommendedRoom($roomId)
+     public function selectRecommendedRoom($roomId)
     {
         // Reset array room_ids dan isi dengan yang dipilih
         $this->room_ids = [$roomId];

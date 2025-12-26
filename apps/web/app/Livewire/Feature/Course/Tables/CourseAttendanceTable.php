@@ -238,8 +238,12 @@ class CourseAttendanceTable extends Component
                 'mode'    => 1,
             ]);
             $this->is_open = true;
+            $this->selectedSchedule->is_open = 1;
+            $this->selectedSchedule->save();
         } catch (Exception $e) {
             $this->is_open = false;
+            $this->selectedSchedule->is_open = 0;
+            $this->selectedSchedule->save();
         }
     }
 
@@ -252,8 +256,12 @@ class CourseAttendanceTable extends Component
                 'mode'    => 0,
             ]);
             $this->is_open = false;
+            $this->selectedSchedule->is_open = 0;
+            $this->selectedSchedule->save();
         } catch (Exception $e) {
             $this->is_open = true;
+            $this->selectedSchedule->is_open = 1;
+            $this->selectedSchedule->save();
         }
     }
 
@@ -286,6 +294,9 @@ class CourseAttendanceTable extends Component
         }
 
         return Attendance::with(['user', 'schedule'])
+            ->whereHas('user.roles', function ($uq) {
+                $uq->where('code', 'mhs');
+            })
             ->where('schedule_id', $schedule->id)
             ->orderBy('id')
             ->paginate($this->perPage);

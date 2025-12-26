@@ -6,6 +6,27 @@ use App\Enums\User\UserGenderEnum;
 
 <div class="card">
     <div class="card-body p-0">
+
+        @if ($lecturer)
+            @if ($lecturer->user->fp_id)
+                <button wire:click="scanFingerPrint" class="alert alert-info alert-soft w-full cursor-pointer" onclick="document.getElementById('fingerprint_modal').showModal()">
+                    <x-icon.info class="size-4"/>
+                    <span>Sidik jari sudah terdaftar</span>
+                    <span class="btn btn-info btn-md">
+                        <span>Ganti</span>
+                    </span>
+                </button>
+            @else
+                <button wire:click="scanFingerPrint" class="alert alert-error alert-soft w-full cursor-pointer" onclick="document.getElementById('fingerprint_modal').showModal()">
+                    <x-icon.warning class="size-4"/>
+                    <span>Sidik jari belum terdaftar silahkan <span class="font-semibold hover:underline">daftarkan</span> sidik jari anda</span>
+                    <span class="btn btn-error btn-md">
+                        <span>Daftarkan</span>
+                    </span>
+                </button>
+            @endif
+        @endif
+
         <!-- Header -->
         <div class="mb-4">
             <h2 class="card-title text-2xl font-bold">
