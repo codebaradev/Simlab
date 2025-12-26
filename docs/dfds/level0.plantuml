@@ -1,0 +1,35 @@
+@startuml level1
+left to right direction
+
+actor Mahasiswa
+actor Dosen
+actor Laboran
+actor "Kepala Lab" as KepalaLab
+actor Admin
+actor "Perangkat IoT\n(Fingerprint)" as IoT
+actor "API Sistem Cerdas\n(FastAPI)" as SC
+
+rectangle "Sistem SIMLAB" {
+}
+
+Mahasiswa --> "Sistem SIMLAB" : Data absensi\nPermintaan jadwal
+"Sistem SIMLAB" --> Mahasiswa : Status absensi\nInformasi jadwal
+
+Dosen --> "Sistem SIMLAB" : Permintaan jadwal\nData absensi
+"Sistem SIMLAB" --> Dosen : Jadwal praktikum\nLaporan absensi
+
+Laboran --> "Sistem SIMLAB" : Data mata kuliah\nData jadwal
+"Sistem SIMLAB" --> Laboran : Informasi jadwal
+
+KepalaLab --> "Sistem SIMLAB" : Persetujuan jadwal
+"Sistem SIMLAB" --> KepalaLab : Permintaan jadwal\nLaporan penggunaan lab
+
+Admin --> "Sistem SIMLAB" : Data akun
+"Sistem SIMLAB" --> Admin : Informasi akun
+
+IoT --> "Sistem SIMLAB" : Data absensi
+
+"Sistem SIMLAB" --> SC : Data absensi\nData jadwal
+SC --> "Sistem SIMLAB" : Hasil rekomendasi
+
+@enduml

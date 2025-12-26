@@ -81,8 +81,8 @@ class LecturerForm extends Component
             'phone_number' => ['nullable', 'string', 'min:10', 'max:13'],
             'gender' => ['nullable', Rule::enum(UserGenderEnum::class)], // atau gunakan Enum Rule jika prefer
             'address' => ['nullable', 'string', 'max:500'],
-            'nip' => ['required', 'string', 'max:20', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],
-            'nidn' => ['required', 'string', 'max:20', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],
+            'nip' => ['required', 'numeric', 'digits:18', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],
+            'nidn' => ['required', 'numeric', 'digits:10', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],
             'code' => ['required', 'string', 'max:20', $lecturerId ? Rule::unique('lecturers','nip')->ignore($lecturerId) : 'unique:lecturers,nip'],
             'sp_id' => ['required', 'exists:study_programs,id'],
         ];

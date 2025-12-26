@@ -130,7 +130,7 @@
                                         <div class="flex items-start gap-3">
                                             <div class="text-center">
                                                 <div class="text-lg font-bold text-primary">
-                                                    {{ $this->getFormattedTime($schedule->time) }}
+                                                    {{ $schedule->time->label() }}
                                                 </div>
                                             </div>
                                             <div class="flex gap-4  items-center flex-1 ">

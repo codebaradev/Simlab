@@ -1,0 +1,47 @@
+@startuml level1
+left to right direction
+
+actor Mahasiswa
+actor Dosen
+actor Laboran
+actor "Kepala Lab" as KepalaLab
+actor Admin
+actor "Perangkat IoT" as IoT
+
+rectangle "P1\nManajemen Pengguna" as P1
+rectangle "P2\nManajemen Penjadwalan" as P2
+rectangle "P3\nManajemen Absensi" as P3
+rectangle "P4\nPersetujuan Jadwal" as P4
+rectangle "P5\nSistem Cerdas\n(Rekomendasi Ruangan)" as P5
+
+database "D1\nData Pengguna" as D1
+database "D2\nData Jadwal" as D2
+database "D3\nData Mata Kuliah" as D3
+database "D4\nData Absensi" as D4
+
+Admin --> P1 : Data akun
+P1 --> D1 : Simpan/ubah akun
+D1 --> P1 : Data pengguna
+
+Laboran --> P2 : Data mata kuliah\nData jadwal
+P2 --> D3 : Simpan data matkul
+P2 --> D2 : Simpan jadwal
+
+Dosen --> P2 : Permintaan jadwal
+Mahasiswa --> P2 : Permintaan jadwal
+P2 --> P4 : Data permintaan jadwal
+
+KepalaLab --> P4 : Persetujuan jadwal
+P4 --> D2 : Update status jadwal
+
+IoT --> P3 : Data absensi
+Dosen --> P3 : Permintaan buka absensi
+P3 --> D4 : Simpan data absensi
+
+D2 --> P5 : Data jadwal
+D3 --> P5 : Data mata kuliah
+P5 --> P2 : Rekomendasi ruangan
+
+P3 --> Dosen : Informasi absensi
+
+@enduml
