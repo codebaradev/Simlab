@@ -30,6 +30,13 @@ use App\Livewire\Feature\StudyProgram\Pages\StudyProgramFormPage;
 use App\Livewire\Feature\StudyProgram\Pages\StudyProgramList;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API is running'
+    ]);
+});
+
 Route::get('/', Login::class)->middleware([GuestOnlyMiddleware::class])->name('login');
 
 Route::middleware([UserOnlyMiddleware::class])->group(function () {

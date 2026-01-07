@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\ApplicationService;
+use App\Services\Auth\AuthService;
 use App\Services\ComputerService;
 use App\Services\DepartmentService;
 use App\Services\RoomService;
@@ -28,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Auth
+        $this->app->singleton(AuthService::class, function ($app) {
+            return new AuthService();
+        });
+
         $this->app->singleton(UserService::class, function ($app) {
             return new UserService();
         });
