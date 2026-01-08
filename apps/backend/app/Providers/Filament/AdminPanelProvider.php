@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Enums\UserRoleEnum;
+use App\Filament\Pages\Auth\LoginCustom;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -27,10 +29,20 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(LoginCustom::class)
+            ->brandLogo(asset('assets/app.svg'))
+            ->brandLogoHeight('2.5rem')
+            ->darkModeBrandLogo(asset('assets/app.svg')) // Logo untuk dark mode
+            ->favicon(asset('favicon.ico'))
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue, // Warna primary untuk selected menu
             ])
+            ->sidebarWidth('16rem')
+            ->font('Inter') // Font yang clean
+            ->darkMode(false)
+            ->sidebarWidth('16rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
