@@ -42,6 +42,11 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'User';
 
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-user';
+    }
+
     protected static function hasRole($roleIds, string $roleName): bool
     {
         if (empty($roleIds) || !is_array($roleIds)) {
